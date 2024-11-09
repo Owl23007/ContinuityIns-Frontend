@@ -1,6 +1,5 @@
-# SSWeb
+# ContinuityIns-Frontend
 
-**SSWeb** —— 一个存储和共享网站，试图去重现互联网共享精神。
 
 ## 预计功能特性
 
