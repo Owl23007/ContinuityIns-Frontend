@@ -43,7 +43,3 @@
 - **邮箱**: mailofowlwork@gmail.com
 - **GitHub Issues**: [Issues 页面](https://github.com/Owl23007/SSWeb/issues)
 
----
-
-感谢您使用SSWeb，希望您喜欢，也希望你能加入我们共建更好的服务！
-```
