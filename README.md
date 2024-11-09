@@ -8,7 +8,7 @@
 
 ## 快速开始
 
-按照以下步骤，本地运行您的SSWeb：
+按照以下步骤，本地运行：
 
 1. **克隆仓库**
 
@@ -31,18 +31,6 @@
    ```bash
    npm start
    ```
-
-   项目将运行在 `http://localhost:3000`。打开浏览器访问该地址，体验在本地部署SSWeb！
-
-## 贡献指南
-
-我们热忱欢迎每一位开发者的贡献！请遵循以下步骤贡献代码：
-
-1. Fork 本仓库
-2. 创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交您的修改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开一个 Pull Request
 
 ## 许可证
 
