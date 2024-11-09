@@ -14,7 +14,7 @@
 
    ```bash
    git clone https://github.com/Owl23007/SSWeb.git
-   cd SSWeb
+
 
 2. **安装依赖**
 
