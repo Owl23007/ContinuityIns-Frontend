@@ -7,30 +7,17 @@
     <main class="center-container">
       <h1>今日推荐</h1>
       <div class="cards-container">
-        <ArticleCard
-          class="large-card"
-          coverImage="https://tse2-mm.cn.bing.net/th/id/OIP-C._0gTCowUaUF9RdEeDEoeKgHaE7?w=264&h=180&c=7&r=0&o=5&dpr=1.5&pid=1.7"
-          title="大卡片标题"
-          author="大卡片作者"
-          time="4小时前"
-          views="1234"
-          favorites="567"
-          duration="10:00"
-          titleLink="https://www.baidu.com"
-          authorLink="https://www.163.com"
-        />
-        <ArticleCard
-          v-for="i in 4"
-          :key="i"
-          class="small-card"
-          coverImage="https://tse2-mm.cn.bing.net/th/id/OIP-C._0gTCowUaUF9RdEeDEoeKgHaE7?w=264&h=180&c=7&r=0&o=5&dpr=1.5&pid=1.7"
-          title="小卡片标题"
-          author="小卡片作者"
-          time="10-01"
-          views="1234"
-          favorites="567"
-          duration="03:00"
-        />
+        <ArticleCard v-for="(article, index) in articles" :key="index" class="large-card"
+          :coverImage="article.coverImage || 'https://via.placeholder.com/300x169?text=No+Image'"
+          :title="article.title || ''"
+          :author="article.author || 'error'" 
+          :userId="article.userId || 'error'"
+          :time="article.duration || 'error'"
+          :views="article.views || 0" 
+          :favorites="article.favorites || 0" 
+          :duration="article.duration || ''"
+          :titleLink="`/article/${article.articleId}`" 
+          :authorLink="`/author/${article.userId}`"  />
       </div>
     </main>
   </div>
@@ -38,43 +25,59 @@
 
 <script>
 import ArticleCard from '@/components/ArticleCard.vue';
+import { ref, onMounted } from 'vue';
+import { getDailyRecommendations_get } from '@/api/article';
 
 export default {
   name: 'homePage',
   components: {
     ArticleCard
+  },
+  setup() {
+    const articles = ref([]);
+
+    onMounted(async () => {
+      try {
+        articles.value = await getDailyRecommendations_get();
+      } catch (error) {
+        console.error('获取每日推荐失败:', error);
+      }
+    })
+    return {
+      articles
+    }
   }
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
-body {
-  font-family: 'Roboto', sans-serif;
-}
-
 .main-container {
-  background-color: #f0f0f0;
   display: flex;
-  margin-top: 100px;
 }
 
 .sidebar {
-  width: 10%;
-  padding: 20px;
+  width: 20%;
   background-color: #f0f0f0;
+  padding: 16px;
 }
 
 .center-container {
-  flex: 1;
-  padding: 20px;
+  width: 80%;
+  background-color: #fff;
+  padding: 16px;
 }
 
 .cards-container {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  /* 添加间距 */
 }
 
+.large-card {
+  flex: 1 1 calc(20% - 16px);
+  /* 五列布局 */
+  box-sizing: border-box;
+  margin-bottom: 16px;
+}
 </style>

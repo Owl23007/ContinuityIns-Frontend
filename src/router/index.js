@@ -9,17 +9,46 @@ const routes = [
     redirect: '/home',// 设置重定向到 /home
     requiresAuth: false,
   },
+
   // 登录页面
- 
+  {
+    path: '/auth',
+    name: 'loginPage',
+    component: () => import('../pages/Auth.vue'),
+    meta: {
+      title: '身份认证',
+      requiresAuth: false,
+    },
+  },
+
+  //验证页面
+  {
+    path: '/user/active',
+    name: 'activeUsers',
+    component: () => import('../pages/Active.vue')
+
+  },
+
   // 首页
   {
     path: '/home',
     name: 'homePage',
-    requiresAuth: false,
     component: homePage,
     meta: {
-      title: '首页'
-    }
+      title: '首页',
+      requiresAuth: false,
+    },
+  },
+
+  //用户信息
+  {
+    path: '/userinfo',
+    name: 'userinfoPage',
+    component: () => import('../pages/UserInfo.vue'),
+    meta: {
+      title: '用户信息',
+      requiresAuth: true,
+    },
   }
 ]
 
@@ -33,15 +62,10 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   document.title = to.meta.title || '默认标题';
 
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    // 需要认证的路由
-    if (!store.state.isLoggedIn) {
-      // 如果用户未登录，重定向到登录页面
-      next({ path: '/login' });
-    } else {
-      // 用户已登录，继续导航
-      next();
-    }
+  if (to.matched.some(record => record.meta.requiresAuth && !store.state.isLoggedIn)) {
+    // 需要认证的路由，如果用户未登录，重定向到登录页面
+
+    next({ path: '/login' });
   } else {
     // 不需要认证的路由，继续导航
     next();

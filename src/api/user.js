@@ -16,7 +16,7 @@ export const register_post = async (username, email, password) => {
 
 export const login_post = async (username, password) => {
   if (username === '' || password === '') {
-    alert("请输入用户名和密码。");
+    alert("请输入用户名或邮箱和密码。");
     return;
   }
   const encryptedPassword = sha256(password).toString();

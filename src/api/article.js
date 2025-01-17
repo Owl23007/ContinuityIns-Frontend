@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+
 export const addCategory_post = async (token, categoryName, categoryAlias) => {
   if (categoryName === '' || categoryAlias === '') {
     alert("请填写完整信息");
@@ -67,4 +68,11 @@ export const getUserArticles_get = async (token) => {
     headers: { Authorization: `Duel ${token}` }
   });
   return response.data;
+};
+
+export const getDailyRecommendations_get = async () => {
+  const response = await axios.get('http://localhost:8081/article/daily', { headers: { "Content-Type": "application/json" } });
+  console.log(response.data.data);
+  return response.data.data;
+  
 };
