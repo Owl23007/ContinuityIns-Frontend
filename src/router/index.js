@@ -1,75 +1,140 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import homePage from '../pages/Home.vue';
-import store from '@/store';
+import { createRouter, createWebHistory } from 'vue-router'
+import homePage from '../pages/Home.vue'
+import store from '../store'
+
+// 开发环境专用路由
+const devRoutes = import.meta.env.DEV ? [
+  // 1. 静态资源白名单
+  {
+    path: '/@fs/:path(.*)*', // 使用 * 匹配多级路径
+    beforeEnter: (to) => {
+      // 直接跳转避免被后续路由拦截
+      window.location.href = to.fullPath
+    }
+  }
+] : []
 
 const routes = [
-  // 默认路由
+  ...devRoutes, // 展开开发环境路由
+  
+  // 2. 默认路由
   {
     path: '/',
-    redirect: '/home',// 设置重定向到 /home
-    requiresAuth: false,
+    redirect: { name: 'homePage' }, // 使用命名路由更安全
+    meta: { requiresAuth: false }
   },
 
-  // 登录页面
+  // 3. 登录页
   {
     path: '/auth',
     name: 'loginPage',
     component: () => import('../pages/Auth.vue'),
     meta: {
       title: '身份认证',
-      requiresAuth: false,
-    },
+      requiresAuth: false
+    }
   },
 
-  //验证页面
+  // 4. 用户激活
   {
     path: '/user/active',
     name: 'activeUsers',
-    component: () => import('../pages/Active.vue')
-
+    component: () => import('../pages/Active.vue'),
+    meta: {
+      title: '用户激活',
+      requiresAuth: false
+    }
   },
 
-  // 首页
+  // 5. 首页
   {
     path: '/home',
     name: 'homePage',
     component: homePage,
     meta: {
       title: '首页',
-      requiresAuth: false,
-    },
+      requiresAuth: false
+    }
   },
 
-  //用户信息
+  // 6. 用户信息
   {
     path: '/userinfo',
     name: 'userinfoPage',
     component: () => import('../pages/UserInfo.vue'),
     meta: {
       title: '用户信息',
-      requiresAuth: true,
+      requiresAuth: true
+    }
+  },
+
+  // 7. 投稿页
+  {
+    path: '/submit',
+    name: 'submitPage',
+    component: () => import('../pages/Submit.vue'),
+    meta: {
+      title: '投稿',
+      requiresAuth: true
+    }
+  },
+
+  // 8. 404 页面（调整匹配规则）
+  {
+    path: '/:pathMatch(.*)*', 
+    name: 'NotFound',
+    component: () => import('../pages/NotFound.vue'),
+    meta: {
+      title: '页面不存在'
     },
+    beforeEnter: (to) => {
+      // 排除静态资源请求
+      if (to.path.startsWith('/@fs/')) {
+        return false // 终止导航
+      }
+    }
   }
 ]
 
-// 创建路由实例
 const router = createRouter({
-  history: createWebHistory(),
-  routes
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  // 增强滚动行为
+  scrollBehavior(to, from, savedPosition) {
+    return savedPosition || { top: 0 }
+  }
 })
 
-// 设置页面标题和路径守卫
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || '默认标题';
+  // 动态标题
+  document.title = to.meta.title ? `${to.meta.title} - 存续院` : '存续院'
 
-  if (to.matched.some(record => record.meta.requiresAuth && !store.state.isLoggedIn)) {
-    // 需要认证的路由，如果用户未登录，重定向到登录页面
+  // 状态检查（建议使用getter）
+  const isLoggedIn = store.getters.isAuthenticated
 
-    next({ path: '/login' });
-  } else {
-    // 不需要认证的路由，继续导航
-    next();
+  // 认证检查
+  if (to.meta.requiresAuth) {
+    if (!isLoggedIn) {
+      return next({
+        name: 'loginPage', // 使用命名路由
+        query: { 
+          redirect: to.fullPath,
+          reason: 'unauthorized'
+        }
+      })
+    }
+    // 已登录检查路由权限（示例）
+    if (to.meta.requiredRole && !store.getters.hasRole(to.meta.requiredRole)) {
+      return next({ name: 'Forbidden' })
+    }
   }
-});
+
+  // 已登录访问登录页重定向
+  if (to.name === 'loginPage' && isLoggedIn) {
+    return next({ name: 'homePage' })
+  }
+
+  next()
+})
 
 export default router

@@ -103,7 +103,7 @@
     },
     setup() {
       const onImageError = (event) => {
-        event.target.src = require('@/assets/image/image_fail_load.png');
+        event.target.src = require('../assets/image/image_fail_load.png');
       }
       return {
         onImageError

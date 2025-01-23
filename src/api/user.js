@@ -7,7 +7,7 @@ export const register_post = async (username, email, password) => {
     return;
   }
   const encryptedPassword = sha256(password).toString();
-  const response = await axios.post(`${process.env.VUE_APP_BASE_API}/user/register`,
+  const response = await axios.post(`${import.meta.env.VITE_APP_BASE_API}/user/register`,
     { username, email, password: encryptedPassword }, {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   });
@@ -20,7 +20,7 @@ export const login_post = async (username, password) => {
     return;
   }
   const encryptedPassword = sha256(password).toString();
-  const response = await axios.post(`${process.env.VUE_APP_BASE_API}/user/login`,
+  const response = await axios.post(`${import.meta.env.VITE_APP_BASE_API}/user/login`,
     { username, password: encryptedPassword }, {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   });
@@ -33,7 +33,7 @@ export const deleteAcc_delete = async (token, password) => {
     return;
   }
   const encryptedPassword = sha256(password).toString();
-  const response = await axios.post(`${process.env.VUE_APP_BASE_API}/user/unregister`,
+  const response = await axios.post(`${import.meta.env.VITE_APP_BASE_API}/user/deleteAcc`,
     { password: encryptedPassword }, {
     headers: {
       Authorization: `Duel ${token}`,
@@ -44,7 +44,7 @@ export const deleteAcc_delete = async (token, password) => {
 };
 
 export const getUserInfo_get = async (token, userId) => {
-  const response = await axios.get(`${process.env.VUE_APP_BASE_API}/user/userinfoById`, {
+  const response = await axios.get(`${import.meta.env.VITE_APP_BASE_API}/user/userinfoById`, {
     params: { userId },
     headers: { Authorization: `Duel ${token}` }
   });
@@ -52,7 +52,7 @@ export const getUserInfo_get = async (token, userId) => {
 };
 
 export const updateAvatar_patch = async (token, avatar) => {
-  const response = await axios.patch(`${process.env.VUE_APP_BASE_API}/user/updateAvatar`,
+  const response = await axios.patch(`${import.meta.env.VITE_APP_BASE_API}/user/updateAvatar`,
     { url: avatar }, {
     headers: {
       Authorization: `Duel ${token}`,
@@ -63,7 +63,7 @@ export const updateAvatar_patch = async (token, avatar) => {
 };
 
 export const updateBackground_patch = async (token, background) => {
-  const response = await axios.patch(`${process.env.VUE_APP_BASE_API}/user/updateBackground`,
+  const response = await axios.patch(`${import.meta.env.VITE_APP_BASE_API}/user/updateBackground`,
     { url: background }, {
     headers: {
       Authorization: `Duel ${token}`,
@@ -74,7 +74,7 @@ export const updateBackground_patch = async (token, background) => {
 };
 
 export const updateUserInfo_put = async (token, nickname, signature) => {
-  const response = await axios.put(`${process.env.VUE_APP_BASE_API}/user/update`,
+  const response = await axios.put(`${import.meta.env.VITE_APP_BASE_API}/user/update`,
     { nickname, signature }, {
     headers: {
       Authorization: `Duel ${token}`,

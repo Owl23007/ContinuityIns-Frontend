@@ -14,7 +14,7 @@
         <label for="password">密码</label>
         <input type="password" id="password" v-model="password" placeholder="请输入密码" required />
       </div>
-      <button type="submit" class="submit-button">{{ isLogin ? '登录' : '注册' }}</button>
+      <button type="submit" class="submit-button" :disabled="isRegistering">{{ isLogin ? '登录' : '注册' }}</button>
     </form>
     <button @click="toggleAuthMode" class="toggle-button">{{ isLogin ? '没有账号？注册' : '已有账号？登录' }}</button>
 
@@ -30,7 +30,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { login_post, register_post } from '@/api/user';
-import store from '@/store/index';
+import store from '../store/index';
 import { getUserInfo_get } from '../api/user';
 
 export default {
@@ -43,6 +43,7 @@ export default {
 
     const showError = ref(false);
     const errorMessage = ref('');
+    const isRegistering = ref(false);
 
     const toggleAuthMode = () => {
       isLogin.value = !isLogin.value;
@@ -67,18 +68,20 @@ export default {
           showError.value = true;
         }
       } catch (error) {
+        console.error('登录失败:', error);
         errorMessage.value = '请求错误，请检查网络或联系管理员';
         showError.value = true;
       }
     };
 
     const register = async () => {
+      if (isRegistering.value) return;
+      isRegistering.value = true;
       try {
         const res = await register_post(username.value, email.value, password.value);
         if (res.code === 0) {
           errorMessage.value = res.data;
           showError.value = true;
-          toggleAuthMode();
         } else {
           errorMessage.value = res.message;
           showError.value = true;
@@ -86,6 +89,8 @@ export default {
       } catch (error) {
         errorMessage.value = '请求错误，请检查网络或联系管理员';
         showError.value = true;
+      }finally {
+        isRegistering.value = false;
       }
     };
 
@@ -99,7 +104,8 @@ export default {
       register,
       showError,
       errorMessage,
-      closeErrorPopup
+      closeErrorPopup,
+      isRegistering
     };
   }
 };

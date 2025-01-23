@@ -1,52 +1,29 @@
 {
-  "name": "my-vue-app",
-  "version": "0.1.0",
+  "name": "continuityins-dev",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "vue-cli-service serve --open",
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.7.3",
-    "core-js": "^3.8.3",
+    "@highlightjs/vue-plugin": "^2.1.0",
+    "@vueuse/core": "^12.4.0",
+    "axios": "^1.7.9",
+    "core-js": "^3.40.0",
     "crypto-js": "^4.2.0",
-    "vue": "^3.2.13",
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.0",
+    "vue": "^3.5.13",
     "vue-cropper": "^0.6.5",
-    "vue-markdown": "^2.2.4",
-    "vue-router": "^4.4.3",
-    "vuex": "^4.0.2",
-    "webpack": "^5.93.0"
+    "vue-router": "^4.5.0",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
-    "babel-plugin-transform-inline-environment-variables": "^0.4.4",
-    "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
-    },
-    "rules": {}
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ]
+    "@vitejs/plugin-vue": "^5.2.1",
+    "globals": "^15.14.0",
+    "vite": "^6.0.5"
+  }
 }

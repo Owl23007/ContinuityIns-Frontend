@@ -24,9 +24,9 @@
 </template>
 
 <script>
-import ArticleCard from '@/components/ArticleCard.vue';
+import ArticleCard from '../components/ArticleCard.vue';
 import { ref, onMounted } from 'vue';
-import { getDailyRecommendations_get } from '@/api/article';
+import { getDailyRecommendations_get } from '../api/article';
 
 export default {
   name: 'homePage',

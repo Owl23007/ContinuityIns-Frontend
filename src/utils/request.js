@@ -32,7 +32,7 @@ service.interceptors.response.use(
     // 对响应数据做些什么
     const res = response.data;
     if (res.code !== 20000) {
-      // 如��响应码不是 20000，则认有错误
+      // 如响应码不是 20000，则认有错误
       console.error(res.message || 'Error');
       // 可以根据具体情况进行处理，比如显示错误提示
       return Promise.reject(new Error(res.message || 'Error'));

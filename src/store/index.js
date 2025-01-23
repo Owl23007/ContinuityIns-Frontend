@@ -52,7 +52,7 @@ const store = createStore({
         return;
       }
       try {
-        const response = await axios.get(`${process.env.VUE_APP_BASE_API}/user/userinfo`, {
+        const response = await axios.get(`${import.meta.env.VITE_APP_BASE_API}/user/userinfo`, {
           headers: { Authorization: `Duel ${token}` }
         });
         commit('setUser', response.data.data);
