@@ -28,7 +28,7 @@ export default {
     const errorMessage = ref('');
 
     const verifyEmail = async () => {
-      const baseUrl = process.env.VUE_APP_BASE_API || 'http://localhost:8081';
+      const baseUrl = 'http://localhost:8081';
       const url = `${baseUrl}/user/active?email=${email.value}&token=${token.value}`;
       try {
         const response = await axios.get(url);

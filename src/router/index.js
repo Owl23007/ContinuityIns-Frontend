@@ -110,7 +110,7 @@ router.beforeEach((to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} - 存续院` : '存续院'
 
   // 状态检查（建议使用getter）
-  const isLoggedIn = store.getters.isAuthenticated
+  const isLoggedIn = store.state.token
 
   // 认证检查
   if (to.meta.requiresAuth) {

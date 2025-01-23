@@ -84,7 +84,7 @@
           </router-link>
         </div>
         <!--登录注册-->
-        <div v-if="!isLoggedIn" class="header_button">
+        <div v-if="!user" class="header_button">
           <router-link to="/Auth" class="no-underline">登录</router-link>
         </div>
         <div v-else class="avatar_button">
@@ -127,7 +127,6 @@ const router = useRouter()
 
 // 响应式状态
 const user = computed(() => store.state.user)
-const isLoggedIn = computed(() => store.state.isLoggedIn)
 
 // 方法定义
 const logout = () => {
@@ -143,9 +142,6 @@ const onAvatarError = (event) => {
 
 // 页面加载时执行
 onMounted(async () => {
-  if (isLoggedIn.value) {
-    await store.dispatch('fetchUserData')
-  }
 
   // 动态调整footer位置
   const adjustFooterPosition = () => {
@@ -170,6 +166,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative; 
 }
 
 :root {
@@ -442,10 +439,10 @@ body {
 .main_container {
   flex: 1;
   width: 100%;
-  padding: 3rem 0;
+  max-width: 100%;
+  margin: 0 auto; /* 新增居中 */
   background: var(--background-color);
   margin-top: auto;
-  padding: 3rem 0;
   min-height: calc(100vh - 180px);
 }
 
@@ -464,7 +461,7 @@ body {
   color: rgba(255, 255, 255, 0.9);
   padding: 1.5rem 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  position: fixed;
+  margin-top: auto;
 }
 
 .footer-content {

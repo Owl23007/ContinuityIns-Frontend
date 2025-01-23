@@ -55,6 +55,7 @@
   <style scoped>
   .not-found-container {
     min-height: 100vh;
+    height: 100%;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     display: flex;
     align-items: center;
@@ -66,10 +67,12 @@
   }
   
   .content {
+    transform: translateY(-50px);
     text-align: center;
     padding: 2rem;
     position: relative;
     z-index: 1;
+    margin-bottom: 2rem;
   }
   
   .error-code {
@@ -124,6 +127,10 @@
   }
   
   .home-button {
+    /* 交互按钮 */
+    /*在最上层*/
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     padding: 1rem 2rem;

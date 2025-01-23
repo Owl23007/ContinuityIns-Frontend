@@ -1,72 +1,140 @@
-import { createStore } from 'vuex';
-import axios from 'axios';
+// store/index.js
+import { createStore } from 'vuex'
+import { 
+  login_post,
+  register_post,
+  sendResetEmail_post,
+  getUserInfo_get,
+  validateToken_post
+} from '@/api/user'
 
-const store = createStore({
-  state: {
-    user: JSON.parse(localStorage.getItem('user')) || null,
-    token: localStorage.getItem('jwt-token') || '',
-    isLoggedIn: !!localStorage.getItem('jwt-token') && !!JSON.parse(localStorage.getItem('user')),
+// 初始化状态
+const initialState = () => ({
+  token: localStorage.getItem('token') || sessionStorage.getItem('token') || null,
+  user: JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null'),
+  rememberMe: localStorage.getItem('rememberMe') === 'true'
+})
 
-  },
+export default createStore({
+  state: initialState(),
 
   mutations: {
-    setCardSetting(state, mode) {
-      state.CardSetting = mode;
+    SET_TOKEN(state, { token, rememberMe }) {
+      // 清理所有旧 token
+      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
+      
+      // 设置新存储
+      const storage = rememberMe ? localStorage : sessionStorage
+      storage.setItem('token', token)
+      storage.setItem('rememberMe', rememberMe)
+      
+      // 更新状态
+      state.token = token
+      state.rememberMe = rememberMe
+      
+      // 清理相反存储的用户数据
+      const oppositeStorage = rememberMe ? sessionStorage : localStorage
+      oppositeStorage.removeItem('user')
     },
-    setUser(state, user) {
-      state.user = user;
-      localStorage.setItem('user', JSON.stringify(user));
+
+    SET_USER(state, user) {
+      state.user = user
+      const storage = state.rememberMe ? localStorage : sessionStorage
+      storage.setItem('user', JSON.stringify(user))
     },
-    setToken(state, token) {
-      state.token = token;
-      localStorage.setItem('jwt-token', token);
-    },
-    logout(state) {
-      state.token = '';
-      state.user = null;
-      state.isLoggedIn = false;
-      localStorage.removeItem('user');
-      localStorage.removeItem('jwt-token');
-    },
-    login(state, token) {
-      state.token = token;
-      state.isLoggedIn = true;
-      localStorage.setItem('jwt-token', token);
-    },
+
+    CLEAR_AUTH(state) {
+      // 重置状态
+      Object.assign(state, initialState())
+      
+      // 精准清除所有认证相关存储
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      localStorage.removeItem('rememberMe')
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('user')
+      sessionStorage.removeItem('rememberMe')
+    }
   },
 
   actions: {
-    setCardSettingMode({ commit }, mode) {
-      commit('setCardSetting', mode);
-    },
-    logout({ commit }) {
-      commit('logout');
-    },
-    login({ commit }, token) {
-      commit('login', token);
-    },
-
-    async fetchUserData({ commit }) {
-      const token = localStorage.getItem('jwt-token');
-      if (!token) {
-        return;
-      }
+    async login({ commit }, { identifier, password, rememberMe }) {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_APP_BASE_API}/user/userinfo`, {
-          headers: { Authorization: `Duel ${token}` }
-        });
-        commit('setUser', response.data.data);
-        console.log('用户信息:', response.data.data);
-       
+        const res = await login_post(identifier, password)
+        if (res.code === 0) {
+          commit('SET_TOKEN', { 
+            token: res.data,
+            rememberMe 
+          })
+          // 自动获取用户信息
+          const userInfo = await this.dispatch('fetchUserInfo')
+          return userInfo
+        }
+        
+        throw new Error(res.message || '登录失败：未知错误')
       } catch (error) {
-        console.error('获取用户信息失败:', error);
-        commit('logout');
+        commit('CLEAR_AUTH')
+        throw new Error(error.message || '登录请求失败')
       }
     },
-  },
-  getters: {
-    isLoggedIn: state => state.isLoggedIn,
-  },
-});
 
-export default store;
+    async register({ commit }, { username, email, password }) {
+      try {
+        const res = await register_post(username, email, password)
+        if (res.code === 0) return true
+        throw new Error(res.message || '注册失败：服务器未返回成功状态')
+      } catch (error) {
+        throw new Error(error.message || '注册请求失败')
+      }
+    },
+
+    async fetchUserInfo({ commit, state }) {
+      if (!state.token) return null
+      
+      try {
+        const res = await getUserInfo_get(state.token)
+        if (res.code === 0) {
+          commit('SET_USER', res.data)
+        }
+        throw new Error(res.message || '获取用户信息失败')
+      } catch (error) {
+        commit('CLEAR_AUTH')
+        throw error
+      }
+    },
+
+    async sendResetEmail({ commit }, email) {
+      try {
+        const res = await sendResetEmail_post(email)
+        if (res.code === 0) return true
+        throw new Error(res.message || '发送失败')
+      } catch (error) {
+        throw new Error(error.message || '邮件发送请求失败')
+      }
+    },
+
+    logout({ commit }) {
+      commit('CLEAR_AUTH')
+    },
+
+    async initializeAuth({ commit, dispatch }) {
+      if (this.state.token) {
+        try {
+          // 先验证 Token 有效性
+          await validateToken_post(this.state.token)
+          // 再获取用户信息
+          await dispatch('fetchUserInfo')
+        } catch (error) {
+          commit('CLEAR_AUTH')
+        }
+      }
+    }
+  },
+
+  getters: {
+    isAuthenticated: state => !!state.token,
+    currentUser: state => state.user,
+    userAvatar: state => state.user?.avatar || '/default-avatar.png'
+  }
+})

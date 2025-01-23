@@ -1,85 +1,75 @@
 import axios from 'axios';
 import sha256 from 'crypto-js/sha256';
 
-export const register_post = async (username, email, password) => {
-  if (username === '' || password === '' || email === '') {
-    alert("请输入用户名、邮箱和密码。");
-    return;
-  }
-  const encryptedPassword = sha256(password).toString();
-  const response = await axios.post(`${import.meta.env.VITE_APP_BASE_API}/user/register`,
-    { username, email, password: encryptedPassword }, {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+// 从.env文件中获取VITE_APP_BASE_API的值
+const baseURL = import.meta.env.VITE_APP_BASE_API;
+const commonHeaders = { 'Content-Type': 'application/x-www-form-urlencoded' };
+
+// 封装请求函数
+const request = async (method, endpoint, data = {}, token) => {
+  const headers = token ? { ...commonHeaders, Authorization: `Duel ${token}` } : commonHeaders;
+  const response = await axios({
+    method,
+    url: `${baseURL}${endpoint}`,
+    data: new URLSearchParams(data),
+    headers,
+    params: method === 'GET' ? data : undefined
   });
   return response.data;
 };
 
-export const login_post = async (username, password) => {
-  if (username === '' || password === '') {
-    alert("请输入用户名或邮箱和密码。");
-    return;
-  }
-  const encryptedPassword = sha256(password).toString();
-  const response = await axios.post(`${import.meta.env.VITE_APP_BASE_API}/user/login`,
-    { username, password: encryptedPassword }, {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-  });
-  return response.data;
+// 封装验证函数
+const validateField = (value, alertMsg) => {
+  if (!value) alert(alertMsg);
+  return !!value;
 };
 
-export const deleteAcc_delete = async (token, password) => {
-  if (password === '') {
-    alert("请输入密码。");
-    return;
-  }
-  const encryptedPassword = sha256(password).toString();
-  const response = await axios.post(`${import.meta.env.VITE_APP_BASE_API}/user/deleteAcc`,
-    { password: encryptedPassword }, {
-    headers: {
-      Authorization: `Duel ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+// 导出API
+export const register_post = (username, email, password) => {
+  if (!validateField(username, '请输入用户名') || 
+      !validateField(email, '请输入邮箱') || 
+      !validateField(password, '请输入密码')) return;
+  return request('POST', '/user/register', {
+    username,
+    email,
+    password: sha256(password).toString()
   });
-  return response.data;
 };
 
-export const getUserInfo_get = async (token, userId) => {
-  const response = await axios.get(`${import.meta.env.VITE_APP_BASE_API}/user/userinfoById`, {
-    params: { userId },
-    headers: { Authorization: `Duel ${token}` }
+export const login_post = (identifier,password) => {
+  if (!validateField(identifier, '请输入用户名或邮箱') || 
+      !validateField(password, '请入密码')) return;
+  return request('POST', '/user/login', {
+    identifier,
+    password: sha256(password).toString()
   });
-  return response.data;
 };
 
-export const updateAvatar_patch = async (token, avatar) => {
-  const response = await axios.patch(`${import.meta.env.VITE_APP_BASE_API}/user/updateAvatar`,
-    { url: avatar }, {
-    headers: {
-      Authorization: `Duel ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  });
-  return response.data;
+export const deleteAcc_delete = (token, password) => {
+  if (!validateField(password, '请输入密码')) return;
+  return request('POST', '/user/deleteAcc', {
+    password: sha256(password).toString()
+  }, token);
 };
 
-export const updateBackground_patch = async (token, background) => {
-  const response = await axios.patch(`${import.meta.env.VITE_APP_BASE_API}/user/updateBackground`,
-    { url: background }, {
-    headers: {
-      Authorization: `Duel ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  });
-  return response.data;
-};
+export const getUserInfo_get = (token) => 
+  request('GET', '/user/userinfo',{}, token);
 
-export const updateUserInfo_put = async (token, nickname, signature) => {
-  const response = await axios.put(`${import.meta.env.VITE_APP_BASE_API}/user/update`,
-    { nickname, signature }, {
-    headers: {
-      Authorization: `Duel ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  });
-  return response.data;
-};
+const updateMedia = (endpoint, token, url) =>
+  request('PATCH', endpoint, { url }, token);
+
+export const updateAvatar_patch = (token, avatar) => 
+  updateMedia('/user/updateAvatar', token, avatar);
+
+export const updateBackground_patch = (token, background) =>
+  updateMedia('/user/updateBackground', token, background);
+
+export const updateUserInfo_put = (token, nickname, signature) =>
+  request('PUT', '/user/update', { nickname, signature }, token);
+
+//发送重置密码邮件
+export const sendResetEmail_post = email => 
+  request('POST', '/user/sendResetEmail', { email });
+
+export const validateToken_post = (token) => 
+  request('POST', '/user/validateToken', {}, token)
