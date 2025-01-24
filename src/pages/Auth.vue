@@ -88,11 +88,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import {
-  login_post,
-  register_post,
-  sendResetEmail_post
-} from '@/api/user'
+import { sendResetEmail_post } from '@/api/user'
 
 const store = useStore()
 const router = useRouter()
@@ -106,12 +102,14 @@ const showForgotPassword = ref(false)
 const processingReset = ref(false)
 const resetEmail = ref('')
 
+// 表单数据
 const form = reactive({
   identifier: '',
   email: '',
   password: ''
 })
 
+// 全局消息提示
 const message = reactive({
   content: '',
   type: 'error' // 'success' | 'error'
@@ -126,7 +124,7 @@ const formValid = computed(() => {
   }
   return (
     form.identifier.trim() &&
-    form.email.match(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/) &&
+    form.email.match(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,}$/) &&
     form.password.length >= 6
   )
 })
@@ -145,6 +143,7 @@ const handleSubmit = async () => {
 
       // 安全获取跳转路径
       const redirectPath = router.currentRoute?.query?.redirect || '/'
+      console.log('即将跳转到:', redirectPath)
       router.replace(redirectPath)
       showMessage('登录成功', 'success')
     } else {
@@ -186,16 +185,20 @@ const toggleAuthMode = () => {
   resetForm()
 }
 
+// 重置表单
 const resetForm = () => {
   form.identifier = ''
   form.email = ''
   form.password = ''
 }
 
-const showMessage = (content, type = 'error') => {
+// 全局消息提示
+let messageTimer = null
+const showMessage = (content, type) => {
   message.content = content
   message.type = type
-  setTimeout(() => message.content = '', 3000)
+  clearTimeout(messageTimer)
+  messageTimer = setTimeout(() => message.content = '', 3000)
 }
 </script>
 

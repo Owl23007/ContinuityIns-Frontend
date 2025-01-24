@@ -1,6 +1,6 @@
 // store/index.js
 import { createStore } from 'vuex'
-import { 
+import {
   login_post,
   register_post,
   sendResetEmail_post,
@@ -23,18 +23,19 @@ export default createStore({
       // 清理所有旧 token
       localStorage.removeItem('token')
       sessionStorage.removeItem('token')
-      
+
       // 设置新存储
       const storage = rememberMe ? localStorage : sessionStorage
       storage.setItem('token', token)
       storage.setItem('rememberMe', rememberMe)
-      
+
       // 更新状态
       state.token = token
       state.rememberMe = rememberMe
-      
+
       // 清理相反存储的用户数据
       const oppositeStorage = rememberMe ? sessionStorage : localStorage
+      oppositeStorage.removeItem('token')
       oppositeStorage.removeItem('user')
     },
 
@@ -47,7 +48,7 @@ export default createStore({
     CLEAR_AUTH(state) {
       // 重置状态
       Object.assign(state, initialState())
-      
+
       // 精准清除所有认证相关存储
       localStorage.removeItem('token')
       localStorage.removeItem('user')
@@ -62,20 +63,28 @@ export default createStore({
     async login({ commit }, { identifier, password, rememberMe }) {
       try {
         const res = await login_post(identifier, password)
-        if (res.code === 0) {
-          commit('SET_TOKEN', { 
-            token: res.data,
-            rememberMe 
-          })
-          // 自动获取用户信息
+        if (res.code !== 0) {
+          throw new Error(res.message || '登录失败：未知错误')
+        }
+
+        // 提交 token
+        commit('SET_TOKEN', {
+          token: res.data,
+          rememberMe
+        })
+
+        // 获取用户信息
+        try {
           const userInfo = await this.dispatch('fetchUserInfo')
           return userInfo
+        } catch (fetchError) {
+          // 如果获取用户信息失败，回滚 token
+          commit('CLEAR_AUTH')
+          throw new Error('获取用户信息失败: ' + fetchError.message)
         }
-        
-        throw new Error(res.message || '登录失败：未知错误')
       } catch (error) {
         commit('CLEAR_AUTH')
-        throw new Error(error.message || '登录请求失败')
+        throw error // 保持错误冒泡
       }
     },
 
@@ -91,11 +100,14 @@ export default createStore({
 
     async fetchUserInfo({ commit, state }) {
       if (!state.token) return null
-      
+
+      console.log('获取用户信息')
       try {
         const res = await getUserInfo_get(state.token)
         if (res.code === 0) {
+          console.log('获取用户信息成功')
           commit('SET_USER', res.data)
+          return res.data
         }
         throw new Error(res.message || '获取用户信息失败')
       } catch (error) {
