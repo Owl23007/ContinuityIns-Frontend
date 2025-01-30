@@ -5,7 +5,8 @@ import {
   register_post,
   sendResetEmail_post,
   getUserInfo_get,
-  validateToken_post
+  validateToken_post,
+  getOssPolicy_get
 } from '@/api/user'
 
 // 初始化状态
@@ -84,7 +85,7 @@ export default createStore({
         }
       } catch (error) {
         commit('CLEAR_AUTH')
-        throw error // 保持错误冒泡
+        throw error 
       }
     },
 
@@ -100,12 +101,9 @@ export default createStore({
 
     async fetchUserInfo({ commit, state }) {
       if (!state.token) return null
-
-      console.log('获取用户信息')
       try {
         const res = await getUserInfo_get(state.token)
         if (res.code === 0) {
-          console.log('获取用户信息成功')
           commit('SET_USER', res.data)
           return res.data
         }
@@ -140,6 +138,17 @@ export default createStore({
         } catch (error) {
           commit('CLEAR_AUTH')
         }
+      }
+    },
+
+    async getOssPolicy({ state }) {
+      if (!state.token) return null
+      try {
+        const res = await getOssPolicy_get(state.token)
+        if (res.code === 0) return res.data
+        throw new Error(res.message || '获取 OSS Policy 失败')
+      } catch (error) {
+        throw new Error(error.message || '获取 OSS Policy 请求失败')
       }
     }
   },

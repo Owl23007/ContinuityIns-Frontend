@@ -58,8 +58,8 @@ export const getUserInfo_get = (token) =>
 const updateMedia = (endpoint, token, url) =>
   request('PATCH', endpoint, { url }, token);
 
-export const updateAvatar_patch = (token, avatar) => 
-  updateMedia('/user/updateAvatar', token, avatar);
+export const updateAvatar_patch = (token, avatarUrl) => 
+  request('PATCH', '/user/updateAvatar', { url: avatarUrl }, token);
 
 export const updateBackground_patch = (token, background) =>
   updateMedia('/user/updateBackground', token, background);
@@ -73,3 +73,8 @@ export const sendResetEmail_post = email =>
 
 export const validateToken_post = (token) => 
   request('POST', '/user/validateToken', {}, token)
+
+//获取OSS请求策略
+export const getOssPolicy_get = (token) => 
+  request('GET', '/user/oss/policy', {}, token);
+

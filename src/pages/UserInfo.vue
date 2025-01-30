@@ -6,14 +6,11 @@
       <template v-if="user">
         <div class="profile-section">
           <div class="avatar-container">
-            <img :src="user.avatarImage || defaultAvatar" 
-                 alt="用户头像"
-                 class="avatar"
-                 @error="handleAvatarError">
+            <img :src="user.avatarImage || defaultAvatar" alt="用户头像" class="avatar" @error="handleAvatarError">
           </div>
           <div class="user-info">
             <p><strong>用户名：</strong>{{ user.username }}</p>
-            <p><strong>昵称：</strong>{{ user.nickname }}</p>
+            <p><strong>昵称：</strong>{{ user.nickname || '暂无昵称' }}</p>
             <p><strong>邮箱：</strong>{{ user.email }}</p>
             <p><strong>签名：</strong>{{ user.signature || '暂无签名' }}</p>
           </div>
@@ -82,30 +79,73 @@
         </div>
       </div>
     </div>
+    <!-- 在现有模态框结构中新增背景上传模态框 -->
+    <div v-if="activeModal === 'background'" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="closeModal">&times;</span>
+        <h2>更换背景</h2>
+        <div class="upload-options">
+          <input type="file" accept="image/*" @change="handleBackgroundUpload">
+          <div class="url-upload">
+            <input type="url" v-model="backgroundUrl" placeholder="输入背景图URL">
+            <button @click="handleBackgroundUrlSubmit">使用URL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+
+
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, toRefs, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import defaultAvatar from '@/assets/image/default_avatar.png'
+import defaultBackground from '@/assets/image/default_cover.jpg'
+
 
 export default {
   setup() {
     const store = useStore()
     const router = useRouter()
-    const user = reactive(store.state.user)
-    
+
     const state = reactive({
       activeModal: null,
       isUpdating: false,
       password: '',
       avatarUrl: '',
+      formData: {
+        nickname: '',
+        signature: ''
+      }
     })
 
+    const getOssConfig = async () => {
+      // 获取 OSS 配置
+      try {
+        const res = store.dispatch('getOssPolicy');
+        return res;
+      } catch (error) {
+        alert('获取上传配置失败');
+        throw error;
+      }
+    };
+
+    const user = computed(() => store.state.user || {})
+    const initialized = ref(false)
+
     onMounted(async () => {
-     
+      const res = await getOssConfig();
+      console.log(res);
+      if (!store.state.user) {
+        await store.dispatch('fetchUserInfo')
+      }
+      initialized.value = true
+      state.formData.nickname = user.value.nickname || ''
+      state.formData.signature = user.value.signature || ''
     })
 
     const handleAvatarError = (e) => {
@@ -114,6 +154,7 @@ export default {
 
     const openModal = (type) => {
       state.activeModal = type
+      console.log(state.activeModal)
     }
 
     const closeModal = () => {
@@ -185,7 +226,7 @@ export default {
     }
 
     return {
-      ...state,
+      ...toRefs(state),
       defaultAvatar,
       handleAvatarError,
       openModal,
@@ -194,7 +235,8 @@ export default {
       handleFileUpload,
       handleUrlSubmit,
       performLogout,
-      user
+      user,
+      initialized,
     }
   }
 }
@@ -210,7 +252,7 @@ export default {
 .profile-card {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 2rem;
 }
 
@@ -257,7 +299,7 @@ button.danger {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
