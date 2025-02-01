@@ -130,8 +130,13 @@ const user = computed(() => store.state.user)
 
 // 方法定义
 const logout = () => {
-  store.dispatch('logout')
-  router.push('/auth')
+ try {
+  console.log('退出登录')
+   store.dispatch('logout')
+   router.push('/')
+ } catch (error) {
+   console.error('遇到错误：',error)
+ }
 }
 
 const onAvatarError = (event) => {
@@ -140,24 +145,6 @@ const onAvatarError = (event) => {
   }
 }
 
-// 页面加载时执行
-onMounted(async () => {
-
-  // 动态调整footer位置
-  const adjustFooterPosition = () => {
-    const footer = document.querySelector('.footer')
-    const bodyHeight = document.body.scrollHeight
-    const windowHeight = window.innerHeight
-
-    footer.style.position = bodyHeight > windowHeight ? 'relative' : 'absolute'
-    footer.style.bottom = bodyHeight > windowHeight ? '0' : '0'
-  }
-
-  // 初始化调整
-  adjustFooterPosition()
-  // 监听窗口变化
-  window.addEventListener('resize', adjustFooterPosition)
-})
 </script>
 
 <style>
@@ -440,7 +427,7 @@ body {
   flex: 1;
   width: 100%;
   max-width: 100%;
-  margin: 0 auto; /* 新增居中 */
+  margin: 0 auto; 
   background: var(--background-color);
   margin-top: auto;
   min-height: calc(100vh - 180px);

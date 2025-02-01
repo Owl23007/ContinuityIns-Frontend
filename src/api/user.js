@@ -26,9 +26,9 @@ const validateField = (value, alertMsg) => {
 
 // 导出API
 export const register_post = (username, email, password) => {
-  if (!validateField(username, '请输入用户名') || 
-      !validateField(email, '请输入邮箱') || 
-      !validateField(password, '请输入密码')) return;
+  if (!validateField(username, '请输入用户名') ||
+    !validateField(email, '请输入邮箱') ||
+    !validateField(password, '请输入密码')) return;
   return request('POST', '/user/register', {
     username,
     email,
@@ -36,9 +36,9 @@ export const register_post = (username, email, password) => {
   });
 };
 
-export const login_post = (identifier,password) => {
-  if (!validateField(identifier, '请输入用户名或邮箱') || 
-      !validateField(password, '请入密码')) return;
+export const login_post = (identifier, password) => {
+  if (!validateField(identifier, '请输入用户名或邮箱') ||
+    !validateField(password, '请入密码')) return;
   return request('POST', '/user/login', {
     identifier,
     password: sha256(password).toString()
@@ -52,13 +52,13 @@ export const deleteAcc_delete = (token, password) => {
   }, token);
 };
 
-export const getUserInfo_get = (token) => 
-  request('GET', '/user/userinfo',{}, token);
+export const getUserInfo_get = (token) =>
+  request('GET', '/user/userinfo', {}, token);
 
 const updateMedia = (endpoint, token, url) =>
   request('PATCH', endpoint, { url }, token);
 
-export const updateAvatar_patch = (token, avatarUrl) => 
+export const updateAvatar_patch = (token, avatarUrl) =>
   request('PATCH', '/user/updateAvatar', { url: avatarUrl }, token);
 
 export const updateBackground_patch = (token, background) =>
@@ -68,13 +68,16 @@ export const updateUserInfo_put = (token, nickname, signature) =>
   request('PUT', '/user/update', { nickname, signature }, token);
 
 //发送重置密码邮件
-export const sendResetEmail_post = email => 
+export const sendResetEmail_post = email =>
   request('POST', '/user/sendResetEmail', { email });
 
-export const validateToken_post = (token) => 
+export const validateToken_post = (token) =>
   request('POST', '/user/validateToken', {}, token)
 
 //获取OSS请求策略
-export const getOssPolicy_get = (token) => 
+export const getOssPolicy_get = (token) =>
   request('GET', '/user/oss/policy', {}, token);
+
+export const resetPassword_post = (email, token, password) =>
+  request('POST', '/user/resetPassword', { email: email, token: token, password: sha256(password).toString() },);
 

@@ -1,16 +1,16 @@
 <template>
   <div class="auth-container">
-    <div class="auth-card" :class="{ 'register-mode': !isLogin }">
+    <div class="auth-card" :class="{ 'register-mode': !uiState.isLogin }">
       <div class="header">
-        <h2>{{ isLogin ? '欢迎回来' : '加入我们' }}</h2>
+        <h2>{{ uiState.isLogin ? '欢迎回来' : '加入我们' }}</h2>
         <div class="decorative-line"></div>
       </div>
 
       <form @submit.prevent="handleSubmit">
         <!-- 用户名输入 -->
         <div class="input-group">
-          <input type="text" v-model="form.identifier" required :class="{ filled: form.identifier }" />
-          <label>{{ isLogin ? '用户名/邮箱' : '用户名' }}</label>
+          <input type="text" v-model="formData.main.identifier" required :class="{ filled: formData.main.identifier }" />
+          <label>{{ uiState.isLogin ? '用户名/邮箱' : '用户名' }}</label>
           <span class="icon">
             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user"
               role="img" viewBox="0 0 448 512" width="16" height="16">
@@ -21,8 +21,9 @@
         </div>
 
         <!-- 邮箱输入（注册模式） -->
-        <div class="input-group" v-if="!isLogin">
-          <input type="email" v-model="form.email" required :class="{ filled: form.email }" />
+        <div class="input-group" :class="{ error: errors.email }" v-if="!uiState.isLogin">
+          <input type="text" v-model="formData.main.email" required @input="validateEmail" @blur="validateEmail"
+            :class="{ filled: formData.main.email }" />
           <label>电子邮箱</label>
           <span class="icon">
             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="envelope"
@@ -31,12 +32,15 @@
                 d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z" />
             </svg>
           </span>
+          <transition name="fade">
+            <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
+          </transition>
         </div>
 
         <!-- 密码输入 -->
-        <div class="input-group">
-          <input :type="showPassword ? 'text' : 'password'" v-model="form.password" required
-            :class="{ filled: form.password }" />
+        <div class="input-group" :class="{ error: errors.password }">
+          <input :type="uiState.showPassword ? 'text' : 'password'" v-model="formData.main.password" required @input="validatePassword"
+            @blur="validatePassword" :class="{ filled: formData.main.password }" />
           <label>密码</label>
           <span class="icon">
             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="lock" class="svg-inline--fa fa-lock"
@@ -45,8 +49,11 @@
                 d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z" />
             </svg>
           </span>
-          <button type="button" class="password-toggle" @click="showPassword = !showPassword">
-            <svg v-if="showPassword" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="eye-slash"
+          <transition name="fade">
+            <div v-if="errors.password" class="error-message">{{ errors.password }}</div>
+          </transition>
+          <button type="button" class="password-toggle" @click="uiState.showPassword = !uiState.showPassword">
+            <svg v-if="uiState.showPassword" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="eye-slash"
               class="svg-inline--fa fa-eye-slash" role="img" viewBox="0 0 640 512" width="16" height="16">
               <path fill="currentColor"
                 d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.9-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z" />
@@ -62,30 +69,38 @@
 
 
         <!-- 登录模式选项 -->
-        <div v-if="isLogin" class="options">
-          <a @click="showForgotPassword = true" style="cursor: pointer;">忘记密码？</a>
+        <div v-if="uiState.isLogin" class="options">
+          <a @click="uiState.showForgotPassword = true" style="cursor: pointer;">忘记密码？</a>
           <div class="remember-me">
-            <input type="checkbox" v-model="rememberMe" id="remember-me" />
+            <input type="checkbox" v-model="uiState.rememberMe" id="remember-me" />
             <p>记住我</p>
+            <span class="tooltip-icon">
+              <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="info-circle"
+                class="svg-inline--fa fa-info-circle" role="img" viewBox="0 0 512 512" width="14" height="14">
+                <path fill="#718096"
+                  d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 110c23.2 0 42 18.8 42 42s-18.8 42-42 42-42-18.8-42-42 18.8-42 42-42zm56 304h-112c-13.3 0-24-10.7-24-24s10.7-24 24-24h24v-88h-24c-13.3 0-24-10.7-24-24s10.7-24 24-24h64c13.3 0 24 10.7 24 24v112h24c13.3 0 24 10.7 24 24s-10.7 24-24 24z" />
+              </svg>
+              <span class="tooltip-text">将通过安全令牌保持登录状态，不会存储任何密码信息，请妥善保管密码！</span>
+            </span>
           </div>
         </div>
 
-        <button type="submit" class="submit-btn" :disabled="processing" :class="{ processing }">
-          <span v-if="!processing">{{ isLogin ? '立即登录' : '注册账号' }}</span>
+        <button type="submit" class="submit-btn" :disabled="uiState.processing" :class="{ processing: uiState.processing }">
+          <span v-if="!uiState.processing">{{ uiState.isLogin ? '立即登录' : '注册账号' }}</span>
           <div v-else class="loader"></div>
         </button>
       </form>
 
       <div class="auth-footer">
-        <span>{{ isLogin ? '新用户？' : '已有账号？' }}</span>
-        <a @click="toggleAuthMode">{{ isLogin ? '创建账号' : '立即登录' }}</a>
+        <span>{{ uiState.isLogin ? '新用户？' : '已有账号？' }}</span>
+        <a @click="toggleAuthMode">{{ uiState.isLogin ? '创建账号' : '立即登录' }}</a>
       </div>
     </div>
 
     <!-- 忘记密码模态框 -->
     <transition name="modal-fade">
-      <div v-if="showForgotPassword" class="modal-mask">
-        <div class="modal-wrapper" @click.self="showForgotPassword = false">
+      <div v-if="uiState.showForgotPassword" class="modal-mask">
+        <div class="modal-wrapper" @click.self="uiState.showForgotPassword = false">
           <div class="modal-container">
             <div class="modal-header">
               <div class="title-group">
@@ -100,9 +115,9 @@
             </div>
 
             <div class="modal-content">
-              <div class="input-group" :class="{ error: emailError }">
-                <input type="email" v-model="resetEmail" required @input="validateEmail" @blur="validateEmail"
-                  placeholder=" " />
+              <div class="input-group" :class="{ error: errors.resetEmail }">
+                <input type="email" v-model="formData.reset.email" required @input="validateResetEmail" @blur="validateResetEmail"
+                  :class="{ filled: formData.reset.email }" placeholder=" " />
                 <label>注册邮箱地址</label>
                 <span class="icon">
                   <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="envelope"
@@ -112,17 +127,17 @@
                   </svg>
                 </span>
                 <transition name="fade">
-                  <div v-if="emailError" class="error-message">{{ emailError }}</div>
+                  <div v-if="errors.resetEmail" class="error-message">{{ errors.resetEmail }}</div>
                 </transition>
               </div>
 
               <div class="modal-actions">
-                <button class="primary-btn" @click="sendResetEmail" :disabled="!!emailError || processingReset"
-                  :class="{ 'has-error': emailError }">
-                  <span v-if="!processingReset">发送重置邮件</span>
+                <button class="primary-btn" @click="sendResetEmail" :disabled="!formData.reset.email || uiState.processingReset"
+                  :class="{ 'has-error': errors.resetEmail }">
+                  <span v-if="!uiState.processingReset">发送重置邮件</span>
                   <div v-else class="mini-loader"></div>
                 </button>
-                <button class="secondary-btn" @click="showForgotPassword = false">
+                <button class="secondary-btn" @click="uiState.showForgotPassword = false">
                   取消
                 </button>
               </div>
@@ -151,138 +166,239 @@
 </template>
 
 <script setup>
-/**
- * TODO:1.完成找回密码的功能 2.解决登出要两次的问题 3.对勾缺失 
- **/
-// 导入依赖
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onBeforeUnmount, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { sendResetEmail_post } from '@/api/user'
 
-// 初始化
+// 基础依赖
 const store = useStore()
 const router = useRouter()
 
-// 响应式状态
-const isLogin = ref(true)
-const showPassword = ref(false)
-const rememberMe = ref(false)
-const processing = ref(false)
-const showForgotPassword = ref(false)
-const processingReset = ref(false)
-const resetEmail = ref('')
+// 定时器管理
+const timers = ref([])
+const setTimer = (callback, delay = 3000) => {
+  const timer = setTimeout(() => {
+    callback()
+    timers.value = timers.value.filter(t => t !== timer)
+  }, delay)
+  timers.value.push(timer)
+}
+const clearAllTimers = () => {
+  timers.value.forEach(timer => clearTimeout(timer))
+  timers.value = []
+}
 
-const form = reactive({
-  identifier: '',
-  email: '',
-  password: ''
+// 组件状态
+const uiState = reactive({
+  isLogin: true,
+  showPassword: false,
+  rememberMe: false,
+  processing: false,
+  showForgotPassword: false,
+  processingReset: false
 })
 
+// 表单数据
+const formData = reactive({
+  main: {
+    identifier: '',
+    email: '',
+    password: ''
+  },
+  reset: {
+    email: ''
+  }
+})
+
+// 错误状态
+const errors = reactive({
+  email: '',
+  password: '',
+  resetEmail: ''
+})
+
+// 消息提示
 const message = reactive({
   content: '',
   type: 'error'
 })
 
-const emailError = ref('')
+// 验证规则
+const validators = {
+  email: (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!value.trim()) return '请输入邮箱地址'
+    if (!emailRegex.test(value)) return '邮箱格式不正确'
+    return ''
+  },
+  password: (value) => {
+    if (value.length < 8) return '密码长度不能少于8位'
+    return ''
+  },
+  username: (value) => {
+    if (!value.trim()) return '请输入用户名'
+    if (value.length < 4) return '用户名不能少于4位'
+    return ''
+  }
+}
 
-// 表单验证
-const formValid = computed(() => {
-  const { identifier, email, password } = form
-  const basicCheck = identifier.trim() && password.length >= 8
+// 主表单验证
+const validateMainForm = () => {
+  let isValid = true
 
-  console.log('参数验证')
-  return isLogin.value
-    ? basicCheck
-    : basicCheck && email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-})
+  // 邮箱验证（注册模式）
+  if (!uiState.isLogin) {
+    const emailError = validators.email(formData.main.email)
+    if (emailError) {
+      errors.email = emailError
+      isValid = false
+      setTimer(() => errors.email = '')
+    }
+  }
 
-// 方法
-const validateEmail = () => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!resetEmail.value.trim()) {
-    emailError.value = '请输入邮箱地址'
+  // 密码验证
+  const passwordError = validators.password(formData.main.password)
+  if (passwordError) {
+    errors.password = passwordError
+    isValid = false
+    setTimer(() => errors.password = '')
+  }
+
+  // 用户名验证（注册模式）
+  if (!uiState.isLogin) {
+    const usernameError = validators.username(formData.main.identifier)
+    if (usernameError) {
+      errors.username = usernameError
+      isValid = false
+      setTimer(() => errors.username = '')
+    }
+  }
+
+  // 基础字段验证
+  if (!formData.main.identifier.trim() || !formData.main.password) {
+    isValid = false
+  }
+
+  return isValid
+}
+
+// 重置邮箱验证
+const validateResetEmail = () => {
+  const error = validators.email(formData.reset.email)
+  if (error) {
+    errors.resetEmail = error
+    setTimer(() => errors.resetEmail = '')
     return false
   }
-  if (!emailRegex.test(resetEmail.value)) {
-    emailError.value = '邮箱格式不正确'
-    return false
-  }
-  emailError.value = ''
   return true
 }
 
-
+// 表单提交
 const handleSubmit = async () => {
-  if (formValid.value || processing.value) {
-    console.log('参数验证失败')
+  if (!validateMainForm() || uiState.processing) {
+    if (!validateMainForm()) showMessage('请填写完整信息')
     return
   }
-  processing.value = true
+
+  uiState.processing = true
   try {
-    if (isLogin.value) {
-      await store.dispatch('login', {
-        identifier: form.identifier,
-        password: form.password,
-        rememberMe: rememberMe.value
-      })
-
-      const redirectPath = router.currentRoute?.query?.redirect || '/'
-      router.replace(redirectPath)
-      showMessage('登录成功', 'success')
+    if (uiState.isLogin) {
+      await handleLogin()
     } else {
-      await store.dispatch('register', {
-        username: form.identifier,
-        email: form.email,
-        password: form.password
-      })
-
-      showMessage('注册成功，请查看邮箱验证', 'success')
-      toggleAuthMode()
+      await handleRegister()
     }
   } catch (error) {
     showMessage(error.message || '操作失败，请检查网络')
   } finally {
-    processing.value = false
+    uiState.processing = false
   }
 }
 
+// 登录处理
+const handleLogin = async () => {
+  await store.dispatch('login', {
+    identifier: formData.main.identifier,
+    password: formData.main.password,
+    rememberMe: uiState.rememberMe
+  })
+  const redirectPath = router.currentRoute?.query?.redirect || '/'
+  router.replace(redirectPath)
+  showMessage('登录成功', 'success')
+}
+
+// 注册处理
+const handleRegister = async () => {
+  await store.dispatch('register', {
+    username: formData.main.identifier,
+    email: formData.main.email,
+    password: formData.main.password
+  })
+  showMessage('注册成功，请查看邮箱验证', 'success')
+  toggleAuthMode()
+}
+
+// 密码重置处理
 const sendResetEmail = async () => {
-  if (!validateEmail()) return
-  if (processingReset.value) return
-
-  processingReset.value = true
+  if (!validateResetEmail() || uiState.processingReset) return
+  
+  uiState.processingReset = true
   try {
-    await sendResetEmail_post(resetEmail.value)
+    const res = await sendResetEmail_post(formData.reset.email)
+    if (res.code === -1) throw new Error(res.message)
+    
     showMessage('重置链接已发送至邮箱', 'success')
-    showForgotPassword.value = false
-    resetEmail.value = ''
+    uiState.showForgotPassword = false
+    formData.reset.email = ''
+    errors.resetEmail = ''
   } catch (error) {
-    showMessage(error.response?.data?.message || '发送失败，请稍后重试')
+    showMessage(error.message || '发送失败，请稍后重试')
   } finally {
-    processingReset.value = false
+    uiState.processingReset = false
   }
 }
 
-// 辅助方法
+// 辅助函数
 const toggleAuthMode = () => {
-  isLogin.value = !isLogin.value
-  resetForm()
+  uiState.isLogin = !uiState.isLogin
+  resetMainForm()
 }
 
-const resetForm = () => {
-  form.identifier = ''
-  form.email = ''
-  form.password = ''
+const resetMainForm = () => {
+  formData.main.identifier = ''
+  formData.main.email = ''
+  formData.main.password = ''
+  clearErrors()
+}
+
+const clearErrors = () => {
+  errors.email = ''
+  errors.password = ''
+  errors.resetEmail = ''
 }
 
 const showMessage = (content, type = 'error') => {
   message.content = content
   message.type = type
-  setTimeout(() => message.content = '', 3000)
+  setTimer(() => message.content = '')
 }
-</script>
 
+// 生命周期
+onBeforeUnmount(() => {
+  clearAllTimers()
+})
+
+// 自动验证重置邮箱
+watch(
+  () => formData.reset.email,
+  () => validateResetEmail()
+)
+
+// 响应式解构
+const isLogin = computed(() => uiState.isLogin)
+const showPassword = computed(() => uiState.showPassword)
+const showForgotPassword = computed(() => uiState.showForgotPassword)
+</script>
 <style scoped>
 /* 新增图标样式 */
 .icon svg {
@@ -333,10 +449,11 @@ const showMessage = (content, type = 'error') => {
   width: 100%;
   max-width: 450px;
   transition: transform 0.3s ease;
+  transform: translateY(-50px);
 }
 
 .auth-card.register-mode {
-  transform: translateY(-10px);
+  transform: translateY(-60px);
 }
 
 .header {
@@ -371,6 +488,21 @@ input {
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.3s ease;
+  background-color: #f8fbff;
+}
+
+
+input[type="password"]::-ms-reveal {
+  display: none !important;
+}
+
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
 }
 
 input:focus {
@@ -493,14 +625,14 @@ input.filled~label {
   content: "";
   position: absolute;
   left: 5px;
-  top: 2px;
+  top: 6px;
   width: 4px;
   height: 8px;
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
   display: block;
-  visibility: visible; 
+  visibility: visible;
 }
 
 
@@ -553,7 +685,7 @@ input.filled~label {
   padding: 2rem;
   border-radius: 1rem;
   width: 90%;
-  max-width: 400px;
+  max-width: 420px;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   transform: scale(0.95);
@@ -584,7 +716,7 @@ input.filled~label {
   transition: all 0.2s ease;
 }
 
-.close-btn:hover {
+close-btn:hover {
   color: #667eea;
   transform: rotate(90deg);
 }
@@ -818,10 +950,50 @@ input.filled~label {
   opacity: 0;
 }
 
+.tooltip-icon {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  transform: translateY(1px);
+}
+
+.tooltip-icon .tooltip-text {
+  visibility: hidden;
+  width: 300px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-90%) translateY(-10px);
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.tooltip-icon .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(+950%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.75) transparent transparent transparent;
+}
+
+.tooltip-icon:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+
+}
+
 @media (max-width: 480px) {
   .auth-card {
     padding: 1.5rem;
   }
 }
 </style>
-

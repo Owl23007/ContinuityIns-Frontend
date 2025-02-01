@@ -47,16 +47,14 @@ export default createStore({
     },
 
     CLEAR_AUTH(state) {
-      // 重置状态
-      Object.assign(state, initialState())
-
-      // 精准清除所有认证相关存储
+      // 清理所有存储
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      localStorage.removeItem('rememberMe')
       sessionStorage.removeItem('token')
       sessionStorage.removeItem('user')
-      sessionStorage.removeItem('rememberMe')
+
+      // 重置状态
+      Object.assign(state, initialState())
     }
   },
 

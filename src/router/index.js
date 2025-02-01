@@ -93,7 +93,28 @@ const routes = [
         return false // 终止导航
       }
     }
-  }
+  },
+
+  //9. 重置密码
+  {
+    path: '/resetPassword',
+    name: 'resetPassword',
+    component: () => import('../pages/ResetPassword.vue'),
+    meta: {
+      title: '重置密码',
+      requiresAuth: false
+    }
+  },
+  //10.chat
+  {
+    path: '/chat',
+    name: 'chatPage',
+    component: () => import('../pages/Chat.vue'),
+    meta: {
+      title: '聊天',
+      requiresAuth: false
+    }
+  },
 ]
 
 const router = createRouter({
