@@ -107,3 +107,7 @@ public
 
 # VS Code
 .history/
+
+# env
+.env.development
+.env.production
