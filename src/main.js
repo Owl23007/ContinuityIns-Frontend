@@ -7,6 +7,7 @@ const app = createApp(App);
 app.use(router);
 app.use(store);
 
+
 app.config.productionTip = true;
 app.config.globalProperties.$test = 'test';
 

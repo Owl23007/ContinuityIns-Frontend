@@ -1,9 +1,9 @@
 <template>
-  <div class="user-profile">
+  <div class="user-profile" :style="{ backgroundImage: `url(${backgroundImage})` }">
     <!-- 主内容区 -->
     <div class="profile-card">
       <h1 class="profile-title">个人主页</h1>
-      <template v-if="user">
+      <template v-if="initialized && user">
         <div class="profile-section">
           <div class="avatar-container">
             <img :src="user.avatarImage || defaultAvatar" alt="用户头像" class="avatar" @error="handleAvatarError">
@@ -19,6 +19,7 @@
         <div class="action-buttons">
           <button @click="openModal('profile')">编辑资料</button>
           <button @click="openModal('avatar')">更换头像</button>
+          <button @click="openModal('background')">更换背景</button>
           <button @click="openModal('logout')" class="danger">注销账户</button>
         </div>
       </template>
@@ -79,7 +80,8 @@
         </div>
       </div>
     </div>
-    <!-- 在现有模态框结构中新增背景上传模态框 -->
+
+    <!-- 更换背景模态框 -->
     <div v-if="activeModal === 'background'" class="modal">
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
@@ -93,10 +95,7 @@
         </div>
       </div>
     </div>
-
   </div>
-
-
 </template>
 
 <script>
@@ -105,7 +104,6 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import defaultAvatar from '@/assets/image/default_avatar.png'
 import defaultBackground from '@/assets/image/default_cover.jpg'
-
 
 export default {
   setup() {
@@ -117,16 +115,18 @@ export default {
       isUpdating: false,
       password: '',
       avatarUrl: '',
+      backgroundUrl: '',
       formData: {
         nickname: '',
         signature: ''
-      }
+      },
+      backgroundImage: defaultBackground
     })
 
     const getOssConfig = async () => {
       // 获取 OSS 配置
       try {
-        const res = store.dispatch('getOssPolicy');
+        const res = await store.dispatch('getOssPolicy');
         return res;
       } catch (error) {
         alert('获取上传配置失败');
@@ -146,6 +146,7 @@ export default {
       initialized.value = true
       state.formData.nickname = user.value.nickname || ''
       state.formData.signature = user.value.signature || ''
+      state.backgroundImage = user.value.backgroundImage || defaultBackground
     })
 
     const handleAvatarError = (e) => {
@@ -161,6 +162,7 @@ export default {
       state.activeModal = null
       state.password = ''
       state.avatarUrl = ''
+      state.backgroundUrl = ''
     }
 
     const validateImage = (file) => {
@@ -216,12 +218,49 @@ export default {
       }
     }
 
+    const handleBackgroundUpload = async (e) => {
+      const file = e.target.files[0]
+      if (!validateImage(file)) {
+        alert('仅支持JPG/PNG格式，且小于2MB')
+        return
+      }
+
+      try {
+        state.isUpdating = true
+        const formData = new FormData()
+        formData.append('background', file)
+        await store.dispatch('updateBackground', formData)
+        state.backgroundImage = URL.createObjectURL(file)
+        state.user = store.state.user
+        closeModal()
+      } catch (error) {
+        alert('上传失败')
+      } finally {
+        state.isUpdating = false
+      }
+    }
+
+    const handleBackgroundUrlSubmit = async () => {
+      try {
+        state.isUpdating = true
+        await store.dispatch('updateBackground', { url: state.backgroundUrl })
+        state.backgroundImage = state.backgroundUrl
+        state.user = store.state.user
+        closeModal()
+      } catch (error) {
+        alert('URL更新失败')
+      } finally {
+        state.isUpdating = false
+      }
+    }
+
     const performLogout = async () => {
       try {
         await store.dispatch('deleteAccount', state.password)
-        router.push('/auth')
+        router.push('/home')
       } catch (error) {
         alert('注销失败，请检查密码')
+        console.error(error)  
       }
     }
 
@@ -234,6 +273,8 @@ export default {
       handleProfileUpdate,
       handleFileUpload,
       handleUrlSubmit,
+      handleBackgroundUpload,
+      handleBackgroundUrlSubmit,
       performLogout,
       user,
       initialized,
@@ -247,13 +288,18 @@ export default {
   max-width: 800px;
   margin: 2rem auto;
   padding: 1rem;
+  background-size: cover;
+  background-position: center;
+  position: relative;
 }
 
 .profile-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 .profile-title {
@@ -287,13 +333,23 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #35a78c;
 }
 
 button.danger {
   background: #ff4444;
 }
 
+button.danger:hover {
+  background: #d63f3f;
+}
+
 .modal {
+  z-index:1001;
   position: fixed;
   top: 0;
   left: 0;
@@ -306,6 +362,7 @@ button.danger {
 }
 
 .modal-content {
+  z-index: 10000; /* 调整 z-index */
   background: white;
   padding: 2rem;
   border-radius: 8px;
@@ -346,5 +403,28 @@ button.danger {
 
 input[type="file"] {
   padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+@media (max-width: 768px) {
+  .profile-section {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .avatar-container {
+    margin-bottom: 1rem;
+  }
 }
 </style>
+
+

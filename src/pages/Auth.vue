@@ -52,6 +52,7 @@
           <transition name="fade">
             <div v-if="errors.password" class="error-message">{{ errors.password }}</div>
           </transition>
+          <!-- 密码可见按钮 -->
           <button type="button" class="password-toggle" @click="uiState.showPassword = !uiState.showPassword">
             <svg v-if="uiState.showPassword" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="eye-slash"
               class="svg-inline--fa fa-eye-slash" role="img" viewBox="0 0 640 512" width="16" height="16">
@@ -64,6 +65,15 @@
                 d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.9-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z" />
             </svg>
           </button>
+           <!-- 密码强度条 -->
+           <div class="password-strength" :data-strength="passwordStrength" v-if="!uiState.isLogin">
+                    <div class="strength-bar"
+                        :style="{ width: strengthPercentage + '%', backgroundColor: strengthColor }"></div>
+                </div>
+                <div class="strength-text" :style="{ color: strengthColor }" v-if="!uiState.isLogin">
+                    {{ strengthText }}
+                </div>
+
         </div>
 
 
@@ -198,6 +208,51 @@ const uiState = reactive({
   showForgotPassword: false,
   processingReset: false
 })
+//
+// 密码强度计算
+const passwordStrength = computed(() => {
+  console.log(formData.main.password)
+    if (!formData.main.password) return 0
+    return score(formData.main.password)
+})
+
+const strengthPercentage = computed(() => {
+    return (passwordStrength.value / 6) * 100
+})
+
+const strengthColor = computed(() => {
+    if (passwordStrength.value <= 2) return '#f56565'
+    if (passwordStrength.value <= 4) return '#f6ad55'
+    return '#48bb78'
+})
+
+const strengthText = computed(() => {
+    if (passwordStrength.value <= 2) return '弱'
+    if (passwordStrength.value <= 4) return '中等'
+    return '强'
+})
+
+const score = (password) => {
+    let score = 0
+
+    // 密码长度
+    if (password.length >= 8) score += 1
+    if (password.length >= 12) score += 1
+
+    // 包含数字
+    if (/\d/.test(password)) score += 1
+
+    // 包含小写字母
+    if (/[a-z]/.test(password)) score += 1
+
+    // 包含大写字母
+    if (/[A-Z]/.test(password)) score += 1
+
+    // 包含特殊字符
+    if (/[^a-zA-Z0-9]/.test(password)) score += 1
+
+    return score
+}
 
 // 表单数据
 const formData = reactive({
@@ -989,6 +1044,26 @@ close-btn:hover {
   visibility: visible;
   opacity: 1;
 
+}
+
+.password-strength {
+    height: 4px;
+    background: #e2e8f0;
+    margin-top: 8px;
+    border-radius: 2px;
+    position: relative;
+}
+
+.strength-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-text {
+    margin-top: 4px;
+    font-size: 0.75rem;
+    text-align: right;
 }
 
 @media (max-width: 480px) {

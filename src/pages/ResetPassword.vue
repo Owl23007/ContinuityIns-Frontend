@@ -66,6 +66,7 @@ const passwordStrength = computed(() => {
 })
 
 const strengthPercentage = computed(() => {
+    console.log((passwordStrength.value / 6) * 100)
     return (passwordStrength.value / 6) * 100
 })
 

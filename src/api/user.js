@@ -45,7 +45,7 @@ export const login_post = (identifier, password) => {
   });
 };
 
-export const deleteAcc_delete = (token, password) => {
+export const deleteAccount_post = (token, password) => {
   if (!validateField(password, '请输入密码')) return;
   return request('POST', '/user/deleteAcc', {
     password: sha256(password).toString()

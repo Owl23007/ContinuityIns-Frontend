@@ -6,7 +6,8 @@ import {
   sendResetEmail_post,
   getUserInfo_get,
   validateToken_post,
-  getOssPolicy_get
+  getOssPolicy_get,
+  deleteAccount_post
 } from '@/api/user'
 
 // 初始化状态
@@ -147,6 +148,20 @@ export default createStore({
         throw new Error(res.message || '获取 OSS Policy 失败')
       } catch (error) {
         throw new Error(error.message || '获取 OSS Policy 请求失败')
+      }
+    },
+
+    async deleteAccount({ commit, state }, password) {
+      if (!state.token) return null
+      try {
+        const res = await deleteAccount_post(state.token, password)
+        if (res.code === 0) {
+          commit('CLEAR_AUTH')
+          return true
+        }
+        throw new Error(res.message || '删除账户失败')
+      } catch (error) {
+        throw new Error(error.message || '删除账户请求失败')
       }
     }
   },
