@@ -28,15 +28,16 @@ export default {
     const errorMessage = ref('');
 
     const verifyEmail = async () => {
-      const baseUrl = 'http://localhost:8081';
+      const baseUrl = import.meta.env.VITE_APP_BASE_API;
       const url = `${baseUrl}/user/active?email=${email.value}&token=${token.value}`;
+      
       try {
         const response = await axios.get(url);
         if (response.data.code === 0) {
           success.value = true;
           setTimeout(() => {
-            router.push({ name: 'loginPage' });
-          }, 2000); // 2秒后重定向到首页
+            router.push({ name: 'homePage' }); // 2秒后重定向到首页
+          }, 2000);
         } else {
           throw new Error(response.data.message || '验证失败，请重试。');
         }

@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => {
         allow: [
           process.cwd(),
         ]
-      }
+      },
     },
 
     // 构建配置
