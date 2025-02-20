@@ -59,6 +59,15 @@
             文章
           </router-link>
         </div>
+        <div class="header_button">
+          <router-link to="/chat" class=" no-underline">
+            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 8h40v24H13l-9 8V8z" />
+            </svg>
+            对话
+          </router-link>
+        </div>
 
         <div class="nav_search">
           <input type="text" placeholder="世界在你脚下..." class="search_input">
@@ -130,13 +139,13 @@ const user = computed(() => store.state.user)
 
 // 方法定义
 const logout = () => {
- try {
-  console.log('退出登录')
-   store.dispatch('logout')
-   router.push('/')
- } catch (error) {
-   console.error('遇到错误：',error)
- }
+  try {
+    console.log('退出登录')
+    store.dispatch('logout')
+    router.push('/')
+  } catch (error) {
+    console.error('遇到错误：', error)
+  }
 }
 
 const onAvatarError = (event) => {
@@ -148,12 +157,11 @@ const onAvatarError = (event) => {
 </script>
 
 <style>
-
 #app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  position: relative; 
+  position: relative;
 }
 
 :root {
@@ -427,7 +435,7 @@ body {
   flex: 1;
   width: 100%;
   max-width: 100%;
-  margin: 0 auto; 
+  margin: 0 auto;
   background: var(--background-color);
   margin-top: auto;
   min-height: calc(100vh - 180px);

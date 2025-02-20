@@ -27,6 +27,7 @@
 import ArticleCard from '../components/ArticleCard.vue';
 import { ref, onMounted } from 'vue';
 import { getDailyRecommendations_get } from '../api/article';
+import axios from 'axios';
 
 export default {
   name: 'homePage',
@@ -35,6 +36,8 @@ export default {
   },
   setup() {
     const articles = ref([]);
+    const chatId = ref('');
+    const message = ref('');
 
     onMounted(async () => {
       try {
@@ -42,10 +45,17 @@ export default {
       } catch (error) {
         console.error('获取每日推荐失败:', error);
       }
-    })
+    });
+
+
+    const clearMessage = () => {
+      message.value = '';
+    };
+
     return {
-      articles
-    }
+      articles,
+    
+    };
   }
 };
 </script>

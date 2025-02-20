@@ -111,4 +111,4 @@ public
 # env
 .env.development
 .env.production
-main
+nginx.conf

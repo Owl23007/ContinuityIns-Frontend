@@ -115,6 +115,16 @@ const routes = [
       requiresAuth: false
     }
   },
+  //11.articleView
+  {
+    path: '/articleView',
+    name: 'articleView',
+    component: () => import('../pages/ArticleView.vue'),
+    meta: {
+      title: '文章',
+      requiresAuth: false
+    }
+  },
 ]
 
 const router = createRouter({
