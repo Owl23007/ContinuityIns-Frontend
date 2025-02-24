@@ -449,14 +449,16 @@ body {
 
 /* 页脚 */
 .footer {
+ max-height: 100px;
   flex-shrink: 0;
   /* 禁止收缩 */
   width: 100%;
   background: var(--primary-color);
   color: rgba(255, 255, 255, 0.9);
-  padding: 1.5rem 2rem;
+  padding: 0.5rem 2rem 0.5rem 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin-top: auto;
+
 }
 
 .footer-content {
@@ -469,8 +471,15 @@ body {
 .beian-link {
   color: rgba(255, 255, 255, 0.8);
   display: block;
-  margin-top: 0.5rem;
+  margin-top: 0.1rem;
+  /*字体大小*/
+  font-size: 0.9rem;
   transition: opacity 0.3s ease;
+}
+
+.beian-link:hover {
+  opacity: 0.8;
+  color: #3498db;
 }
 
 @media (max-width: 768px) {

@@ -56,12 +56,18 @@
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
         <h2>更换头像</h2>
+        <Cropper 
+          v-model="avatarFile"
+          :aspect-ratio="1"
+          @cropped="handleCropped"
+          @error="handleCropError"
+        />
         <div class="upload-options">
-          <input type="file" accept="image/*" @change="handleFileUpload">
-          <div class="url-upload">
-            <input type="url" v-model="avatarUrl" placeholder="输入图片URL">
-            <button @click="handleUrlSubmit">使用URL</button>
-          </div>
+          <input 
+            type="file" 
+            accept="image/*" 
+            @change="handleFileSelect"
+          >
         </div>
       </div>
     </div>
@@ -98,187 +104,178 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, reactive, onMounted, toRefs, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import defaultAvatar from '@/assets/image/default_avatar.png'
 import defaultBackground from '@/assets/image/default_cover.jpg'
+import Cropper from '@/components/Croppper.vue'
 
-export default {
-  setup() {
-    const store = useStore()
-    const router = useRouter()
+const store = useStore()
+const router = useRouter()
 
-    const state = reactive({
-      activeModal: null,
-      isUpdating: false,
-      password: '',
-      avatarUrl: '',
-      backgroundUrl: '',
-      formData: {
-        nickname: '',
-        signature: ''
-      },
-      backgroundImage: defaultBackground
-    })
+const state = reactive({
+  activeModal: null,
+  isUpdating: false,
+  password: '',
+  avatarUrl: '',
+  backgroundUrl: '',
+  formData: {
+    nickname: '',
+    signature: ''
+  },
+  backgroundImage: defaultBackground
+})
 
-    const getOssConfig = async () => {
-      // 获取 OSS 配置
-      try {
-        const res = await store.dispatch('getOssPolicy');
-        return res;
-      } catch (error) {
-        alert('获取上传配置失败');
-        throw error;
-      }
-    };
+const user = computed(() => store.state.user || {})
+const initialized = ref(false)
 
-    const user = computed(() => store.state.user || {})
-    const initialized = ref(false)
+onMounted(async () => {
+  const res = await getOssConfig();
+  console.log(res);
+  if (!store.state.user) {
+    await store.dispatch('fetchUserInfo')
+  }
+  initialized.value = true
+  state.formData.nickname = user.value.nickname || ''
+  state.formData.signature = user.value.signature || ''
+  state.backgroundImage = user.value.backgroundImage || defaultBackground
+})
 
-    onMounted(async () => {
-      const res = await getOssConfig();
-      console.log(res);
-      if (!store.state.user) {
-        await store.dispatch('fetchUserInfo')
-      }
-      initialized.value = true
-      state.formData.nickname = user.value.nickname || ''
-      state.formData.signature = user.value.signature || ''
-      state.backgroundImage = user.value.backgroundImage || defaultBackground
-    })
+async function getOssConfig() {
+  try {
+    const res = await store.dispatch('getOssPolicy');
+    return res;
+  } catch (error) {
+    alert('获取上传配置失败');
+    throw error;
+  }
+}
 
-    const handleAvatarError = (e) => {
-      e.target.src = defaultAvatar
-    }
+function handleAvatarError(e) {
+  e.target.src = defaultAvatar
+}
 
-    const openModal = (type) => {
-      state.activeModal = type
-      console.log(state.activeModal)
-    }
+function openModal(type) {
+  state.activeModal = type
+  console.log(state.activeModal)
+}
 
-    const closeModal = () => {
-      state.activeModal = null
-      state.password = ''
-      state.avatarUrl = ''
-      state.backgroundUrl = ''
-    }
+function closeModal() {
+  state.activeModal = null
+  state.password = ''
+  state.avatarUrl = ''
+  state.backgroundUrl = ''
+}
 
-    const validateImage = (file) => {
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif']
-      const maxSize = 2 * 1024 * 1024 // 2MB
-      return validTypes.includes(file.type) && file.size <= maxSize
-    }
+function validateImage(file) {
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif']
+  const maxSize = 2 * 1024 * 1024 // 2MB
+  return validTypes.includes(file.type) && file.size <= maxSize
+}
 
-    const handleProfileUpdate = async () => {
-      try {
-        state.isUpdating = true
-        await store.dispatch('updateUserInfo', state.formData)
-        state.user = store.state.user
-        closeModal()
-      } catch (error) {
-        alert('更新失败')
-      } finally {
-        state.isUpdating = false
-      }
-    }
+async function handleProfileUpdate() {
+  try {
+    state.isUpdating = true
+    await store.dispatch('updateUserInfo', state.formData)
+    state.user = store.state.user
+    closeModal()
+  } catch (error) {
+    alert('更新失败')
+  } finally {
+    state.isUpdating = false
+  }
+}
 
-    const handleFileUpload = async (e) => {
-      const file = e.target.files[0]
-      if (!validateImage(file)) {
-        alert('仅支持JPG/PNG格式，且小于2MB')
-        return
-      }
+const avatarFile = ref(null)
 
-      try {
-        state.isUpdating = true
-        const formData = new FormData()
-        formData.append('avatar', file)
-        await store.dispatch('updateAvatar', formData)
-        state.user = store.state.user
-        closeModal()
-      } catch (error) {
-        alert('上传失败')
-      } finally {
-        state.isUpdating = false
-      }
-    }
+function handleFileSelect(e) {
+  const file = e.target.files[0]
+  if (validateImage(file)) {
+    avatarFile.value = file
+  }
+}
 
-    const handleUrlSubmit = async () => {
-      try {
-        state.isUpdating = true
-        await store.dispatch('updateAvatar', { url: state.avatarUrl })
-        state.user = store.state.user
-        closeModal()
-      } catch (error) {
-        alert('URL更新失败')
-      } finally {
-        state.isUpdating = false
-      }
-    }
+function handleCropped({ file, dataUrl }) {
+  handleUpload(file)
+}
 
-    const handleBackgroundUpload = async (e) => {
-      const file = e.target.files[0]
-      if (!validateImage(file)) {
-        alert('仅支持JPG/PNG格式，且小于2MB')
-        return
-      }
+function handleCropError(message) {
+  alert(message)
+}
 
-      try {
-        state.isUpdating = true
-        const formData = new FormData()
-        formData.append('background', file)
-        await store.dispatch('updateBackground', formData)
-        state.backgroundImage = URL.createObjectURL(file)
-        state.user = store.state.user
-        closeModal()
-      } catch (error) {
-        alert('上传失败')
-      } finally {
-        state.isUpdating = false
-      }
-    }
+async function handleUpload(file) {
+  try {
+    state.isUpdating = true
+    const formData = new FormData()
+    formData.append('avatar', file)
+    await store.dispatch('updateAvatar', formData)
+    state.user = store.state.user
+    closeModal()
+  } catch (error) {
+    alert('上传失败')
+  } finally {
+    state.isUpdating = false
+  }
+}
 
-    const handleBackgroundUrlSubmit = async () => {
-      try {
-        state.isUpdating = true
-        await store.dispatch('updateBackground', { url: state.backgroundUrl })
-        state.backgroundImage = state.backgroundUrl
-        state.user = store.state.user
-        closeModal()
-      } catch (error) {
-        alert('URL更新失败')
-      } finally {
-        state.isUpdating = false
-      }
-    }
+async function handleUrlSubmit() {
+  try {
+    state.isUpdating = true
+    await store.dispatch('updateAvatar', { url: state.avatarUrl })
+    state.user = store.state.user
+    closeModal()
+  } catch (error) {
+    alert('URL更新失败')
+  } finally {
+    state.isUpdating = false
+  }
+}
 
-    const performLogout = async () => {
-      try {
-        await store.dispatch('deleteAccount', state.password)
-        router.push('/home')
-      } catch (error) {
-        alert('注销失败，请检查密码')
-        console.error(error)  
-      }
-    }
+async function handleBackgroundUpload(e) {
+  const file = e.target.files[0]
+  if (!validateImage(file)) {
+    alert('仅支持JPG/PNG格式，且小于2MB')
+    return
+  }
 
-    return {
-      ...toRefs(state),
-      defaultAvatar,
-      handleAvatarError,
-      openModal,
-      closeModal,
-      handleProfileUpdate,
-      handleFileUpload,
-      handleUrlSubmit,
-      handleBackgroundUpload,
-      handleBackgroundUrlSubmit,
-      performLogout,
-      user,
-      initialized,
-    }
+  try {
+    state.isUpdating = true
+    const formData = new FormData()
+    formData.append('background', file)
+    await store.dispatch('updateBackground', formData)
+    state.backgroundImage = URL.createObjectURL(file)
+    state.user = store.state.user
+    closeModal()
+  } catch (error) {
+    alert('上传失败')
+  } finally {
+    state.isUpdating = false
+  }
+}
+
+async function handleBackgroundUrlSubmit() {
+  try {
+    state.isUpdating = true
+    await store.dispatch('updateBackground', { url: state.backgroundUrl })
+    state.backgroundImage = state.backgroundUrl
+    state.user = store.state.user
+    closeModal()
+  } catch (error) {
+    alert('URL更新失败')
+  } finally {
+    state.isUpdating = false
+  }
+}
+
+async function performLogout() {
+  try {
+    await store.dispatch('deleteAccount', state.password)
+    router.push('/home')
+  } catch (error) {
+    alert('注销失败，请检查密码')
+    console.error(error)  
   }
 }
 </script>

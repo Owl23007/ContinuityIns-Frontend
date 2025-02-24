@@ -110,11 +110,15 @@ const handleSubmit = async () => {
 
     processing.value = true
     try {
-        console.log(route.query.email, route.query.token, form.newPassword)
-    const response = await resetPassword_post(route.query.email, route.query.token, form.newPassword)
-        if (response.data.success) {
-            showMessage('密码重置成功，正在跳转至登录页...', 'success')
-            setTimeout(() => router.push('/login'), 2000)
+        const response = await resetPassword_post(route.query.email, route.query.token, form.newPassword)
+        console.log(response)
+        if (response && response.code === 0) {
+            showMessage(response.message || '密码重置成功', 'success')
+            setTimeout(() => router.push('/auth'), 2000)
+        } else if (response && response.code === -1) {
+            showMessage(response.message || '未知错误', 'error')
+        } else {
+            showMessage('网络错误', 'error')
         }
     } catch (error) {
         const errorMsg = error.response?.data?.message || '链接已失效或系统错误'
