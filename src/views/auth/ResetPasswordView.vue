@@ -49,7 +49,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { resetPassword_post } from '../api/user'
+import { resetPassword_post } from '@/api/user'
 
 const route = useRoute()
 const router = useRouter()
@@ -85,21 +85,20 @@ const strengthText = computed(() => {
 const score = (password) => {
     let score = 0
 
-    // 密码长度
+    // 基础分 - 长度
     if (password.length >= 8) score += 1
     if (password.length >= 12) score += 1
+    if (password.length >= 16) score += 1
 
-    // 包含数字
-    if (/\d/.test(password)) score += 1
+    // 字符类型多样性
+    if (/[a-z]/.test(password)) score += 1  // 小写字母
+    if (/[A-Z]/.test(password)) score += 1  // 大写字母
+    if (/\d/.test(password)) score += 1     // 数字
+    if (/[^a-zA-Z0-9]/.test(password)) score += 2  // 特殊字符加权
 
-    // 包含小写字母
-    if (/[a-z]/.test(password)) score += 1
-
-    // 包含大写字母
-    if (/[A-Z]/.test(password)) score += 1
-
-    // 包含特殊字符
-    if (/[^a-zA-Z0-9]/.test(password)) score += 1
+    // 复杂度奖励
+    const types = [/[a-z]/, /[A-Z]/, /\d/, /[^a-zA-Z0-9]/].filter(regex => regex.test(password)).length
+    if (types >= 3) score += 1  // 使用3种及以上字符类型的奖励
 
     return score
 }
@@ -110,19 +109,33 @@ const handleSubmit = async () => {
 
     processing.value = true
     try {
-        const response = await resetPassword_post(route.query.email, route.query.token, form.newPassword)
-        console.log(response)
-        if (response && response.code === 0) {
-            showMessage(response.message || '密码重置成功', 'success')
+        if (!route.query.email || !route.query.token) {
+            throw new Error('重置链接无效')
+        }
+
+        const response = await resetPassword_post(
+            route.query.email,
+            route.query.token,
+            form.newPassword
+        )
+
+        if (response.code === 0) {
+            showMessage('密码重置成功，即将跳转到登录页面', 'success')
             setTimeout(() => router.push('/auth'), 2000)
-        } else if (response && response.code === -1) {
-            showMessage(response.message || '未知错误', 'error')
-        } else {
-            showMessage('网络错误', 'error')
+        } else if (response.code === -1) {
+            if (response.message.includes('token')) {
+                showMessage('重置链接已过期，请重新申请', 'error')
+                setTimeout(() => router.push('/auth'), 3000)
+            } else {
+                showMessage(response.message || '重置失败，请重试', 'error')
+            }
         }
     } catch (error) {
         const errorMsg = error.response?.data?.message || '链接已失效或系统错误'
         showMessage(`操作失败：${errorMsg}`, 'error')
+        if (errorMsg.includes('token') || errorMsg.includes('链接')) {
+            setTimeout(() => router.push('/auth'), 3000)
+        }
     } finally {
         processing.value = false
     }
@@ -130,8 +143,9 @@ const handleSubmit = async () => {
 
 // 表单验证
 const validateForm = () => {
-    if (passwordStrength.value < 3) {
-        showMessage('密码强度不足，请至少包含大小写字母和数字', 'error')
+    // 密码强度验证
+    if (passwordStrength.value < 4) {
+        showMessage('密码强度不足，请确保：\n1. 长度至少8位\n2. 包含大小写字母和数字\n3. 建议使用特殊字符', 'error')
         return false
     }
 

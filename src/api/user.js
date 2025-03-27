@@ -24,6 +24,9 @@ const validateField = (value, alertMsg) => {
   return !!value;
 };
 
+// 密码加密处理
+const encryptPassword = (password) => sha256(password).toString();
+
 // 导出API
 export const register_post = (username, email, password) => {
   if (!validateField(username, '请输入用户名') ||
@@ -32,23 +35,23 @@ export const register_post = (username, email, password) => {
   return request('POST', '/user/register', {
     username,
     email,
-    password: sha256(password).toString()
+    password: encryptPassword(password)
   });
 };
 
 export const login_post = (identifier, password) => {
   if (!validateField(identifier, '请输入用户名或邮箱') ||
-    !validateField(password, '请入密码')) return;
+    !validateField(password, '请输入密码')) return;
   return request('POST', '/user/login', {
     identifier,
-    password: sha256(password).toString()
+    password: encryptPassword(password)
   });
 };
 
 export const deleteAccount_post = (token, password) => {
   if (!validateField(password, '请输入密码')) return;
   return request('POST', '/user/deleteAcc', {
-    password: sha256(password).toString()
+    password: encryptPassword(password)
   }, token);
 };
 
@@ -71,13 +74,26 @@ export const updateUserInfo_put = (token, nickname, signature) =>
 export const sendResetEmail_post = email =>
   request('POST', '/user/sendResetEmail', { email });
 
-export const validateToken_post = (token) =>
-  request('POST', '/user/validateToken', {}, token)
+export const validateToken_post = async (token) => {
+  try {
+    const res = await request('POST', '/user/validateToken', {}, token);
+    return res.code === 0;
+  } catch (error) {
+    // 验证失败时主动清理存储
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    throw error;
+  }
+};
 
 //获取OSS请求策略
 export const getOssPolicy_get = (token) =>
   request('GET', '/user/oss/policy', {}, token);
 
 export const resetPassword_post = (email, token, password) =>
-  request('POST', '/user/resetPassword', { email: email, token: token, password: sha256(password).toString() },);
+  request('POST', '/user/resetPassword', { 
+    email, 
+    token, 
+    password: encryptPassword(password)
+  });
 

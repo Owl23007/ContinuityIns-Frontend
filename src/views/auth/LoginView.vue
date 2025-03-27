@@ -449,11 +449,8 @@ watch(
   () => validateResetEmail()
 )
 
-// 响应式解构
-const isLogin = computed(() => uiState.isLogin)
-const showPassword = computed(() => uiState.showPassword)
-const showForgotPassword = computed(() => uiState.showForgotPassword)
 </script>
+
 <style scoped>
 /* 新增图标样式 */
 .icon svg {

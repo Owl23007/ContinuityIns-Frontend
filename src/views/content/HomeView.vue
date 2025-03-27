@@ -7,27 +7,21 @@
     <main class="center-container">
       <h1>今日推荐</h1>
       <div class="cards-container">
-        <ArticleCard v-for="(article, index) in articles" :key="index" class="large-card"
-          :coverImage="article.coverImage || 'https://via.placeholder.com/300x169?text=No+Image'"
-          :title="article.title || ''"
-          :author="article.author || 'error'" 
-          :userId="article.userId || 'error'"
-          :time="article.duration || 'error'"
-          :views="article.views || 0" 
-          :favorites="article.favorites || 0" 
-          :duration="article.duration || ''"
-          :titleLink="`/article/${article.articleId}`" 
-          :authorLink="`/author/${article.userId}`"  />
+        <ArticleCard
+          v-for="article in articles"
+          :key="article.id"
+          :article="article"
+          class="large-card"
+        />
       </div>
     </main>
   </div>
 </template>
 
 <script>
-import ArticleCard from '../components/ArticleCard.vue';
 import { ref, onMounted } from 'vue';
-import { getDailyRecommendations_get } from '../api/article';
-import axios from 'axios';
+import { getDailyRecommendations_get } from '../../api/article';
+import ArticleCard from '@/components/common/ArticleCard.vue';
 
 export default {
   name: 'homePage',
@@ -36,8 +30,6 @@ export default {
   },
   setup() {
     const articles = ref([]);
-    const chatId = ref('');
-    const message = ref('');
 
     onMounted(async () => {
       try {
@@ -47,14 +39,8 @@ export default {
       }
     });
 
-
-    const clearMessage = () => {
-      message.value = '';
-    };
-
     return {
       articles,
-    
     };
   }
 };
