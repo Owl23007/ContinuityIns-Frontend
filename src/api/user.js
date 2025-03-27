@@ -76,7 +76,7 @@ export const sendResetEmail_post = email =>
 
 export const validateToken_post = async (token) => {
   try {
-    const res = await request('POST', '/user/validateToken', {}, token);
+    const res = await request('POST', '/user/validateToken', { token }, token);
     return res.code === 0;
   } catch (error) {
     // 验证失败时主动清理存储

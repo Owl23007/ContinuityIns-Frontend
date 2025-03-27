@@ -27,18 +27,6 @@
       </div>
 
       <div class="header_button">
-        <router-link to="/resourcelist" class="no-underline">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5 6H39C39 6 43 8 43 13C43 18 39 20 39 20H5C5 20 9 18 9 13C9 8 5 6 5 6Z" fill="none"
-              stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M43 28H9C9 28 5 30 5 35C5 40 9 42 9 42H43C43 42 39 40 39 35C39 30 43 28 43 28Z" fill="none"
-              stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          视频
-        </router-link>
-      </div>
-
-      <div class="header_button">
         <router-link to="/articlelist" class="no-underline">
           <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M39 4H11C9.89543 4 9 4.89543 9 6V42C9 43.1046 9.89543 44 11 44H39C40.1046 44 41 43.1046 41 42V6C41 4.89543 40.1046 4 39 4Z"
@@ -112,18 +100,20 @@ const tohome = () => {
 
 <style scoped>
 .header_style {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 2rem;
-  height: 70px;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1000;
-  background: rgba(var(--background-color-rgb), var(--header-bg-alpha));
-  box-shadow: 0 4px 20px var(--shadow-color);
-  backdrop-filter: blur(12px);
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  padding: 0 var(--padding-x);
+  background: rgba(255, 255, 255, var(--header-bg-alpha));
+  backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-color);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
 }
 
 .nav_left {
@@ -268,12 +258,27 @@ const tohome = () => {
 }
 
 @media (max-width: 768px) {
+  .header_style {
+    padding: 0 1rem;
+  }
+
   .nav_links {
     display: none;
   }
 
   .nav_search {
     margin-left: auto;
+  }
+
+  .search_input {
+    width: 160px;
+    font-size: 14px;
+    padding: 0.5rem 1rem;
+  }
+
+  .search_button {
+    padding: 0.5rem 1.2rem;
+    font-size: 14px;
   }
 }
 </style>

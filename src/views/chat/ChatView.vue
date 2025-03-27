@@ -1,74 +1,59 @@
 <template>
   <div class="chat-container">
     <div ref="chatContainer" class="messages">
-      <div v-for="(msg, index) in messages" :key="index" class="message">
-        <div v-if="msg.role === 'user'" class="user-message bubble">
-          {{ msg.content }}
-        </div>
-        <div v-else-if="msg.role === 'assistant'" class="ai-message bubble">
-          <div v-if="msg.loading" class="loading">思考中...</div>
-          <div v-else class="ai-response">
-            <!-- 只在有思考内容时显示 -->
-            <div 
-              v-if="msg.reasoning?.trim()" 
-              class="reasoning-content"
-              :class="{ 'has-border': msg.content }"
-            >
-              <span class="reasoning-label">思考过程：</span>
-              <div v-html="renderMarkdown(msg.reasoning)"></div>
-            </div>
-
-            <!-- 正式回答 -->
-            <div 
-              v-if="msg.content" 
-              class="answer-content markdown-body"
-              :class="{ 'has-margin': msg.reasoning?.trim() }"
-              v-html="renderMarkdownWithCopy(msg.content)"
-            >
-            </div>
-          </div>
-        </div>
-      </div>
+      <chat-message
+        v-for="(msg, index) in messages"
+        :key="index"
+        :role="msg.role"
+        :content="msg.content"
+        :loading="msg.loading"
+        :reasoning="msg.reasoning"
+      />
     </div>
 
-    <form @submit.prevent="sendMessage" class="input-form">
-      <div class="textarea-container">
-        <textarea
-          v-model="userInput"
-          ref="textareaRef"
-          :disabled="isLoading"
-          placeholder="输入消息...(Shift+Enter换行)"
-          class="input-field"
-          @keydown.enter.exact.prevent="handleEnter"
-          @keydown.shift.enter.exact.prevent="insertNewline"
-          @input="adjustHeight"
-        ></textarea>
-      </div>
-      <button
-        type="button"
-        :class="['smart-button', { 'abort-mode': isLoading }]"
-        @click="handleSmartClick"
-      >
-        {{ isLoading ? '停止生成' : '发送消息' }}
-      </button>
-    </form>
+    <div class="input-section">
+      <model-selector 
+        v-model:modelId="selectedModel" 
+        class="model-selector"
+      />
+      <chat-input
+        :disabled="isLoading"
+        @submit="handleMessageSubmit"
+        @abort="handleAbort"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, computed } from 'vue'
+import { ref, nextTick, onMounted, onUpdated } from 'vue'
 import { useElementVisibility, useScroll } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
-import { renderMarkdown, renderMarkdownWithCopy } from '@/utils/markdown'
+import { useRouter } from 'vue-router'
 import { initCodeCopy } from '@/utils/copy'
+import ChatMessage from './components/ChatMessage.vue'
+import ChatInput from './components/ChatInput.vue'
+import ModelSelector from './components/ModelSelector.vue'
 
+const router = useRouter()
 const messages = ref([])
-const userInput = ref('')
 const isLoading = ref(false)
 const chatContainer = ref(null)
 let controller = null
 const authStore = useAuthStore()
 const taskId = ref('')
+const selectedModel = ref('gpt-3.5-turbo')
+
+// 验证登录状态
+onMounted(() => {
+  if (!authStore.isAuthenticated) {
+    router.push('/auth?redirect=' + encodeURIComponent(router.currentRoute.value.fullPath))
+    return
+  }
+  nextTick(() => {
+    initCodeCopy()
+  })
+})
 
 const { y } = useScroll(chatContainer)
 const containerVisible = useElementVisibility(chatContainer)
@@ -129,11 +114,12 @@ async function processStream(response, aiIndex) {
   }
 }
 
-const sendMessage = async () => {
-  if (isLoading.value || !userInput.value.trim()) return
-
-  const messageToSend = userInput.value.trim()
-
+const handleMessageSubmit = async (messageText) => {
+  if (!authStore.isAuthenticated) {
+    router.push('/auth=?redirect=' + encodeURIComponent(router.currentRoute.value.fullPath))
+    return
+  }
+  
   try {
     isLoading.value = true
     controller?.abort()
@@ -142,7 +128,7 @@ const sendMessage = async () => {
     // 添加用户消息
     messages.value.push({
       role: 'user',
-      content: messageToSend
+      content: messageText
     })
 
     // 添加 AI 消息占位
@@ -152,8 +138,6 @@ const sendMessage = async () => {
       loading: true,
       reasoning: ''
     }) - 1
-
-    userInput.value = ''
 
     const url = import.meta.env.VITE_APP_BASE_API + '/ai/chat'
     
@@ -168,6 +152,7 @@ const sendMessage = async () => {
         messages: messages.value
           .filter(m => m.role !== 'assistant' || !m.loading)
           .map(({ loading, reasoning, ...rest }) => rest),
+        model: selectedModel.value
       }),
       signal: controller.signal
     })
@@ -198,7 +183,7 @@ const sendMessage = async () => {
   }
 }
 
-const abort = async () => {
+const handleAbort = async () => {
   if (controller) {
     try {
       await fetch(`${import.meta.env.VITE_APP_BASE_API}/ai/${taskId.value}`, {
@@ -218,233 +203,72 @@ function showErrorToast(msg) {
   console.error(msg)
 }
 
-const textareaRef = ref(null)
-
-const handleSmartClick = () => {
-  if (isLoading.value) {
-    abort()
-  } else {
-    sendMessage()
-  }
-}
-
-// 调整高度函数
-const adjustHeight = () => {
-  nextTick(() => {
-    const textarea = textareaRef.value
-    textarea.style.height = 'auto'
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
-  })
-}
-
-// 回车处理
-const handleEnter = () => {
-  if (!isLoading.value && userInput.value.trim()) {
-    sendMessage()
-  }
-}
-
-// 换行处理
-const insertNewline = () => {
-  const textarea = textareaRef.value
-  const start = textarea.selectionStart
-  const end = textarea.selectionEnd
-
-  userInput.value = userInput.value.substring(0, start) + '\n' + userInput.value.substring(end)
-  nextTick(() => {
-    textarea.selectionStart = textarea.selectionEnd = start + 1
-    adjustHeight()
-  })
-}
-
-onMounted(() => {
-  adjustHeight()
+onUpdated(() => {
   nextTick(() => {
     initCodeCopy()
-  })
-})
-
-onUpdated(()=>
-{
-  nextTick(()=>{
-    initCodeCopy();
   })
 })
 </script>
 
 <style>
 .chat-container {
-  max-width: 60%;
-  margin: 0 auto;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 100%;
+  height: calc(100vh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  position: relative;
 }
 
 .messages {
-  height: 65vh;
-  background: white;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-  border: 1px solid #eee;
-  overflow-y: auto;
-}
-
-.message {
-  margin: 1rem 0;
-}
-
-.user-message {
-  text-align: right;
-  background: #e3f2fd;
-  padding: 0.5rem;
-  border-radius: 4px;
-}
-
-.ai-message {
-  text-align: left;
-  background: #f5f7fa;
-  padding: 0.5rem;
-  border-radius: 4px;
-}
-
-.loading {
-  color: #666;
-  font-style: italic;
-}
-
-.ai-response {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.reasoning-content {
-  color: #666;
-  font-size: 0.8em;
-  line-height: 1.4;
-  padding: 8px 12px;
-  background: #f8f8f8;
-  border-radius: 4px;
-  position: relative;
-}
-
-.reasoning-content.has-border {
-  border-bottom: 1px dashed #ddd;
-  padding-bottom: 12px;
-  margin-bottom: 8px;
-}
-
-.reasoning-label {
-  color: #999;
-  font-size: 0.85em;
-  margin-right: 6px;
-}
-
-.answer-content {
-  font-size: 0.95em;
-  line-height: 1.6;
-  padding: 8px 0;
-}
-
-.answer-content.has-margin {
-  padding-top: 12px;
-}
-
-/* 优化现有样式 */
-.bubble {
-  padding: 12px 16px;
-  margin: 8px 0;
-  max-width: 85%;
-  border-radius: 18px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.user-message.bubble {
-  margin-left: auto;
-  background: #e3f2fd;
-  border-bottom-right-radius: 4px;
-}
-
-.ai-message.bubble {
-  margin-right: auto;
-  background: #f5f7fa;
-  border-bottom-left-radius: 4px;
-}
-
-.loading {
-  color: #888;
-  font-size: 0.9em;
-}
-
-/* 新增的表单样式 */
-.input-form {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  padding: 16px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #eee;
-}
-
-.textarea-container {
   flex: 1;
-  position: relative;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  scroll-behavior: smooth;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.02);
+  margin-bottom: 140px; /* 确保底部内容不被输入区域遮挡 */
 }
 
-.input-field {
+.input-section {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
-  min-height: 44px;
-  max-height: 200px;
-  padding: 12px 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  resize: none;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-  transition: all 0.2s ease;
+  max-width: var(--container-width);
+  background: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+  padding: 16px;
+  z-index: 100;
+  backdrop-filter: blur(8px);
 }
 
-.input-field:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+.model-selector {
+  margin-bottom: 12px;
 }
 
-.smart-button {
-  height: 44px;
-  padding: 0 24px;
-  border-radius: 8px;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 15px;
-  letter-spacing: 0.5px;
-  background: #007bff;
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+.messages::-webkit-scrollbar {
+  width: 8px;
 }
 
-.smart-button:hover {
-  background: #0056b3;
-  transform: translateY(-1px);
+.messages::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.smart-button:active {
-  transform: translateY(0);
+.messages::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+  transition: background 0.2s;
 }
 
-.smart-button.abort-mode {
-  background: #dc3545;
-}
-
-.smart-button.abort-mode:hover {
-  background: #c82333;
+.messages::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 .markdown-body {
@@ -468,38 +292,6 @@ onUpdated(()=>
   margin: 0;
   background-color: rgba(175, 184, 193, 0.2);
   border-radius: 6px;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.markdown-body pre code {
-  background: rgb(255, 255, 255);
-  padding: 0;
-}
-
-.markdown-body p {
-  margin: 8px 0;
-}
-
-.markdown-body ul, 
-.markdown-body ol {
-  padding-left: 2em;
-}
-
-.markdown-body table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 8px 0;
-}
-
-.markdown-body th,
-.markdown-body td {
-  border: 1px solid #d0d7de;
-  padding: 6px 13px;
-}
-
-.markdown-body tr:nth-child(2n) {
-  background-color: #f6f8fa;
 }
 
 .code-block-wrapper {
@@ -524,10 +316,37 @@ onUpdated(()=>
   justify-content: center;
   transition: all 0.2s;
   z-index: 1;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.code-block-wrapper:hover .copy-btn {
+  opacity: 1;
 }
 
 .copy-btn:hover {
   background: #ffffff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .chat-container {
+    height: calc(100vh - var(--header-height));
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .messages {
+    padding: 16px;
+    margin-bottom: 120px; /* 移动端调整底部间距 */
+  }
+  
+  .input-section {
+    padding: 12px;
+    width: 100%;
+    left: 0;
+    transform: none;
+    max-width: 100%;
+  }
 }
 </style>

@@ -127,16 +127,30 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async initializeAuth() {
-      if (this.token) {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+      const rememberMe = localStorage.getItem('rememberMe') === 'true'
+      
+      if (token) {
         try {
-          // Validate token first
-          await validateToken_post(this.token)
-          // Then get user info
+          // 先验证token有效性，添加错误处理
+          const validationResult = await validateToken_post(token)
+          if (!validationResult) {
+            throw new Error('Token validation failed')
+          }
+
+          // 设置token状态
+          this.setToken({ token, rememberMe })
+          
+          // 获取用户信息
           await this.fetchUserInfo()
+          return true
         } catch (error) {
+          console.error('Auth initialization failed:', error.message)
           this.clearAuth()
+          return false
         }
       }
+      return false
     }
   }
 })

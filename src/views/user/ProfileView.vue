@@ -89,13 +89,13 @@ import defaultAvatar from '@/assets/image/default_avatar.png'
 import defaultBackground from '@/assets/image/default_cover.jpg'
 
 // Import components
-import ModalDialog from '@/components/userProfile/ModalDialog.vue'
-import ProfileForm from '@/components/userProfile/ProfileForm.vue'
-import AvatarUploader from '@/components/userProfile/AvatarUploader.vue'
-import BackgroundUploader from '@/components/userProfile/BackgroundUploader.vue'
-import AccountDeleteConfirm from '@/components/userProfile/AccountDeleteConfirm.vue'
+import ModalDialog from '@/views/user/components/ModalDialog.vue'
+import ProfileForm from '@/views/user/components/ProfileForm.vue'
+import AvatarUploader from '@/views/user/components/AvatarUploader.vue'
+import BackgroundUploader from '@/views/user/components/BackgroundUploader.vue'
+import AccountDeleteConfirm from '@/views/user/components/AccountDeleteConfirm.vue'
 import NotificationSystem from '@/components/common/NotificationSystem.vue'
-import ProfileActionButtons from '@/components/userProfile/ProfileActionButtons.vue'
+import ProfileActionButtons from '@/views/user/components/ProfileActionButtons.vue'
 
 const authStore = useAuthStore()
 const userStore = useUserStore()

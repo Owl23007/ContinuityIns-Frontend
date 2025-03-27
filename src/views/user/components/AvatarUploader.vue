@@ -52,10 +52,12 @@
 
 <script setup>
 import { ref, inject } from 'vue';
-import { useStore } from 'vuex';
-import ImageCropper from '../common/ImageCropper.vue';
+import { useAuthStore } from '@/stores/auth';
+import { useUserStore } from '@/stores/user';
+import ImageCropper from '@/components/common/ImageCropper.vue';
 
-const store = useStore();
+const authStore = useAuthStore();
+const userStore = useUserStore();
 const emit = defineEmits(['avatar-updated', 'cancel']);
 const axios = inject('axios');
 
@@ -105,7 +107,7 @@ async function handleCropComplete(cropResult) {
     const formData = new FormData();
     formData.append('file', cropResult.file);
     
-    const ossPolicy = store.state.ossPolicy;
+    const ossPolicy = await userStore.getOssPolicy();
     if (!ossPolicy) {
       throw new Error('获取上传凭证失败，请重新登录后重试');
     }
@@ -124,7 +126,7 @@ async function handleCropComplete(cropResult) {
       const imageUrl = `${ossPolicy.host}/${formData.get('key')}`;
       
       // 更新用户头像信息
-      await store.dispatch('updateUserInfo', {
+      await authStore.updateUserProfile({
         avatarImage: imageUrl
       });
       

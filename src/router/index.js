@@ -45,13 +45,30 @@ router.beforeEach(async (to, from, next) => {
   // 动态标题
   document.title = to.meta.title ? `${to.meta.title} - 存续院` : '存续院'
 
-  if (requiresAuth && !authStore.isAuthenticated) {
-    next({ 
-      path: '/auth',
-      query: { redirect: to.fullPath }
-    })
-  } else {
-    next()
+  try {
+    // 如果存在token但用户未初始化，尝试初始化
+    if (!authStore.isAuthenticated && (localStorage.getItem('token') || sessionStorage.getItem('token'))) {
+      await authStore.initializeAuth()
+    }
+
+    if (requiresAuth && !authStore.isAuthenticated) {
+      next({ 
+        path: '/auth',
+        query: { redirect: to.fullPath }
+      })
+    } else {
+      next()
+    }
+  } catch (error) {
+    console.error('Route guard error:', error)
+    if (requiresAuth) {
+      next({ 
+        path: '/auth',
+        query: { redirect: to.fullPath }
+      })
+    } else {
+      next()
+    }
   }
 })
 
