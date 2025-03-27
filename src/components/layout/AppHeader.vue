@@ -96,14 +96,14 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import UserDropdown from '@/components/layout/UserDropdown.vue'
 import logoPic from '@/assets/image/logo.png'
 
-const store = useStore()
+const authStore = useAuthStore()
 const router = useRouter()
-const isLoggedIn = computed(() => store.getters.isAuthenticated)
+const isLoggedIn = computed(() => authStore.isAuthenticated)
 
 const tohome = () => {
   router.push('/')

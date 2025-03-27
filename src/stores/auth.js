@@ -1,0 +1,142 @@
+import { defineStore } from 'pinia'
+import {
+  login_post,
+  register_post,
+  sendResetEmail_post,
+  validateToken_post,
+  getUserInfo_get
+} from '@/api/user'
+
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    token: localStorage.getItem('token') || sessionStorage.getItem('token') || null,
+    user: JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null'),
+    rememberMe: localStorage.getItem('rememberMe') === 'true'
+  }),
+
+  getters: {
+    isAuthenticated: (state) => !!state.token,
+    currentUser: (state) => state.user,
+    userAvatar: (state) => state.user?.avatar || '/default-avatar.png'
+  },
+
+  actions: {
+    clearAuth() {
+      // Clear all storage
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('user')
+
+      // Reset state
+      this.token = null
+      this.user = null
+      this.rememberMe = false
+    },
+
+    setToken({ token, rememberMe }) {
+      // Clear old tokens
+      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
+
+      // Set new storage
+      const storage = rememberMe ? localStorage : sessionStorage
+      storage.setItem('token', token)
+      storage.setItem('rememberMe', rememberMe)
+
+      // Update state
+      this.token = token
+      this.rememberMe = rememberMe
+
+      // Clear opposite storage user data
+      const oppositeStorage = rememberMe ? sessionStorage : localStorage
+      oppositeStorage.removeItem('token')
+      oppositeStorage.removeItem('user')
+    },
+
+    setUser(user) {
+      this.user = user
+      const storage = this.rememberMe ? localStorage : sessionStorage
+      storage.setItem('user', JSON.stringify(user))
+    },
+
+    async login({ identifier, password, rememberMe }) {
+      try {
+        const res = await login_post(identifier, password)
+        if (res.code !== 0) {
+          throw new Error(res.message || '登录失败：未知错误')
+        }
+
+        // Set token
+        this.setToken({
+          token: res.data,
+          rememberMe
+        })
+
+        // Get user info
+        try {
+          await this.fetchUserInfo()
+        } catch (fetchError) {
+          // Rollback if user info fetch fails
+          this.clearAuth()
+          throw new Error('获取用户信息失败: ' + fetchError.message)
+        }
+      } catch (error) {
+        this.clearAuth()
+        throw error
+      }
+    },
+
+    async register({ username, email, password }) {
+      try {
+        const res = await register_post(username, email, password)
+        if (res.code === 0) return true
+        throw new Error(res.message || '注册失败：服务器未返回成功状态')
+      } catch (error) {
+        throw new Error(error.message || '注册请求失败')
+      }
+    },
+
+    async fetchUserInfo() {
+      if (!this.token) return null
+      try {
+        const res = await getUserInfo_get(this.token)
+        if (res.code === 0) {
+          this.setUser(res.data)
+          return res.data
+        }
+        throw new Error(res.message || '获取用户信息失败')
+      } catch (error) {
+        this.clearAuth()
+        throw error
+      }
+    },
+
+    async sendResetEmail(email) {
+      try {
+        const res = await sendResetEmail_post(email)
+        if (res.code === 0) return true
+        throw new Error(res.message || '发送失败')
+      } catch (error) {
+        throw new Error(error.message || '邮件发送请求失败')
+      }
+    },
+
+    logout() {
+      this.clearAuth()
+    },
+
+    async initializeAuth() {
+      if (this.token) {
+        try {
+          // Validate token first
+          await validateToken_post(this.token)
+          // Then get user info
+          await this.fetchUserInfo()
+        } catch (error) {
+          this.clearAuth()
+        }
+      }
+    }
+  }
+})

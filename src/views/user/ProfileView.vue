@@ -81,148 +81,150 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import defaultAvatar from '@/assets/image/default_avatar.png';
-import defaultBackground from '@/assets/image/default_cover.jpg';
+import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useUserStore } from '@/stores/user'
+import defaultAvatar from '@/assets/image/default_avatar.png'
+import defaultBackground from '@/assets/image/default_cover.jpg'
 
-// 导入分离的组件
-import ModalDialog from '@/components/userProfile/ModalDialog.vue';
-import ProfileForm from '@/components/userProfile/ProfileForm.vue';
-import AvatarUploader from '@/components/userProfile/AvatarUploader.vue';
-import BackgroundUploader from '@/components/userProfile/BackgroundUploader.vue';
-import AccountDeleteConfirm from '@/components/userProfile/AccountDeleteConfirm.vue';
-import NotificationSystem from '@/components/common/NotificationSystem.vue';
-import ProfileActionButtons from '@/components/userProfile/ProfileActionButtons.vue';
+// Import components
+import ModalDialog from '@/components/userProfile/ModalDialog.vue'
+import ProfileForm from '@/components/userProfile/ProfileForm.vue'
+import AvatarUploader from '@/components/userProfile/AvatarUploader.vue'
+import BackgroundUploader from '@/components/userProfile/BackgroundUploader.vue'
+import AccountDeleteConfirm from '@/components/userProfile/AccountDeleteConfirm.vue'
+import NotificationSystem from '@/components/common/NotificationSystem.vue'
+import ProfileActionButtons from '@/components/userProfile/ProfileActionButtons.vue'
 
-const store = useStore();
-const router = useRouter();
-const notificationSystem = ref(null);
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const router = useRouter()
+const notificationSystem = ref(null)
 
-// 状态变量
-const loading = ref(true);
-const user = computed(() => store.state.user);
-const activeModal = ref(null);
-const isUpdating = ref(false);
-const isDeleting = ref(false);
-const backgroundImage = ref(defaultBackground);
+// State variables
+const loading = ref(true)
+const user = computed(() => authStore.currentUser)
+const activeModal = ref(null)
+const isUpdating = ref(false)
+const isDeleting = ref(false)
+const backgroundImage = ref(defaultBackground)
 const formData = reactive({
   nickname: '',
   signature: ''
-});
+})
 
-// 初始化
+// Initialize
 onMounted(async () => {
   try {
-    loading.value = true;
-    await store.dispatch('fetchUserInfo');
-    updateUserDataFromStore();
-    // 预先获取OSS上传策略
-    await store.dispatch('getOssPolicy');
+    loading.value = true
+    await authStore.fetchUserInfo()
+    updateUserDataFromStore()
+    // Pre-fetch OSS upload policy
+    await userStore.getOssPolicy()
   } catch (error) {
-    showNotification('获取用户信息失败', 'error');
-    console.error('获取用户信息失败:', error);
+    showNotification('获取用户信息失败', 'error')
+    console.error('获取用户信息失败:', error)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-});
+})
 
-// 当用户数据更新时，更新表单数据
+// Watch for user data changes
 watch(() => user.value, (newUser) => {
   if (newUser) {
-    updateUserDataFromStore();
+    updateUserDataFromStore()
   }
-}, { deep: true });
+}, { deep: true })
 
-// 从Store中更新用户数据到本地状态
+// Update local state from store
 function updateUserDataFromStore() {
   if (user.value) {
-    formData.nickname = user.value.nickname || '';
-    formData.signature = user.value.signature || '';
-    backgroundImage.value = user.value.backgroundImage || defaultBackground;
+    formData.nickname = user.value.nickname || ''
+    formData.signature = user.value.signature || ''
+    backgroundImage.value = user.value.backgroundImage || defaultBackground
   }
 }
 
-// 重新加载用户信息
+// Reload user info
 async function reloadUserInfo() {
-  loading.value = true;
+  loading.value = true
   try {
-    await store.dispatch('fetchUserInfo');
-    updateUserDataFromStore();
+    await authStore.fetchUserInfo()
+    updateUserDataFromStore()
   } catch (error) {
-    showNotification('获取用户信息失败', 'error');
+    showNotification('获取用户信息失败', 'error')
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
-// 处理头像加载错误
+// Handle avatar load error
 function handleAvatarError(e) {
-  e.target.src = defaultAvatar;
+  e.target.src = defaultAvatar
 }
 
-// 打开模态框
+// Open modal
 function openModal(type) {
-  activeModal.value = type;
+  activeModal.value = type
 }
 
-// 关闭模态框
+// Close modal
 function closeModal() {
-  activeModal.value = null;
+  activeModal.value = null
 }
 
-// 更新用户资料
+// Update user profile
 async function handleProfileUpdate(data) {
-  if (isUpdating.value) return;
+  if (isUpdating.value) return
 
-  isUpdating.value = true;
+  isUpdating.value = true
   try {
-    await store.dispatch('updateUserInfo', data);
-    showNotification('个人资料更新成功', 'success');
-    closeModal();
+    await authStore.updateUserProfile(data)
+    showNotification('个人资料更新成功', 'success')
+    closeModal()
   } catch (error) {
-    showNotification('更新失败: ' + (error.message || '未知错误'), 'error');
-    console.error('更新用户资料失败:', error);
+    showNotification('更新失败: ' + (error.message || '未知错误'), 'error')
+    console.error('更新用户资料失败:', error)
   } finally {
-    isUpdating.value = false;
+    isUpdating.value = false
   }
 }
 
-// 处理头像更新完成
+// Handle avatar update complete
 function handleAvatarUpdated() {
-  showNotification('头像更新成功', 'success');
-  closeModal();
+  showNotification('头像更新成功', 'success')
+  closeModal()
 }
 
-// 处理背景更新完成
+// Handle background update complete
 function handleBackgroundUpdated(newBackground) {
-  backgroundImage.value = newBackground;
-  showNotification('背景更新成功', 'success');
-  closeModal();
+  backgroundImage.value = newBackground
+  showNotification('背景更新成功', 'success')
+  closeModal()
 }
 
-// 注销账户
+// Delete account
 async function performLogout(password) {
-  if (isDeleting.value) return;
+  if (isDeleting.value) return
 
-  isDeleting.value = true;
+  isDeleting.value = true
   try {
-    await store.dispatch('deleteAccount', password);
-    showNotification('账户已成功注销', 'success');
-    await router.push('/login');
+    await userStore.deleteAccount(password)
+    showNotification('账户已成功注销', 'success')
+    await router.push('/auth')
   } catch (error) {
-    showNotification('注销失败: ' + (error.message || '请检查密码'), 'error');
-    console.error('注销账户失败:', error);
+    showNotification('注销失败: ' + (error.message || '请检查密码'), 'error')
+    console.error('注销账户失败:', error)
   } finally {
-    isDeleting.value = false;
-    closeModal();
+    isDeleting.value = false
+    closeModal()
   }
 }
 
-// 显示通知
+// Show notification
 function showNotification(message, type = 'info') {
-  notificationSystem.value.show(message, type);
+  notificationSystem.value.show(message, type)
 }
 </script>
 

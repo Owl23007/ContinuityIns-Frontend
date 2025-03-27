@@ -1,11 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import store from '../store'
-
-// 导入路由模块
-import authRoutes from './modules/auth'
-import userRoutes from './modules/user'
-import contentRoutes from './modules/content'
-import aiRoutes from './modules/ai'
+import { useAuthStore } from '@/stores/auth'
+import auth from './modules/auth'
+import content from './modules/content'
+import user from './modules/user'
+import ai from './modules/ai'
 
 // Development routes
 const devRoutes = import.meta.env.DEV ? [
@@ -28,53 +26,33 @@ const notFoundRoute = {
   }
 }
 
-const routes = [
-  ...devRoutes,
-  ...authRoutes,
-  ...userRoutes,
-  ...aiRoutes,
-  ...contentRoutes,
-  notFoundRoute
-]
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
-  scrollBehavior(to, from, savedPosition) {
-    return savedPosition || { top: 0 }
-  }
+  routes: [
+    ...devRoutes,
+    ...auth,
+    ...content,
+    ...user,
+    ...ai,
+    notFoundRoute
+  ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+
   // 动态标题
   document.title = to.meta.title ? `${to.meta.title} - 存续院` : '存续院'
 
-  // 使用getter获取登录状态
-  const isLoggedIn = store.getters.isAuthenticated
-
-  // 认证检查
-  if (to.meta.requiresAuth) {
-    if (!isLoggedIn) {
-      return next({
-        name: 'loginPage',
-        query: { 
-          redirect: to.fullPath,
-          reason: 'unauthorized'
-        }
-      })
-    }
-    // 已登录检查路由权限
-    if (to.meta.requiredRole && !store.getters.hasRole(to.meta.requiredRole)) {
-      return next({ name: 'Forbidden' })
-    }
+  if (requiresAuth && !authStore.isAuthenticated) {
+    next({ 
+      path: '/auth',
+      query: { redirect: to.fullPath }
+    })
+  } else {
+    next()
   }
-
-  // 已登录访问登录页重定向
-  if (to.name === 'loginPage' && isLoggedIn) {
-    return next({ name: 'homePage' })
-  }
-
-  next()
 })
 
 export default router

@@ -49,10 +49,11 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { resetPassword_post } from '@/api/user'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 // 响应式状态
 const form = reactive({ newPassword: '', confirmPassword: '' })
@@ -113,7 +114,7 @@ const handleSubmit = async () => {
             throw new Error('重置链接无效')
         }
 
-        const response = await resetPassword_post(
+        const response = await authStore.resetPassword(
             route.query.email,
             route.query.token,
             form.newPassword

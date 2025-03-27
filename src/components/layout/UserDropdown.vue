@@ -26,12 +26,15 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessageBox } from 'element-plus'
+import { CaretBottom, User, Setting, SwitchButton } from '@element-plus/icons-vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
-const userStore = useUserStore()
+const authStore = useAuthStore()
 
-const userName = computed(() => userStore.userName || '用户')
-const userAvatar = computed(() => userStore.avatar)
+const userName = computed(() => authStore.currentUser?.username || '用户')
+const userAvatar = computed(() => authStore.userAvatar)
 const userNameFirst = computed(() => userName.value.charAt(0))
 
 const goToProfile = () => {
@@ -48,8 +51,8 @@ const handleLogout = () => {
         cancelButtonText: '取消',
         type: 'warning'
     }).then(async () => {
-        await userStore.logout()
-        router.push('/login')
+        authStore.logout()
+        router.push('/auth')
     }).catch(() => {})
 }
 </script>

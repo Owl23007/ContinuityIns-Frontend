@@ -177,12 +177,12 @@
 
 <script setup>
 import { ref, reactive, computed, onBeforeUnmount, watch } from 'vue'
-import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { sendResetEmail_post } from '@/api/user'
 
 // 基础依赖
-const store = useStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 // 定时器管理
@@ -372,7 +372,7 @@ const handleSubmit = async () => {
 
 // 登录处理
 const handleLogin = async () => {
-  await store.dispatch('login', {
+  await authStore.login({
     identifier: formData.main.identifier,
     password: formData.main.password,
     rememberMe: uiState.rememberMe
@@ -384,7 +384,7 @@ const handleLogin = async () => {
 
 // 注册处理
 const handleRegister = async () => {
-  await store.dispatch('register', {
+  await authStore.register({
     username: formData.main.identifier,
     email: formData.main.email,
     password: formData.main.password

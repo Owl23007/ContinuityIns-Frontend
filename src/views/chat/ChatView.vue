@@ -56,9 +56,9 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, onUpdated } from 'vue'
+import { ref, nextTick, computed } from 'vue'
 import { useElementVisibility, useScroll } from '@vueuse/core'
-import { useStore } from 'vuex'
+import { useAuthStore } from '@/stores/auth'
 import { renderMarkdown, renderMarkdownWithCopy } from '@/utils/markdown'
 import { initCodeCopy } from '@/utils/copy'
 
@@ -67,7 +67,7 @@ const userInput = ref('')
 const isLoading = ref(false)
 const chatContainer = ref(null)
 let controller = null
-const store = useStore()
+const authStore = useAuthStore()
 const taskId = ref('')
 
 const { y } = useScroll(chatContainer)
@@ -155,7 +155,6 @@ const sendMessage = async () => {
 
     userInput.value = ''
 
-    const token = store.state.token
     const url = import.meta.env.VITE_APP_BASE_API + '/ai/chat'
     
     // 发送完整上下文
@@ -163,7 +162,7 @@ const sendMessage = async () => {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json', 
-        'Authorization': `Duel ${token}` 
+        'Authorization': `Duel ${authStore.token}` 
       },
       body: JSON.stringify({
         messages: messages.value
@@ -177,7 +176,7 @@ const sendMessage = async () => {
     taskId.value = data.data
 
     const response = await fetch(`${import.meta.env.VITE_APP_BASE_API}/ai/${taskId.value}`, {
-      headers: { 'Authorization': `Duel ${token}` },
+      headers: { 'Authorization': `Duel ${authStore.token}` },
       signal: controller.signal
     })
 
@@ -202,10 +201,9 @@ const sendMessage = async () => {
 const abort = async () => {
   if (controller) {
     try {
-      const token = store.state.token
       await fetch(`${import.meta.env.VITE_APP_BASE_API}/ai/${taskId.value}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'text/plain', 'Authorization': `Duel ${token}` }
+        headers: { 'Content-Type': 'text/plain', 'Authorization': `Duel ${authStore.token}` }
       })
     } catch (error) {
       console.error('停止请求失败:', error)
