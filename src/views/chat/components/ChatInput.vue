@@ -9,6 +9,8 @@
         class="input-field"
         @keydown.enter.exact.prevent="handleEnter"
         @keydown.shift.enter.exact.prevent="insertNewline"
+        @keydown.up.prevent="showPreviousMessage"
+        @keydown.down.prevent="showNextMessage"
         @input="adjustHeight"
       ></textarea>
     </div>
@@ -36,11 +38,24 @@ const emit = defineEmits(['submit', 'abort'])
 
 const inputValue = ref('')
 const textareaRef = ref(null)
+const messageHistory = ref([])
+const currentHistoryIndex = ref(-1)
+const tempInput = ref('') // 存储未发送的输入
 
 const handleSubmit = () => {
   if (props.disabled || !inputValue.value.trim()) return
+  
+  // 添加到历史记录
+  messageHistory.value.unshift(inputValue.value.trim())
+  // 限制历史记录数量，防止占用过多内存
+  if (messageHistory.value.length > 50) {
+    messageHistory.value.pop()
+  }
+  
   emit('submit', inputValue.value.trim())
   inputValue.value = ''
+  currentHistoryIndex.value = -1 // 重置历史记录索引
+  tempInput.value = '' // 清空临时输入
   adjustHeight()
 }
 
@@ -56,6 +71,66 @@ const handleEnter = () => {
   if (!props.disabled && inputValue.value.trim()) {
     handleSubmit()
   }
+}
+
+const scrollToMessage = (index) => {
+  const messages = document.querySelectorAll('.message')
+  if (messages && messages.length > 0) {
+    // 计算需要滚动到的消息的位置
+    // 用户消息在数组中是交替出现的，所以索引需要乘2
+    const targetIndex = messages.length - 1 - (index * 2)
+    if (targetIndex >= 0 && messages[targetIndex]) {
+      messages[targetIndex].scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
+}
+
+const showPreviousMessage = () => {
+  if (messageHistory.value.length === 0) return
+  
+  if (currentHistoryIndex.value === -1) {
+    // 保存当前未发送的输入
+    tempInput.value = inputValue.value
+  }
+  
+  currentHistoryIndex.value = Math.min(
+    currentHistoryIndex.value + 1,
+    messageHistory.value.length - 1
+  )
+  
+  inputValue.value = messageHistory.value[currentHistoryIndex.value]
+  nextTick(() => {
+    adjustHeight()
+    // 将光标移动到末尾
+    const textarea = textareaRef.value
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length
+    // 滚动到对应的消息
+    scrollToMessage(currentHistoryIndex.value)
+  })
+}
+
+const showNextMessage = () => {
+  if (currentHistoryIndex.value === -1) return
+  
+  currentHistoryIndex.value--
+  
+  if (currentHistoryIndex.value === -1) {
+    // 恢复未发送的输入
+    inputValue.value = tempInput.value
+  } else {
+    inputValue.value = messageHistory.value[currentHistoryIndex.value]
+  }
+  
+  nextTick(() => {
+    adjustHeight()
+    // 将光标移动到末尾
+    const textarea = textareaRef.value
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length
+    // 如果不是恢复到编辑状态，滚动到对应消息
+    if (currentHistoryIndex.value !== -1) {
+      scrollToMessage(currentHistoryIndex.value)
+    }
+  })
 }
 
 const insertNewline = () => {
@@ -83,69 +158,60 @@ const adjustHeight = () => {
 .input-form {
   display: flex;
   gap: 16px;
-  align-items: flex-end;
-  padding: 12px;
-  background: white;
-  border-radius: 12px;
+  padding: 0;
   position: relative;
-  z-index: 1;
+  width: 100%;
 }
 
 .textarea-container {
   flex: 1;
   position: relative;
-  min-width: 0; /* 防止文本框在flex布局中溢出 */
+  min-width: 0;
 }
 
 .input-field {
   width: 100%;
   min-height: 44px;
-  max-height: 120px; /* 限制最大高度，避免在移动端占用过多空间 */
+  max-height: 200px;
   padding: 12px 16px;
-  border: 1px solid #e5e7eb;
+  padding-right: 44px;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   resize: none;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: rgba(var(--background-color-rgb), 0.6);
+  color: var(--text-color);
   transition: all 0.2s ease;
-  background: #f9fafb;
-  overflow-y: auto;
 }
 
 .input-field:focus {
   outline: none;
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.input-field::placeholder {
-  color: #9ca3af;
+  border-color: var(--secondary-color);
+  background: rgba(var(--background-color-rgb), 0.8);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .smart-button {
   height: 44px;
-  padding: 0 28px;
+  padding: 0 24px;
   border: none;
-  border-radius: 12px;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 15px;
+  border-radius: 10px;
+  background: var(--secondary-color);
+  color: #fff;
+  font-size: 0.95rem;
   font-weight: 500;
-  letter-spacing: 0.3px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 8px;
-  white-space: nowrap;
 }
 
 .smart-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
 }
 
 .smart-button:active {
@@ -153,165 +219,43 @@ const adjustHeight = () => {
 }
 
 .smart-button.abort-mode {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: #ef4444;
 }
 
 .smart-button.abort-mode:hover {
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
-}
-
-@media (max-width: 640px) {
-  .input-form {
-    flex-direction: column;
-    gap: 12px;
-    padding: 8px;
-  }
-
-  .input-field {
-    min-height: 80px;
-    font-size: 16px;
-  }
-
-  .smart-button {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-.chat-input-container {
-  position: relative;
-  width: 100%;
-}
-
-.input-wrapper {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  background: white;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-}
-
-textarea {
-  flex: 1;
-  min-height: 44px;
-  max-height: 200px;
-  padding: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.5;
-  resize: none;
-  transition: all 0.3s ease;
-  background: transparent;
-}
-
-textarea:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.button-group {
-  display: flex;
-  gap: 8px;
-  padding-bottom: 8px;
-}
-
-.send-button, .abort-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.send-button {
-  background: #667eea;
-  color: white;
-}
-
-.send-button:hover:not(:disabled) {
-  background: #5a67d8;
-  transform: translateY(-1px);
-}
-
-.abort-button {
-  background: #f56565;
-  color: white;
-}
-
-.abort-button:hover:not(:disabled) {
-  background: #e53e3e;
-  transform: translateY(-1px);
-}
-
-.button-group button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* 快捷键提示 */
-.shortcut-hint {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  font-size: 12px;
-  color: #a0aec0;
-  pointer-events: none;
-  opacity: 0.7;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 /* 移动端适配 */
 @media (max-width: 768px) {
-  .input-wrapper {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  textarea {
-    min-height: 80px;
-    font-size: 16px; /* 防止iOS自动缩放 */
-  }
-  
-  .button-group {
-    width: 100%;
-    padding-bottom: 0;
-  }
-  
-  .send-button, .abort-button {
-    flex: 1;
-    justify-content: center;
-  }
-  
-  .shortcut-hint {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
   .input-form {
-    padding: 8px;
-    gap: 8px;
+    gap: 12px;
   }
-  
+
   .input-field {
-    min-height: 44px;
-    max-height: 100px;
-    font-size: 16px; /* 防止iOS自动缩放 */
-    padding: 10px 12px;
+    font-size: 16px;
+    padding: 10px 14px;
+    padding-right: 40px;
+    min-height: 40px;
   }
-  
+
   .smart-button {
     height: 40px;
     padding: 0 16px;
-    font-size: 14px;
+    font-size: 0.9rem;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .input-field {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(51, 65, 85, 0.8);
+  }
+
+  .input-field:focus {
+    background: rgba(30, 41, 59, 0.8);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
   }
 }
 </style>

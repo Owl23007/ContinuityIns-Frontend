@@ -6,13 +6,18 @@
         <slot></slot>
       </div>
     </main>
-    <app-footer />
+    <app-footer v-if="!isChat"/>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
+
+const route = useRoute()
+const isChat = computed(() => route.path === '/chat')
 </script>
 
 <style>
@@ -34,7 +39,7 @@ import AppFooter from './AppFooter.vue'
 
 .main-content {
   flex: 1;
-  padding: 2rem 0;
+  padding: 0;
   margin-top: var(--header-height);
   min-height: calc(100vh - var(--header-height));
   position: relative;
@@ -45,8 +50,9 @@ import AppFooter from './AppFooter.vue'
 
 .container {
   width: 100%;
-  max-width: var(--container-width);
-  margin: 0 auto; /* 修改为 0 auto 使内容居中 */
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
   flex: 1; 
   display: flex; 
   flex-direction: column; 
@@ -61,23 +67,23 @@ import AppFooter from './AppFooter.vue'
 @media (max-width: 768px) {
   :root {
     --container-width: 100%;
-    --padding-x: 1.5rem;
+    --padding-x: 0;
     --footer-height: 160px;
   }
   
   .container {
     width: 100%;
-    padding: 0 var(--padding-x);
+    padding: 0;
   }
   
   .main-content {
-    padding: 1rem 0;
+    padding: 0;
   }
 }
 
 @media (max-width: 480px) {
   :root {
-    --padding-x: 1rem;
+    --padding-x: 0;
     --header-height: 56px;
   }
 }

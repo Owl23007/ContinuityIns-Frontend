@@ -1,5 +1,9 @@
 <template>
   <div class="message" :class="[role, { loading }]">
+    <div class="avatar">
+      <img v-if="role === 'user'" :src="userAvatar" alt="用户头像" @error="handleAvatarError">
+      <img v-else :src="botAvatar" alt="AI头像">
+    </div>
     <div class="message-content">
       <div v-if="loading" class="loading-animation">
         <div class="dot"></div>
@@ -56,8 +60,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { renderMarkdown } from '@/utils/markdown'
+import { ref, computed, watch, onMounted, onUpdated } from 'vue'
+import { renderMarkdownWithCopy } from '@/utils/markdown'
+import { initCodeCopy } from '@/utils/copy'
+import defaultAvatar from '@/assets/image/default_avatar.png'
+import botAvatar from '@/assets/image/bot-avatar.png'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
   role: {
@@ -77,6 +85,13 @@ const props = defineProps({
     default: false
   }
 })
+
+const authStore = useAuthStore()
+const userAvatar = computed(() => authStore.userAvatar || defaultAvatar)
+
+const handleAvatarError = (e) => {
+  e.target.src = defaultAvatar
+}
 
 const isReasoningExpanded = ref(false)
 const isThinking = ref(false)
@@ -114,17 +129,35 @@ watch(() => props.reasoning, (newVal, oldVal) => {
   }
 }, { immediate: true })
 
-const renderedContent = computed(() => renderMarkdown(props.content))
-const renderedReasoning = computed(() => renderMarkdown(props.reasoning))
+const renderedContent = computed(() => renderMarkdownWithCopy(props.content))
+const renderedReasoning = computed(() => renderMarkdownWithCopy(props.reasoning))
+
+// 在内容更新后初始化复制按钮功能
+onMounted(() => {
+  initCodeCopy()
+})
+
+onUpdated(() => {
+  initCodeCopy()
+})
 </script>
 
 <style scoped>
 .message {
   display: flex;
-  margin-bottom: 24px;
+  margin: 1.5rem auto;
+  max-width: 900px; /* 限制最大宽度 */
+  width: 100%;
+  padding: 0 1rem;
   opacity: 0;
   transform: translateY(20px);
   animation: messageIn 0.3s ease forwards;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.message.user {
+  flex-direction: row-reverse;
 }
 
 @keyframes messageIn {
@@ -134,116 +167,40 @@ const renderedReasoning = computed(() => renderMarkdown(props.reasoning))
   }
 }
 
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .message-content {
   flex: 1;
-  padding: 12px 16px;
-  background: v-bind(messageBackground);
+  padding: 1rem 1.25rem;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   position: relative;
+  max-width: calc(100% - 4rem); /* 确保内容不会溢出 */
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.message-content:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.message.assistant .message-content {
+  background: rgba(247, 249, 252, 0.8);
+  border-color: rgba(226, 232, 240, 0.8);
 }
 
-.loading-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-  font-size: 14px;
-}
-
-.typing-dots {
-  display: flex;
-  gap: 4px;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  animation: dotPulse 1.5s infinite;
-}
-
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes dotPulse {
-  0%, 60%, 100% { transform: scale(1); opacity: 0.4; }
-  30% { transform: scale(1.2); opacity: 1; }
-}
-
-.reasoning-toggle {
-  position: absolute;
-  bottom: -24px;
-  right: 0;
-  background: none;
-  border: none;
-  color: #666;
-  font-size: 12px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  opacity: 0;
-  transition: all 0.2s ease;
-}
-
-.message-content:hover .reasoning-toggle {
-  opacity: 1;
-}
-
-.reasoning {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed rgba(0, 0, 0, 0.1);
-  font-size: 0.9em;
-  color: #666;
-  opacity: 0;
-  transform: translateY(-10px);
-  animation: reasoningIn 0.3s ease forwards;
-}
-
-@keyframes reasoningIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 768px) {
-  .message {
-    margin-bottom: 16px;
-  }
-  
-  .message-content {
-    padding: 10px 14px;
-  }
-  
-  .reasoning-toggle {
-    opacity: 1;
-    font-size: 11px;
-  }
-}
-
-.message {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.message.assistant {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-}
-
-.message.user {
-  background: white;
-  border: 1px solid #e2e8f0;
+.message.user .message-content {
+  background: rgba(var(--secondary-color-rgb), 0.1);
 }
 
 .loading-animation {
@@ -269,12 +226,13 @@ const renderedReasoning = computed(() => renderMarkdown(props.reasoning))
   40% { transform: translateY(-10px); }
 }
 
+/* 优化思考过程区域的样式 */
 .reasoning-section {
   margin-bottom: 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 8px;
-  background: #ffffff;
-  overflow: hidden; /* 确保内容不会溢出 */
+  background: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
 }
 
 .reasoning-header {
@@ -283,10 +241,8 @@ const renderedReasoning = computed(() => renderMarkdown(props.reasoning))
   justify-content: space-between;
   padding: 0.75rem 1rem;
   cursor: pointer;
-  color: #64748b;
-  font-size: 0.9rem;
-  user-select: none;
-  border-radius: 8px;
+  background: rgba(247, 249, 252, 0.8);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   transition: background-color 0.2s ease;
 }
 
@@ -317,19 +273,14 @@ const renderedReasoning = computed(() => renderMarkdown(props.reasoning))
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
-  padding: 0;
-  margin: 0;
-  border-top: 0;
-  will-change: max-height;
+  transition: all 0.3s ease-out;
+  padding: 0 1rem;
 }
 
 .reasoning-content.expanded {
-  max-height: 2000px; /* 设置一个较大的最大高度 */
+  max-height: 2000px;
   opacity: 1;
   padding: 1rem;
-  margin-top: 0.5rem;
-  border-top: 1px solid #e2e8f0;
 }
 
 .thinking-indicator {
@@ -354,8 +305,168 @@ const renderedReasoning = computed(() => renderMarkdown(props.reasoning))
   40% { transform: scale(1); opacity: 1; }
 }
 
+/* Markdown内容样式优化 */
 :deep(.markdown-body) {
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  overflow-wrap: break-word;
+}
+
+:deep(.markdown-body pre) {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(240, 242, 245, 0.8) !important; /* 更高对比度的背景色 */
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+:deep(.markdown-body code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  background: rgba(45, 55, 72, 0.06);
+  color: #333; /* 确保亮色主题下代码文本颜色够深 */
+}
+
+/* 代码块内的代码颜色增强 */
+:deep(.hljs) {
+  color: #383a42 !important; /* 确保代码颜色够深 */
+}
+
+/* 代码块复制按钮样式改进 */
+:deep(.code-block-wrapper) {
+  position: relative;
+}
+
+:deep(.copy-btn) {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 0.75rem;
+}
+
+:deep(.copy-btn::after) {
+  content: "复制";
+  display: inline-block;
+}
+
+:deep(.code-block-wrapper:hover .copy-btn) {
+  opacity: 1;
+}
+
+:deep(.copy-btn:hover) {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+:deep(.copy-btn:active) {
+  transform: translateY(0);
+}
+
+:deep(.copy-btn.copied) {
+  background: #10b981;
+  color: white;
+}
+
+:deep(.copy-btn.copied::after) {
+  content: "已复制";
+}
+
+:deep(.copy-btn.copied svg) {
+  color: white;
+}
+
+/* 响应式布局优化 */
+@media (max-width: 768px) {
+  .message {
+    margin: 1rem auto;
+    padding: 0 0.5rem;
+  }
+
+  .message-content {
+    padding: 0.875rem 1rem;
+  }
+
+  :deep(.markdown-body) {
+    font-size: 0.9rem;
+  }
+
+  :deep(.markdown-body pre) {
+    padding: 0.875rem;
+    margin: 0.875rem 0;
+  }
+  
+  .reasoning-header {
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .reasoning-content.expanded {
+    padding: 0.875rem;
+  }
+}
+
+/* 深色模式支持优化 */
+@media (prefers-color-scheme: dark) {
+  .message.assistant .message-content {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(51, 65, 85, 0.8);
+  }
+
+  .message.user .message-content {
+    background: rgba(30, 41, 59, 0.6);
+  }
+
+  .reasoning-section {
+    border-color: rgba(51, 65, 85, 0.8);
+    background: rgba(30, 41, 59, 0.6);
+  }
+
+  .reasoning-header {
+    background: rgba(30, 41, 59, 0.8);
+    border-bottom-color: rgba(51, 65, 85, 0.8);
+  }
+
+  :deep(.markdown-body pre) {
+    background: rgba(30, 41, 59, 0.7) !important; /* 深色模式下更暗的背景 */
+    border-color: rgba(51, 65, 85, 0.8);
+  }
+
+  :deep(.markdown-body code) {
+    background: rgba(15, 23, 42, 0.4);
+    color: #e2e8f0; /* 确保深色模式下代码文本颜色够亮 */
+  }
+
+  :deep(.hljs) {
+    color: #abb2bf !important; /* 深色模式代码颜色 */
+  }
+
+  :deep(.copy-btn) {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(51, 65, 85, 0.8);
+    color: #e2e8f0;
+  }
+  
+  :deep(.copy-btn:hover) {
+    background: rgba(51, 65, 85, 0.9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  :deep(.copy-btn svg) {
+    color: #e2e8f0;
+  }
 }
 </style>
