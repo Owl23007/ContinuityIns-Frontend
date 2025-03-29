@@ -1,118 +1,86 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { v4 as uuidv4 } from 'uuid'
+import { ref, watch } from 'vue'
 
-export const useChatStore = defineStore('chat', () => {
-  // 聊天会话列表
-  const chatSessions = ref([])
-  // 当前会话ID
-  const currentSessionId = ref('')
+export const useConversationStore = defineStore('conversation', () => {
+  // Initialize from localStorage if available
+  const initialConversations = JSON.parse(localStorage.getItem('conversations') || '[]')
+  const initialCurrentId = localStorage.getItem('currentConversationId') || null
+  
+  const conversations = ref(initialConversations)
+  const currentConversationId = ref(initialCurrentId)
 
-  // 获取当前会话
-  const currentSession = computed(() => {
-    if (!currentSessionId.value || chatSessions.value.length === 0) return null
-    return chatSessions.value.find(session => session.id === currentSessionId.value) || null
+  // Save to localStorage when state changes
+  watch(() => conversations.value, (newConversations) => {
+    localStorage.setItem('conversations', JSON.stringify(newConversations))
+  }, { deep: true })
+
+  watch(() => currentConversationId.value, (newId) => {
+    localStorage.setItem('currentConversationId', newId)
   })
 
-  // 当前会话的消息
-  const currentMessages = computed(() => {
-    return currentSession.value?.messages || []
-  })
-
-  // 创建新会话
-  const createNewSession = (modelId = 'gpt-3.5-turbo') => {
-    const newSession = {
-      id: uuidv4(),
-      title: '新的对话',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  function createConversation() {
+    const newConversation = {
+      id: Date.now().toString(),
+      name: '新对话',
       messages: [],
-      modelId: modelId
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
-    chatSessions.value.unshift(newSession)
-    currentSessionId.value = newSession.id
-    return newSession
+    conversations.value.unshift(newConversation)
+    currentConversationId.value = newConversation.id
+    return newConversation
   }
 
-  // 删除会话
-  const deleteSession = (sessionId) => {
-    const index = chatSessions.value.findIndex(s => s.id === sessionId)
-    if (index === -1) return false
-
-    // 如果删除的是当前会话，则切换到另一个会话
-    if (currentSessionId.value === sessionId) {
-      if (chatSessions.value.length > 1) {
-        // 如果有其他会话，选择下一个或上一个
-        const nextIndex = index === chatSessions.value.length - 1 ? index - 1 : index + 1
-        currentSessionId.value = chatSessions.value[nextIndex].id
-      } else {
-        // 如果没有其他会话，创建一个新会话
-        createNewSession()
+  function updateConversation(id, updates) {
+    const index = conversations.value.findIndex(conv => conv.id === id)
+    if (index !== -1) {
+      conversations.value[index] = {
+        ...conversations.value[index],
+        ...updates,
+        updatedAt: new Date()
       }
     }
-
-    chatSessions.value.splice(index, 1)
-    return true
   }
 
-  // 添加消息到当前会话
-  const addMessage = (message) => {
-    // 如果没有会话，创建一个新的
-    if (!currentSession.value) {
-      createNewSession(message.modelId)
-    }
-
-    currentSession.value.messages.push(message)
-    currentSession.value.updatedAt = new Date().toISOString()
-
-    // 更新会话标题 - 使用第一条用户消息
-    if (message.role === 'user' && currentSession.value.title === '新的对话' && currentSession.value.messages.length <= 2) {
-      // 取前20个字符
-      currentSession.value.title = message.content.substring(0, 20) + (message.content.length > 20 ? '...' : '')
-    }
-
-    return currentSession.value
-  }
-
-  // 更新消息
-  const updateMessage = (index, messageUpdate) => {
-    if (!currentSession.value || index >= currentSession.value.messages.length) return
-    
-    currentSession.value.messages[index] = {
-      ...currentSession.value.messages[index],
-      ...messageUpdate
-    }
-    
-    currentSession.value.updatedAt = new Date().toISOString()
-  }
-
-  // 设置当前会话的模型
-  const setSessionModel = (modelId) => {
-    if (currentSession.value) {
-      currentSession.value.modelId = modelId
+  function deleteConversation(id) {
+    const index = conversations.value.findIndex(conv => conv.id === id)
+    if (index !== -1) {
+      conversations.value.splice(index, 1)
+      if (currentConversationId.value === id) {
+        currentConversationId.value = conversations.value[0]?.id || null
+      }
     }
   }
 
-  // 切换到指定会话
-  const switchSession = (sessionId) => {
-    const exists = chatSessions.value.some(s => s.id === sessionId)
-    if (exists) {
-      currentSessionId.value = sessionId
-      return true
+  function getCurrentConversation() {
+    return conversations.value.find(conv => conv.id === currentConversationId.value)
+  }
+
+  function addMessage(conversationId, message) {
+    const conversation = conversations.value.find(conv => conv.id === conversationId)
+    if (conversation) {
+      conversation.messages.push(message)
+      // 如果对话名称还是默认的"新对话"，则使用用户的第一条消息作为对话名称
+      if (conversation.name === '新对话' && message.role === 'user') {
+        conversation.name = message.content.slice(0, 20) + (message.content.length > 20 ? '...' : '')
+      }
+      conversation.updatedAt = new Date()
+      // 将最新的对话移到顶部
+      const index = conversations.value.findIndex(conv => conv.id === conversationId)
+      if (index > 0) {
+        const [conv] = conversations.value.splice(index, 1)
+        conversations.value.unshift(conv)
+      }
     }
-    return false
   }
 
   return {
-    chatSessions,
-    currentSessionId,
-    currentSession,
-    currentMessages,
-    createNewSession,
-    deleteSession,
-    addMessage,
-    updateMessage,
-    setSessionModel,
-    switchSession
+    conversations,
+    currentConversationId,
+    createConversation,
+    updateConversation,
+    deleteConversation,
+    getCurrentConversation,
+    addMessage
   }
 })

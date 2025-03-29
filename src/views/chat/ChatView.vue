@@ -1,42 +1,71 @@
 <template>
   <div class="chat-container">
-    <div ref="chatContainer" class="messages">
-      <chat-message
-        v-for="(msg, index) in messages"
-        :key="index"
-        :role="msg.role"
-        :content="msg.content"
-        :loading="msg.loading"
-        :reasoning="msg.reasoning"
-      />
+    <!-- 会话列表面板 -->
+    <div class="conversation-panel">
+      <div class="panel-header">
+        <h2>会话记录</h2>
+        <button class="new-chat-btn" @click="createNewChat">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          新对话
+        </button>
+      </div>
+      <div class="conversation-list">
+        <conversation-item 
+          v-for="conv in conversations" 
+          :key="conv.id"
+          :conversation="conv"
+          :is-active="conv.id === currentConversationId"
+          @select="selectConversation(conv.id)"
+          @rename="renameConversation(conv.id, $event)"
+          @delete="deleteConversation(conv.id)"
+        />
+      </div>
     </div>
 
-    <!-- 简化滚动控制按钮 -->
-    <button 
-      v-show="showScrollBottom"
-      class="scroll-btn" 
-      @click="scrollToBottom" 
-      title="滚动到底部"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </button>
+    <!-- 主聊天区域 -->
+    <div class="chat-main">
+      <div ref="chatContainer" class="messages">
+        <chat-message
+          v-for="(msg, index) in currentMessages"
+          :key="index"
+          :role="msg.role"
+          :content="msg.content"
+          :loading="msg.loading"
+          :reasoning="msg.reasoning"
+        />
+      </div>
 
-    <div class="input-section">
-      <div class="input-container">
-        <div class="input-left">
-          <model-selector 
-            v-model:modelId="selectedModel" 
-            class="model-selector"
-          />
-        </div>
-        <div class="input-right">
-          <chat-input
-            :disabled="isLoading"
-            @submit="handleMessageSubmit"
-            @abort="handleAbort"
-          />
+      <!-- 滚动按钮 -->
+      <button 
+        v-show="showScrollBottom"
+        class="scroll-btn" 
+        @click="scrollToBottom" 
+        title="滚动到底部"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <!-- 输入区域 -->
+      <div class="input-section">
+        <div class="input-container">
+          <div class="input-left">
+            <model-selector 
+              v-model:modelId="selectedModel" 
+              class="model-selector"
+            />
+          </div>
+          <div class="input-right">
+            <chat-input
+              :disabled="isLoading"
+              @submit="handleMessageSubmit"
+              @abort="handleAbort"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -44,7 +73,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, onUpdated, watch, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted, onUpdated, watch, onUnmounted, computed } from 'vue'
 import { useElementVisibility, useScroll } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
@@ -52,6 +81,8 @@ import { initCodeCopy } from '@/utils/copy'
 import ChatMessage from './components/ChatMessage.vue'
 import ChatInput from './components/ChatInput.vue'
 import ModelSelector from './components/ModelSelector.vue'
+import { useConversationStore } from '@/stores/chat'
+import ConversationItem from './components/ConversationItem.vue'
 
 const router = useRouter()
 const messages = ref([])
@@ -60,7 +91,7 @@ const chatContainer = ref(null)
 let controller = null
 const authStore = useAuthStore()
 const taskId = ref('')
-const selectedModel = ref('gpt-3.5-turbo')
+const selectedModel = ref('deepseek-v3')
 
 // 简化滚动控制逻辑
 const showScrollBottom = ref(false)
@@ -186,10 +217,55 @@ async function processStream(response, aiIndex) {
   }
 }
 
+const conversationStore = useConversationStore()
+
+// Computed properties for conversations
+const conversations = computed(() => conversationStore.conversations)
+const currentConversationId = computed(() => conversationStore.currentConversationId)
+const currentMessages = computed(() => {
+  const currentConv = conversationStore.getCurrentConversation()
+  return currentConv?.messages || messages.value
+})
+
+// Conversation management methods
+function createNewChat() {
+  conversationStore.createConversation()
+  messages.value = []
+  nextTick(() => {
+    scrollToBottom()
+  })
+}
+
+function selectConversation(id) {
+  conversationStore.currentConversationId = id
+  const conv = conversationStore.getCurrentConversation()
+  messages.value = conv?.messages || []
+  nextTick(() => {
+    scrollToBottom()
+  })
+}
+
+function renameConversation(id, newName) {
+  conversationStore.updateConversation(id, { name: newName })
+}
+
+function deleteConversation(id) {
+  conversationStore.deleteConversation(id)
+  if (!conversationStore.currentConversationId) {
+    createNewChat()
+  }
+}
+
+// Override message submit to include conversation management
 const handleMessageSubmit = async (messageText) => {
   if (!authStore.isAuthenticated) {
     router.push('/auth?redirect=' + encodeURIComponent(router.currentRoute.value.fullPath))
     return
+  }
+  
+  // Create new conversation if none exists
+  if (!currentConversationId.value) {
+    createNewChat()
   }
   
   lastUserMessageTime.value = Date.now()
@@ -199,26 +275,28 @@ const handleMessageSubmit = async (messageText) => {
     controller?.abort()
     controller = new AbortController()
 
-    // 添加用户消息时自动滚动到底部
-    messages.value.push({
+    // Add user message to both local state and store
+    const userMessage = {
       role: 'user',
       content: messageText
-    })
+    }
+    messages.value.push(userMessage)
+    conversationStore.addMessage(currentConversationId.value, userMessage)
     await autoScroll()
 
-    // 添加 AI 消息占位
-    const aiIndex = messages.value.push({
+    // Add AI message placeholder to both local state and store
+    const aiMessage = {
       role: 'assistant',
       content: '',
       loading: true,
       reasoning: ''
-    }) - 1
-    
+    }
+    messages.value.push(aiMessage)
+    const aiIndex = messages.value.length - 1
     await autoScroll()
 
     const url = import.meta.env.VITE_APP_BASE_API + '/ai/chat'
     
-    // 发送完整上下文
     const res = await fetch(url, {
       method: 'POST',
       headers: { 
@@ -244,12 +322,14 @@ const handleMessageSubmit = async (messageText) => {
 
     if (!response.ok) throw new Error('网络响应失败')
 
-    messages.value[aiIndex] = {
-      ...messages.value[aiIndex],
-      loading: false
-    }
+    // Update local message state to not loading
+    messages.value[aiIndex].loading = false
 
     await processStream(response, aiIndex)
+
+    // After stream is complete, update the conversation store with the final AI message
+    conversationStore.addMessage(currentConversationId.value, messages.value[aiIndex])
+
   } catch (error) {
     if (error.name !== 'AbortError') {
       console.error('Error:', error)
@@ -298,11 +378,65 @@ const scrollToBottom = () => {
 <style>
 .chat-container {
   display: flex;
-  flex-direction: column;
   height: calc(100vh - var(--header-height));
   background: rgba(var(--background-color-rgb), 0.95);
   position: relative;
-  overflow: hidden;
+}
+
+.conversation-panel {
+  width: 260px;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  background: rgba(var(--background-color-rgb), 0.98);
+}
+
+.panel-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-color);
+}
+
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--secondary-color);
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.new-chat-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.conversation-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
 }
 
 .messages {
@@ -425,6 +559,15 @@ const scrollToBottom = () => {
   .scroll-btn:hover {
     background: rgba(30, 41, 59, 0.95);
   }
+
+  .conversation-panel {
+    border-right-color: rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.98);
+  }
+  
+  .panel-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 /* 移动端适配 */
@@ -453,6 +596,10 @@ const scrollToBottom = () => {
     bottom: 140px;
     width: 36px;
     height: 36px;
+  }
+
+  .conversation-panel {
+    display: none;
   }
 }
 </style>
