@@ -311,8 +311,14 @@ const handleMessageSubmit = async (messageText) => {
       loading: true,
       reasoning: ''
     }
-    aiIndex = messages.value.length
     chatStore.addMessage(aiMessage)
+    nextTick(() => {
+      chatContainer.value.scrollTo({
+        top: chatContainer.value.scrollHeight,
+        behavior: 'smooth'
+      })
+    })
+    aiIndex = messages.value.length - 1
     
     await autoScroll()
 
