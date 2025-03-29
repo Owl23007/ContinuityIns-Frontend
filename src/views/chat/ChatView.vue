@@ -60,7 +60,7 @@ const chatContainer = ref(null)
 let controller = null
 const authStore = useAuthStore()
 const taskId = ref('')
-const selectedModel = ref('gpt-3.5-turbo')
+const selectedModel = ref('deepseek-v3')
 
 // 简化滚动控制逻辑
 const showScrollBottom = ref(false)
