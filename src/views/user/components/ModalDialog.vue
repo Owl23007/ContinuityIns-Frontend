@@ -1,16 +1,16 @@
 <template>
-  <div class="modal-backdrop" @mousedown="handleBackdropClick" ref="modalBackdrop">
+  <div class="modal-overlay" @mousedown="handleBackdropClick" ref="modalBackdrop">
     <div class="modal-container" :class="theme">
       <div class="modal-header">
-        <h2>{{ title }}</h2>
+        <h2 class="modal-title" :class="{ danger: theme === 'danger' }">{{ title }}</h2>
         <button class="close-button" @click="$emit('close')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-content">
         <slot></slot>
       </div>
     </div>
@@ -78,98 +78,137 @@ function handleBackdropClick(event) {
 </script>
 
 <style scoped>
-.modal-backdrop {
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(3px);
 }
 
 .modal-container {
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  width: 90%;
-  max-width: 600px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 90%;
+  width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  animation: modalFadeIn 0.3s ease;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transform: scale(1);
+  transition: all 0.3s ease;
+}
+
+.modal-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.5);
+  border-radius: 3px;
+}
+
+.modal-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid #eee;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.7);
 }
 
-.modal-header h2 {
-  margin: 0;
+.modal-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--primary-color);
+  margin: 0;
+  padding: 0;
+}
+
+.modal-title.danger {
+  color: #e74c3c;
 }
 
 .close-button {
-  background: none;
+  background: transparent;
   border: none;
+  color: #94a3b8;
+  padding: 0.5rem;
   cursor: pointer;
-  color: #999;
-  transition: color 0.3s;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
+  transition: all 0.2s ease;
 }
 
 .close-button:hover {
-  color: #555;
+  background: rgba(226, 232, 240, 0.5);
+  color: #64748b;
+  transform: rotate(90deg);
 }
 
-.modal-body {
-  padding: 1.5rem;
+.close-button svg {
+  width: 20px;
+  height: 20px;
 }
 
-.modal-container.danger .modal-header {
-  background-color: #ffebee;
-  border-bottom-color: #ffcdd2;
+.modal-content {
+  margin-bottom: 1rem;
 }
 
-.modal-container.danger .modal-header h2 {
-  color: #d32f2f;
+/* 动画效果 */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.modal-enter-active .modal-container,
+.modal-leave-active .modal-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 响应式调整 */
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal-container,
+.modal-leave-to .modal-container {
+  transform: scale(0.9);
+  opacity: 0;
+}
+
 @media (max-width: 768px) {
   .modal-container {
     width: 95%;
+    padding: 1.25rem;
   }
-  
-  .modal-header {
-    padding: 1rem;
+
+  .modal-title {
+    font-size: 1.25rem;
   }
-  
-  .modal-body {
-    padding: 1rem;
+
+  .close-button svg {
+    width: 18px;
+    height: 18px;
   }
 }
 </style>

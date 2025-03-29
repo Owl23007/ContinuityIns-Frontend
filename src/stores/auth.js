@@ -4,7 +4,11 @@ import {
   register_post,
   sendResetEmail_post,
   validateToken_post,
-  getUserInfo_get
+  getUserInfo_get,
+  updateUserInfo_put,
+  updateAvatar_patch,
+  updateBackground_patch,
+  deleteAccount_post
 } from '@/api/user'
 
 export const useAuthStore = defineStore('auth', {
@@ -58,6 +62,62 @@ export const useAuthStore = defineStore('auth', {
       this.user = user
       const storage = this.rememberMe ? localStorage : sessionStorage
       storage.setItem('user', JSON.stringify(user))
+    },
+
+    async updateUserProfile({ nickname, signature, avatarImage, backgroundImage }) {
+      if (!this.token) throw new Error('未登录');
+      
+      // If avatar or background is being updated, use the specific methods
+      if (avatarImage) {
+        return this.updateAvatar(avatarImage);
+      }
+      
+      if (backgroundImage) {
+        return this.updateBackground(backgroundImage);
+      }
+      
+      // Otherwise update the profile info
+      try {
+        const res = await updateUserInfo_put(this.token, nickname, signature);
+        if (res.code === 0) {
+          // Update the user data in store
+          this.setUser({ ...this.user, nickname, signature });
+          return true;
+        }
+        throw new Error(res.message || '更新失败');
+      } catch (error) {
+        throw new Error(error.message || '更新请求失败');
+      }
+    },
+    
+    async updateAvatar(avatarUrl) {
+      if (!this.token) throw new Error('未登录');
+      try {
+        const res = await updateAvatar_patch(this.token, avatarUrl);
+        if (res.code === 0) {
+          // Update the user data in store with the new avatar
+          this.setUser({ ...this.user, avatar: avatarUrl });
+          return true;
+        }
+        throw new Error(res.message || '更新头像失败');
+      } catch (error) {
+        throw new Error(error.message || '更新头像请求失败');
+      }
+    },
+    
+    async updateBackground(backgroundUrl) {
+      if (!this.token) throw new Error('未登录');
+      try {
+        const res = await updateBackground_patch(this.token, backgroundUrl);
+        if (res.code === 0) {
+          // Update the user data in store with the new background
+          this.setUser({ ...this.user, backgroundImage: backgroundUrl });
+          return true;
+        }
+        throw new Error(res.message || '更新背景失败');
+      } catch (error) {
+        throw new Error(error.message || '更新背景请求失败');
+      }
     },
 
     async login({ identifier, password, rememberMe }) {
@@ -119,6 +179,20 @@ export const useAuthStore = defineStore('auth', {
         throw new Error(res.message || '发送失败')
       } catch (error) {
         throw new Error(error.message || '邮件发送请求失败')
+      }
+    },
+    
+    async deleteAccount(password) {
+      if (!this.token) throw new Error('未登录');
+      try {
+        const res = await deleteAccount_post(this.token, password);
+        if (res.code === 0) {
+          this.clearAuth();
+          return true;
+        }
+        throw new Error(res.message || '账户注销失败');
+      } catch (error) {
+        throw new Error(error.message || '账户注销请求失败');
       }
     },
 

@@ -51,20 +51,22 @@
 </template>
 
 <script setup>
-import { ref, inject } from 'vue';
+import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { useUserStore } from '@/stores/user';
 import ImageCropper from '@/components/common/ImageCropper.vue';
+import { uploadFile, validateFile } from '@/utils/upload';
 
 const authStore = useAuthStore();
-const userStore = useUserStore();
 const emit = defineEmits(['background-updated', 'cancel']);
-const axios = inject('axios');
 
 const props = defineProps({
   isSubmitting: {
     type: Boolean,
     default: false
+  },
+  token: {
+    type: String,
+    required: true
   }
 });
 
@@ -73,73 +75,64 @@ const selectedFile = ref(null);
 const isUploading = ref(false);
 const uploadError = ref('');
 
-// 选择文件
+// 处理文件选择
 function handleFileSelect(event) {
   const file = event.target.files[0];
   if (file) {
-    // 验证文件类型
-    if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      uploadError.value = '只支持 JPG 或 PNG 格式的图片';
-      return;
+    try {
+      validateFile(file, 'background');  // Added 'background' as type parameter
+      selectedFile.value = file;
+      uploadError.value = '';
+    } catch (error) {
+      uploadError.value = error.message;
     }
-
-    // 验证文件大小 (限制为 8MB)
-    if (file.size > 8 * 1024 * 1024) {
-      uploadError.value = '图片大小不能超过 8MB';
-      return;
-    }
-
-    selectedFile.value = file;
-    uploadError.value = '';
   }
 }
 
 // 处理裁剪完成
 async function handleCropComplete(cropResult) {
-  try {
-    if (!cropResult || !cropResult.file) {
-      throw new Error('图片处理失败');
-    }
-
-    isUploading.value = true;
-    uploadError.value = '';
-    
-    const formData = new FormData();
-    formData.append('file', cropResult.file);
-    
-    const ossPolicy = await userStore.getOssPolicy();
-    if (!ossPolicy) {
-      throw new Error('获取上传凭证失败，请重新登录后重试');
-    }
-    
-    // 上传到OSS
-    try {
-      formData.append('OSSAccessKeyId', ossPolicy.accessid);
-      formData.append('policy', ossPolicy.policy);
-      formData.append('signature', ossPolicy.signature);
-      formData.append('key', `backgrounds/${Date.now()}-${cropResult.file.name}`);
-      formData.append('success_action_status', '200');
-      
-      await axios.post(ossPolicy.host, formData);
-      
-      // 构建图片URL
-      const imageUrl = `${ossPolicy.host}/${formData.get('key')}`;
-      
-      // 更新用户背景图片信息
-      await authStore.updateUserProfile({
-        backgroundImage: imageUrl
-      });
-      
-      emit('background-updated', imageUrl);
-    } catch (uploadError) {
-      throw new Error(uploadError.response?.data?.message || '图片上传失败，请重试');
-    }
-  } catch (error) {
-    console.error('上传背景图片失败:', error);
-    uploadError.value = error.message || '上传失败，请重试';
-  } finally {
-    isUploading.value = false;
+  if (!cropResult || !cropResult.file) {
+    uploadError.value = '图片处理失败';
+    return;
   }
+
+  if (!props.token) {
+    uploadError.value = '未登录，请重新登录后再试';
+    return;
+  }
+
+  isUploading.value = true;
+  uploadError.value = '';
+  
+  let retryCount = 0;
+  const maxRetries = 3;
+
+  while (retryCount < maxRetries) {
+    try {
+      const accessUrl = await uploadFile(cropResult.file, 'background', props.token);
+      await authStore.updateUserProfile({ backgroundImage: accessUrl });
+      emit('background-updated', accessUrl);
+      return;
+    } catch (error) {
+      console.error('上传背景图片失败:', error);
+      retryCount++;
+      
+      if (error.message.includes('401') || error.message.includes('未登录')) {
+        uploadError.value = '登录已过期，请重新登录';
+        break;
+      }
+      
+      if (error.message.includes('网络连接失败') && retryCount < maxRetries) {
+        uploadError.value = `网络连接失败，正在重试(${retryCount}/${maxRetries})...`;
+        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        continue;
+      }
+      
+      uploadError.value = error.message || '上传失败，请重试';
+      break;
+    }
+  }
+  isUploading.value = false;
 }
 
 // 重置上传状态
@@ -161,113 +154,182 @@ function resetUpload() {
 }
 
 .file-upload-area {
-  border: 2px dashed #ddd;
-  border-radius: 10px;
-  padding: 40px 20px;
+  border: 2px dashed rgba(203, 213, 225, 0.6);
+  border-radius: 16px;
+  padding: 2rem;
   text-align: center;
   cursor: pointer;
   position: relative;
   transition: all 0.3s ease;
-  background-color: #f9f9f9;
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
 .file-upload-area:hover {
   border-color: #42b983;
-  background-color: #f0f7f4;
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+.file-upload-area.dragging {
+  border-color: #42b983;
+  background: rgba(66, 185, 131, 0.1);
 }
 
 .upload-icon {
-  font-size: 48px;
-  color: #42b983;
-  margin-bottom: 15px;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: rgba(66, 185, 131, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
-.upload-instructions p {
-  margin: 5px 0;
-  color: #666;
+.upload-icon svg {
+  width: 32px;
+  height: 32px;
+  color: #42b983;
+}
+
+.upload-text {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
 }
 
 .upload-hint {
-  font-size: 14px;
-  color: #999;
-  margin-top: 10px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 80%;
+  margin: 0 auto;
 }
 
-.file-input {
+.preview-container {
+  margin-top: 1.5rem;
+  text-align: center;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.error-container {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.error-container svg {
+  color: #e74c3c;
+  width: 32px;
+  height: 32px;
+}
+
+.error-container p {
+  color: #e74c3c;
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.retry-button {
+  background: transparent;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  background: #e74c3c;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.loading-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.uploading-feedback {
+  background: rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30px;
+  justify-content: center;
+  gap: 1rem;
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
 }
 
-.spinner {
+.loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(66, 185, 131, 0.2);
+  border: 3px solid rgba(66, 185, 131, 0.1);
   border-top-color: #42b983;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 15px;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.upload-error {
-  color: #e74c3c;
-  background-color: #fdf1f0;
-  padding: 15px;
-  border-radius: 8px;
-  margin-top: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+@media (max-width: 768px) {
+  .file-upload-area {
+    padding: 1.5rem;
+  }
 
-.upload-error i {
-  font-size: 24px;
-  margin-bottom: 10px;
-}
+  .upload-icon {
+    width: 48px;
+    height: 48px;
+  }
 
-.retry-button {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
-  margin-top: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
+  .upload-icon svg {
+    width: 24px;
+    height: 24px;
+  }
 
-.retry-button:hover {
-  background-color: #c0392b;
-}
+  .upload-text {
+    font-size: 1rem;
+  }
 
-.cropper-area {
-  margin: 20px 0;
-  width: 100%;
-}
+  .upload-hint {
+    max-width: 100%;
+  }
 
-.cropper-tips {
-  margin-top: 10px;
-  color: #666;
-  font-size: 0.9rem;
-  text-align: center;
-  padding: 6px;
-  background-color: #f0f7f4;
-  border-radius: 6px;
-  border-left: 3px solid #42b983;
+  .preview-image {
+    max-height: 200px;
+  }
+
+  .retry-button {
+    width: 100%;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+
 import auth from './modules/auth'
 import content from './modules/content'
 import user from './modules/user'
@@ -38,37 +38,58 @@ const router = createRouter({
   ]
 })
 
+// Helper function to check authentication status using localStorage directly
+// This avoids circular dependencies with the auth store
+function hasValidToken() {
+  return !!(localStorage.getItem('token') || sessionStorage.getItem('token'))
+}
+
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore()
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-
-  // 动态标题
+  // Update title
   document.title = to.meta.title ? `${to.meta.title} - 存续院` : '存续院'
-
-  try {
-    // 如果存在token但用户未初始化，尝试初始化
-    if (!authStore.isAuthenticated && (localStorage.getItem('token') || sessionStorage.getItem('token'))) {
-      await authStore.initializeAuth()
+  
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  
+  // If route doesn't require auth, proceed
+  if (!requiresAuth) {
+    return next()
+  }
+  
+  // If route requires auth, check token
+  if (hasValidToken()) {
+    // Dynamically import auth store only when needed
+    const { useAuthStore } = await import('@/stores/auth')
+    const authStore = useAuthStore()
+    
+    // Initialize auth if not already authenticated
+    if (!authStore.isAuthenticated) {
+      try {
+        await authStore.initializeAuth()
+        
+        // If authentication failed, redirect to login
+        if (!authStore.isAuthenticated) {
+          return next({ 
+            path: '/auth',
+            query: { redirect: to.fullPath }
+          })
+        }
+      } catch (error) {
+        console.error('Route guard error:', error)
+        return next({ 
+          path: '/auth',
+          query: { redirect: to.fullPath }
+        })
+      }
     }
-
-    if (requiresAuth && !authStore.isAuthenticated) {
-      next({ 
-        path: '/auth',
-        query: { redirect: to.fullPath }
-      })
-    } else {
-      next()
-    }
-  } catch (error) {
-    console.error('Route guard error:', error)
-    if (requiresAuth) {
-      next({ 
-        path: '/auth',
-        query: { redirect: to.fullPath }
-      })
-    } else {
-      next()
-    }
+    
+    // User authenticated, proceed to route
+    return next()
+  } else {
+    // No token, redirect to login
+    return next({ 
+      path: '/auth',
+      query: { redirect: to.fullPath }
+    })
   }
 })
 

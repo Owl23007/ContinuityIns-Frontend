@@ -64,8 +64,8 @@ const updateMedia = (endpoint, token, url) =>
 export const updateAvatar_patch = (token, avatarUrl) =>
   request('PATCH', '/user/updateAvatar', { url: avatarUrl }, token);
 
-export const updateBackground_patch = (token, background) =>
-  updateMedia('/user/updateBackground', token, background);
+export const updateBackground_patch = (token, backgroundUrl) =>
+  request('PATCH', '/user/updateBackground', { url: backgroundUrl }, token);
 
 export const updateUserInfo_put = (token, nickname, signature) =>
   request('PUT', '/user/update', { nickname, signature }, token);
@@ -86,10 +86,7 @@ export const validateToken_post = async (token) => {
   }
 };
 
-//获取OSS请求策略
-export const getOssPolicy_get = (token) =>
-  request('GET', '/user/oss/policy', {}, token);
-
+//重置密码
 export const resetPassword_post = (email, token, password) =>
   request('POST', '/user/resetPassword', { 
     email, 
@@ -97,3 +94,11 @@ export const resetPassword_post = (email, token, password) =>
     password: encryptPassword(password)
   });
 
+//修改密码    
+//获取OSS直链
+export const getOssUrl_get = (type, token) => {
+  if (!['avatar', 'background', 'article'].includes(type)) {
+    throw new Error('不支持的上传类型');
+  }
+  return request('GET', '/user/oss/policy', { type }, token);
+};

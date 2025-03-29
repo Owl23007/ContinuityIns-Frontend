@@ -59,14 +59,23 @@
       </modal-dialog>
 
       <!-- 头像上传模态框 -->
-      <modal-dialog v-if="activeModal === 'avatar'" title="更换头像" @close="closeModal">
-        <avatar-uploader @avatar-updated="handleAvatarUpdated" @cancel="closeModal" :is-submitting="isUpdating" />
+      <modal-dialog v-if="activeModal === 'avatar' && authStore.token" title="更换头像" @close="closeModal">
+        <avatar-uploader 
+          @avatar-updated="handleAvatarUpdated" 
+          @cancel="closeModal" 
+          :is-submitting="isUpdating"
+          :token="authStore.token"
+        />
       </modal-dialog>
 
       <!-- 背景上传模态框 -->
-      <modal-dialog v-if="activeModal === 'background'" title="更换背景" @close="closeModal">
-        <background-uploader @background-updated="handleBackgroundUpdated" @cancel="closeModal"
-          :is-submitting="isUpdating" />
+      <modal-dialog v-if="activeModal === 'background' && authStore.token" title="更换背景" @close="closeModal">
+        <background-uploader 
+          @background-updated="handleBackgroundUpdated" 
+          @cancel="closeModal"
+          :is-submitting="isUpdating"
+          :token="authStore.token"
+        />
       </modal-dialog>
 
       <!-- 注销账户模态框 -->
@@ -84,7 +93,6 @@
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useUserStore } from '@/stores/user'
 import defaultAvatar from '@/assets/image/default_avatar.png'
 import defaultBackground from '@/assets/image/default_cover.jpg'
 
@@ -98,7 +106,6 @@ import NotificationSystem from '@/components/common/NotificationSystem.vue'
 import ProfileActionButtons from '@/views/user/components/ProfileActionButtons.vue'
 
 const authStore = useAuthStore()
-const userStore = useUserStore()
 const router = useRouter()
 const notificationSystem = ref(null)
 
@@ -120,8 +127,6 @@ onMounted(async () => {
     loading.value = true
     await authStore.fetchUserInfo()
     updateUserDataFromStore()
-    // Pre-fetch OSS upload policy
-    await userStore.getOssPolicy()
   } catch (error) {
     showNotification('获取用户信息失败', 'error')
     console.error('获取用户信息失败:', error)
@@ -210,7 +215,7 @@ async function performLogout(password) {
 
   isDeleting.value = true
   try {
-    await userStore.deleteAccount(password)
+    await authStore.deleteAccount(password)
     showNotification('账户已成功注销', 'success')
     await router.push('/auth')
   } catch (error) {
@@ -231,43 +236,58 @@ function showNotification(message, type = 'info') {
 <style scoped>
 .user-profile {
   max-width: 1000px;
-  /* 增加最大宽度 */
   width: 100%;
   margin: 0 auto;
-  /* 居中显示 */
   min-height: 100vh;
-  /* 从90vh改为100vh，占满整个视口高度 */
   padding: 2rem;
   background-size: cover;
   background-position: center;
   position: relative;
   background-attachment: fixed;
   transition: background-image 0.5s ease;
+  background-color: rgba(var(--primary-color-rgb), 0.05);
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: 15px;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
-  /* 增强阴影效果 */
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 2.5rem;
-  /* 稍微减小内边距 */
-  backdrop-filter: blur(12px);
-  transition: all 0.3s ease;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   margin-top: 2rem;
-  /* 添加顶部边距 */
+  position: relative;
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.2);
 }
 
 .profile-title {
-  color: #2c3e50;
+  color: var(--primary-color);
   font-size: 2rem;
-  /* 略微减小字号 */
   border-bottom: 3px solid #42b983;
   padding-bottom: 0.8rem;
   margin-bottom: 2rem;
-  /* 减小底部边距 */
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.profile-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #42b983, #3498db);
+  border-radius: 2px;
 }
 
 .loading-container,
@@ -283,10 +303,10 @@ function showNotification(message, type = 'info') {
 .spinner {
   width: 50px;
   height: 50px;
-  border: 5px solid rgba(66, 185, 131, 0.2);
+  border: 4px solid rgba(66, 185, 131, 0.1);
   border-radius: 50%;
   border-top-color: #42b983;
-  animation: spin 1s ease-in-out infinite;
+  animation: spin 0.8s linear infinite;
   margin-bottom: 1.5rem;
 }
 
@@ -299,15 +319,17 @@ function showNotification(message, type = 'info') {
 .profile-section {
   display: flex;
   flex-wrap: wrap;
-  /* 允许在小屏幕上换行 */
   gap: 2rem;
   margin: 1.5rem 0;
   align-items: center;
   justify-content: center;
-  /* 居中显示 */
+  position: relative;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* 更新头像样式 */
 .avatar-container {
   display: flex;
   justify-content: center;
@@ -315,14 +337,19 @@ function showNotification(message, type = 'info') {
 }
 
 .avatar {
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   object-fit: cover;
-  border: 5px solid #fff;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 4px solid #fff;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   background-color: #f8f8f8;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 }
 
 .user-info {
@@ -331,35 +358,59 @@ function showNotification(message, type = 'info') {
   flex-direction: column;
   justify-content: center;
   min-width: 280px;
-  /* 确保在移动设备上有足够宽度 */
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .user-name {
-  font-size: 1.7rem;
-  margin-bottom: 1.2rem;
-  color: #2c3e50;
-  border-bottom: 2px dashed #ddd;
-  padding-bottom: 0.5rem;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(120deg, var(--primary-color), #3498db);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
   text-align: center;
 }
 
 .info-item {
-  margin: 0.6rem 0;
+  margin: 1rem 0;
   font-size: 1.1rem;
   line-height: 1.5;
   display: flex;
   align-items: center;
-  padding: 0.4rem 0;
+  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateX(5px);
 }
 
 .info-item i {
-  width: 25px;
-  color: #42b983;
-  margin-right: 10px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #42b983, #3498db);
+  border-radius: 8px;
+  color: white;
+  margin-right: 15px;
+}
+
+.info-item strong {
+  color: var(--primary-color);
+  margin-right: 8px;
+  font-weight: 600;
 }
 
 .error-container {
@@ -371,28 +422,31 @@ function showNotification(message, type = 'info') {
   text-decoration: underline;
 }
 
-/* 添加响应式设计 */
 @media (max-width: 768px) {
+  .user-profile {
+    padding: 1rem;
+  }
+
   .profile-card {
     padding: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .profile-section {
+    padding: 1rem;
   }
 
   .avatar {
-    width: 130px;
-    height: 130px;
-    border-width: 4px;
-  }
-
-  .profile-title {
-    font-size: 1.7rem;
+    width: 140px;
+    height: 140px;
   }
 
   .user-name {
     font-size: 1.5rem;
   }
 
-  .user-info {
-    padding: 1rem;
+  .info-item {
+    padding: 0.6rem 0.8rem;
   }
 }
 

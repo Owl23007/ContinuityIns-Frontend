@@ -75,93 +75,138 @@ function handleSubmit() {
 
 <style scoped>
 .profile-form {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  position: relative;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #333;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
-.input-container {
-  position: relative;
-}
-
-input[type="text"],
-textarea {
+.form-group input,
+.form-group textarea {
   width: 100%;
   padding: 0.8rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 2px solid rgba(203, 213, 225, 0.4);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
   font-size: 1rem;
-  transition: border 0.3s;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
 }
 
-input:focus,
-textarea:focus {
-  border-color: #42b983;
+.form-group input:focus,
+.form-group textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.1);
+  border-color: #42b983;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 4px rgba(66, 185, 131, 0.1);
 }
 
-textarea {
-  min-height: 100px;
+.form-group textarea {
+  min-height: 120px;
   resize: vertical;
 }
 
 .char-counter {
   position: absolute;
   right: 0.5rem;
-  bottom: 0.5rem;
+  bottom: -1.5rem;
   font-size: 0.8rem;
-  color: #999;
+  color: var(--text-muted);
+}
+
+.char-counter.limit {
+  color: #e74c3c;
 }
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 1rem;
   margin-top: 2rem;
+  justify-content: flex-end;
 }
 
+.submit-btn,
 .cancel-btn {
-  background: #f0f0f0;
-  color: #666;
-  padding: 0.7rem 1.5rem;
+  padding: 0.8rem 1.6rem;
   border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: 10px;
   font-weight: 600;
-  transition: all 0.2s;
-}
-
-.cancel-btn:hover {
-  background: #e0e0e0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .submit-btn {
-  background: #42b983;
+  background: linear-gradient(135deg, #42b983 0%, #3498db 100%);
   color: white;
-  padding: 0.7rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
+  min-width: 120px;
 }
 
-.submit-btn:hover {
-  background: #3aa876;
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(66, 185, 131, 0.3);
 }
 
-button:disabled {
+.submit-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 2px solid rgba(203, 213, 225, 0.4);
+}
+
+.cancel-btn:hover {
+  background: rgba(203, 213, 225, 0.2);
+  border-color: rgba(203, 213, 225, 0.6);
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .submit-btn,
+  .cancel-btn {
+    width: 100%;
+    padding: 0.7rem 1rem;
+  }
 }
 </style>
