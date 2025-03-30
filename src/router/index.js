@@ -4,6 +4,7 @@ import auth from './modules/auth'
 import content from './modules/content'
 import user from './modules/user'
 import ai from './modules/ai'
+import { useAuthStore } from '@/stores/auth'
 
 // Development routes
 const devRoutes = import.meta.env.DEV ? [
@@ -58,7 +59,7 @@ router.beforeEach(async (to, from, next) => {
   // If route requires auth, check token
   if (hasValidToken()) {
     // Dynamically import auth store only when needed
-    const { useAuthStore } = await import('@/stores/auth')
+
     const authStore = useAuthStore()
     
     // Initialize auth if not already authenticated
