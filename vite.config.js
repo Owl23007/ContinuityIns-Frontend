@@ -2,6 +2,8 @@ import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
+import { fa } from 'element-plus/es/locales.mjs'
+
 // 动态环境变量处理
 const envResolver = (mode) => {
   return loadEnv(mode, process.cwd(), 'VITE_')
@@ -18,10 +20,8 @@ export default defineConfig(({ mode }) => {
 
     // 核心插件
     plugins: [
-      vue({
-        // 启用响应性语法糖
-        reactivityTransform: true
-      })
+      vue(),
+      fa,
     ],
 
     // 开发服务器配置
@@ -50,14 +50,11 @@ export default defineConfig(({ mode }) => {
           chunkFileNames: 'js/[name]-[hash].js',
           entryFileNames: 'js/[name]-[hash].js',
           assetFileNames: 'assets/[name]-[hash].[ext]',
-          // 手动分块优化
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              if (id.includes('vue')) return 'vue-vendor'
-              if (id.includes('axios')) return 'axios-vendor'
-              return 'vendor'
+              return id.toString().split('node_modules/')[1].split('/')[0].toString();
             }
-          }
+          },
         }
       },
       // 生产环境清除console

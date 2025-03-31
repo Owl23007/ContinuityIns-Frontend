@@ -1,39 +1,43 @@
-export class Article {
-    id;
+export const ArticleStatus = {
+    DRAFT: 'DRAFT',
+    PRIVATE: 'PRIVATE',
+    PUBLISHED: 'PUBLISHED',
+    BANNED: 'BANNED'
+};
+
+export class ArticleDTO {
+    articleId;
     title;
     content;
     coverImg;
-    state;
-    categoryId;
+    status;
     createUser;
     createTime;
 
-    constructor(id, title, content, coverImg, state, categoryId, createUser, createTime) {
-        this.id = id;
+    constructor(articleId, title, content, coverImg, status, createUser, createTime) {
+        this.articleId = articleId;
         this.title = title;
         this.content = content;
         this.coverImg = coverImg;
-        this.state = state;
-        this.categoryId = categoryId;
+        this.status = status;
         this.createUser = createUser;
         this.createTime = createTime;
     }
 }
 
-export class PreviewArticle {
-    id;
+export class ArticlePreviewDTO {
+    articleId;
     title;
     coverImg;
-    category;
-    categoryId;
+    status;
     createUser;
     createTime;
 
-    constructor(id, title, coverImg, categoryId, createUser, createTime) {
-        this.id = id;
+    constructor(articleId, title, coverImg, status, createUser, createTime) {
+        this.articleId = articleId;
         this.title = title;
         this.coverImg = coverImg;
-        this.categoryId = categoryId;
+        this.status = status;
         this.createUser = createUser;
         this.createTime = createTime;
     }
