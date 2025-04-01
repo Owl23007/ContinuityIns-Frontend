@@ -22,6 +22,9 @@ const md = new MarkdownIt({
 
 // 导出渲染函数
 export const renderMarkdown = (content) => {
+  if (typeof content !== 'string') {
+    content = String(content || '');
+  }
   if (!content) return '';
   return md.render(content);
 };

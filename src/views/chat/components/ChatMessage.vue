@@ -64,7 +64,7 @@ import { ref, computed, watch, onMounted, onUpdated } from 'vue'
 import { renderMarkdownWithCopy } from '@/utils/markdown'
 import { initCodeCopy } from '@/utils/copy'
 import defaultAvatar from '@/assets/image/default_avatar.png'
-import botAvatar from '@/assets/image/bot-avatar.png'
+import botAvatar from '@/assets/image/ai-girl.png'
 import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({

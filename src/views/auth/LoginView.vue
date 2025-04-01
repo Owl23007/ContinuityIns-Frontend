@@ -485,23 +485,25 @@ watch(
 
 /* 基础样式 */
 .auth-container {
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0);
+  padding: clamp(1rem, 3vw, 2rem);
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 2.5rem;
-  border-radius: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.98);
+  padding: clamp(2rem, 5vw, 2.5rem);
+  border-radius: min(24px, 5vw);
+  box-shadow: 
+    0 10px 30px -5px rgba(0, 0, 0, 0.15),
+    0 2px 8px -2px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
   width: 100%;
-  max-width: 450px;
-  transition: transform 0.3s ease;
-  transform: translateY(-50px);
+  max-width: 420px;
+  transform: translateY(0);
+  transition: all 0.3s ease;
 }
 
 .auth-card.register-mode {
@@ -530,17 +532,17 @@ h2 {
 /* 输入组样式 */
 .input-group {
   position: relative;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
 
 input {
   width: 100%;
-  padding: 1rem 1rem 1rem 2.5rem;
+  padding: 0.9rem 1rem 0.9rem 2.75rem;
   border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background-color: #f8fbff;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background-color: rgba(248, 250, 252, 0.8);
 }
 
 
@@ -558,8 +560,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: #ffffff;
 }
 
 input.filled {
@@ -588,8 +591,17 @@ input.filled~label {
 .icon {
   position: absolute;
   left: 1rem;
-  top: 1rem;
-  color: #a0aec0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+input:focus ~ .icon {
+  color: #3b82f6;
 }
 
 .password-toggle {
@@ -605,20 +617,30 @@ input.filled~label {
 /* 按钮样式 */
 .submit-btn {
   width: 100%;
-  padding: 1rem;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.3s;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
 }
 
 .submit-btn.processing {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .loader {
@@ -649,7 +671,7 @@ input.filled~label {
 .remember-me {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   cursor: pointer;
   position: relative;
 }
@@ -657,8 +679,8 @@ input.filled~label {
 .remember-me input[type="checkbox"] {
   margin: 0;
   padding: 5px;
-  width: 16px;
-  height: 16px;
+  width: 1.125rem;
+  height: 1.125rem;
   border: 2px solid #cbd5e0;
   border-radius: 4px;
   appearance: none;
@@ -669,8 +691,8 @@ input.filled~label {
 }
 
 .remember-me input[type="checkbox"]:checked {
-  background-color: #667eea;
-  border-color: #667eea;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
 }
 
 .remember-me input[type="checkbox"]:checked::after {
@@ -696,7 +718,7 @@ input.filled~label {
 
 .auth-footer {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
   color: #718096;
 }
 
@@ -708,21 +730,23 @@ input.filled~label {
 
 /* 模态框样式 */
 .modal-mask {
-
   position: fixed;
+  top:-30vh;
   z-index: 9998;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 160vh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: opacity 0.3s ease;
+  backdrop-filter: blur(4px);
 }
 
 .modal-wrapper {
+  position: absolute;
+  top:0;
+  left: 0;
   width: 100%;
   height: 100%;
   max-width: 3500px;
@@ -1044,11 +1068,11 @@ close-btn:hover {
 }
 
 .password-strength {
-    height: 4px;
+    height: 3px;
     background: #e2e8f0;
-    margin-top: 8px;
-    border-radius: 2px;
-    position: relative;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .strength-bar {
@@ -1063,9 +1087,40 @@ close-btn:hover {
     text-align: right;
 }
 
+/* 移动端适配 */
 @media (max-width: 480px) {
   .auth-card {
     padding: 1.5rem;
+    margin: 0 1rem;
+  }
+
+  input {
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    font-size: 0.9rem;
+  }
+
+  .submit-btn {
+    padding: 0.8rem;
+  }
+
+  .auth-footer {
+    margin-top: 1.25rem;
+  }
+}
+
+/* 横屏模式 */
+@media (max-height: 600px) and (orientation: landscape) {
+  .auth-card {
+    padding: 1.25rem;
+    margin: 0.5rem;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+  }
+
+  .input-group {
+    margin-bottom: 1.25rem;
   }
 }
 </style>

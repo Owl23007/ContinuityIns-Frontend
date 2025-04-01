@@ -176,22 +176,26 @@ onMounted(() => {
 <style scoped>
 /* 基础样式 */
 .auth-container {
-    min-height: 100vh;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 2rem;
+    background: rgba(255, 255, 255, 0);
+    padding: clamp(1rem, 3vw, 2rem);
 }
 
 .auth-card {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.98);
+    padding: clamp(2rem, 5vw, 2.5rem);
+    border-radius: min(24px, 5vw);
+    box-shadow: 
+        0 10px 30px -5px rgba(0, 0, 0, 0.15),
+        0 2px 8px -2px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(12px);
     width: 100%;
-    max-width: 450px;
-    transform: translateY(-80px);
+    max-width: 420px;
+    transform: translateY(0);
+    transition: all 0.3s ease;
 }
 
 .header {
@@ -216,21 +220,23 @@ h2 {
 /* 输入组样式 */
 .input-group {
     position: relative;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
 }
 
 input {
     width: 100%;
-    padding: 1rem 1rem 1rem 2.5rem;
+    padding: 0.9rem 1rem 0.9rem 2.5rem;
     border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background-color: rgba(248, 250, 252, 0.8);
 }
 
 input:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background-color: #ffffff;
 }
 
 input.filled {
@@ -253,7 +259,7 @@ input.filled~label {
     font-size: 0.8rem;
     background: white;
     padding: 0 0.5rem;
-    color: #667eea;
+    color: #3b82f6;
 }
 
 .icon {
@@ -275,11 +281,11 @@ input.filled~label {
 
 /* 密码强度条 */
 .password-strength {
-    height: 4px;
+    height: 3px;
     background: #e2e8f0;
-    margin-top: 8px;
-    border-radius: 2px;
-    position: relative;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .strength-bar {
@@ -297,18 +303,28 @@ input.filled~label {
 /* 按钮样式 */
 .submit-btn {
     width: 100%;
-    padding: 1rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 0.9rem;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.3s;
+    transition: all 0.2s ease;
+    margin-top: 0.5rem;
 }
 
-.submit-btn.processing {
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }
@@ -332,7 +348,7 @@ input.filled~label {
 /* 全局消息提示 */
 .global-message {
     position: fixed;
-    top: 80px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     padding: 1rem 2rem;
@@ -340,14 +356,16 @@ input.filled~label {
     color: white;
     font-weight: 500;
     z-index: 9999;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .global-message.success {
-    background: #48bb78;
+    background: rgba(72, 187, 120, 0.9);
 }
 
 .global-message.error {
-    background: #f56565;
+    background: rgba(245, 101, 101, 0.9);
 }
 
 /* 过渡动画 */
@@ -360,5 +378,61 @@ input.filled~label {
 .slide-down-leave-to {
     opacity: 0;
     transform: translateY(-20px);
+}
+
+/* 移动端适配 */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 1.5rem;
+        margin: 0 1rem;
+    }
+
+    input {
+        padding: 0.8rem 1rem 0.8rem 2.5rem;
+        font-size: 0.9rem;
+    }
+
+    .submit-btn {
+        padding: 0.8rem;
+    }
+}
+
+/* 横屏模式 */
+@media (max-height: 600px) and (orientation: landscape) {
+    .auth-card {
+        padding: 1.25rem;
+        margin: 0.5rem;
+    }
+
+    .header {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group {
+        margin-bottom: 1.25rem;
+    }
+}
+
+/* 模态框样式 */
+.modal-wrapper {
+    width: 100%;
+    height: 100%;
+    max-width: 3500px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

@@ -87,7 +87,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import UserDropdown from '@/components/layout/UserDropdown.vue'
-import logoPic from '@/assets/image/logo.png'
+import logoPic from '@/assets/svg/logo.svg'
 
 const authStore = useAuthStore()
 const router = useRouter()

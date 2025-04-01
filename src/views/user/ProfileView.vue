@@ -24,7 +24,7 @@
               <i class="fas fa-user"></i>
               <span><strong>用户名：</strong>{{ user.username }}</span>
             </div>
-            <div class="info-item">
+            <div class="info-item" v-if="isOwnProfile">
               <i class="fas fa-envelope"></i>
               <span><strong>邮箱：</strong>{{ user.email }}</span>
             </div>
@@ -35,8 +35,9 @@
           </div>
         </div>
 
-        <!-- 使用更新后的设置按钮组件 -->
+        <!-- 仅在查看自己的主页时显示设置按钮 -->
         <profile-action-buttons 
+          v-if="isOwnProfile"
           :disabled="isUpdating || isDeleting"
           @edit-profile="openModal('profile')" 
           @change-background="openModal('background')"
@@ -91,8 +92,9 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { getUserById_get } from '@/api/user'
 import defaultAvatar from '@/assets/image/default_avatar.png'
 import defaultBackground from '@/assets/image/default_cover.jpg'
 
@@ -105,13 +107,14 @@ import AccountDeleteConfirm from '@/views/user/components/AccountDeleteConfirm.v
 import NotificationSystem from '@/components/common/NotificationSystem.vue'
 import ProfileActionButtons from '@/views/user/components/ProfileActionButtons.vue'
 
-const authStore = useAuthStore()
+const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 const notificationSystem = ref(null)
 
 // State variables
 const loading = ref(true)
-const user = computed(() => authStore.currentUser)
+const profileUser = ref(null)
 const activeModal = ref(null)
 const isUpdating = ref(false)
 const isDeleting = ref(false)
@@ -121,11 +124,44 @@ const formData = reactive({
   signature: ''
 })
 
+// 是否为当前用户的个人页面
+const isOwnProfile = computed(() => {
+  return !route.params.id || authStore.currentUser?.id === Number(route.params.id)
+})
+
+// 获取要显示的用户信息
+const user = computed(() => {
+  return isOwnProfile.value ? authStore.currentUser : profileUser.value
+})
+
+// 获取指定用户信息
+const fetchUserProfile = async (userId) => {
+  try {
+    loading.value = true
+    const response = await getUserById_get(authStore.token, userId)
+    if (response.code === 0) {
+      profileUser.value = response.data
+      updateUserDataFromStore()
+    } else {
+      throw new Error(response.message || '获取用户信息失败')
+    }
+  } catch (error) {
+    showNotification('获取用户信息失败: ' + error.message, 'error')
+    console.error('获取用户信息失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
 // Initialize
 onMounted(async () => {
   try {
     loading.value = true
-    await authStore.fetchUserInfo()
+    if (isOwnProfile.value) {
+      await authStore.fetchUserInfo()
+    } else {
+      await fetchUserProfile(route.params.id)
+    }
     updateUserDataFromStore()
   } catch (error) {
     showNotification('获取用户信息失败', 'error')
@@ -135,14 +171,16 @@ onMounted(async () => {
   }
 })
 
-// Watch for user data changes
-watch(() => user.value, (newUser) => {
-  if (newUser) {
-    updateUserDataFromStore()
+// Watch for route param changes
+watch(() => route.params.id, async (newId) => {
+  if (newId && !isOwnProfile.value) {
+    await fetchUserProfile(newId)
+  } else if (!newId) {
+    await authStore.fetchUserInfo()
   }
-}, { deep: true })
+}, { immediate: true })
 
-// Update local state from store
+// Update local state from store or profile
 function updateUserDataFromStore() {
   if (user.value) {
     formData.nickname = user.value.nickname || ''
@@ -155,7 +193,11 @@ function updateUserDataFromStore() {
 async function reloadUserInfo() {
   loading.value = true
   try {
-    await authStore.fetchUserInfo()
+    if (isOwnProfile.value) {
+      await authStore.fetchUserInfo()
+    } else if (route.params.id) {
+      await fetchUserProfile(route.params.id)
+    }
     updateUserDataFromStore()
   } catch (error) {
     showNotification('获取用户信息失败', 'error')

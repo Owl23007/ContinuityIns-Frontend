@@ -58,6 +58,9 @@ export const deleteAccount_post = (token, password) => {
 export const getUserInfo_get = (token) =>
   request('GET', '/user/userinfo', {}, token);
 
+export const getUserById_get = (token, userId) =>
+  request('GET', `/user/${userId}`, {}, token);
+
 const updateMedia = (endpoint, token, url) =>
   request('PATCH', endpoint, { url }, token);
 

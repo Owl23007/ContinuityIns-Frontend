@@ -39,35 +39,27 @@ const router = createRouter({
   ]
 })
 
-// Helper function to check authentication status using localStorage directly
-// This avoids circular dependencies with the auth store
 function hasValidToken() {
   return !!(localStorage.getItem('token') || sessionStorage.getItem('token'))
 }
 
 router.beforeEach(async (to, from, next) => {
-  // Update title
   document.title = to.meta.title ? `${to.meta.title} - 存续院` : '存续院'
   
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  
-  // If route doesn't require auth, proceed
   if (!requiresAuth) {
     return next()
   }
-  
-  // If route requires auth, check token
-  if (hasValidToken()) {
-    // Dynamically import auth store only when needed
 
+  if (hasValidToken()) {
+  
     const authStore = useAuthStore()
     
-    // Initialize auth if not already authenticated
     if (!authStore.isAuthenticated) {
       try {
         await authStore.initializeAuth()
         
-        // If authentication failed, redirect to login
+      
         if (!authStore.isAuthenticated) {
           return next({ 
             path: '/auth',
@@ -83,10 +75,9 @@ router.beforeEach(async (to, from, next) => {
       }
     }
     
-    // User authenticated, proceed to route
     return next()
   } else {
-    // No token, redirect to login
+   
     return next({ 
       path: '/auth',
       query: { redirect: to.fullPath }

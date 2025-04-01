@@ -10,6 +10,17 @@ export default [
     }
   },
   {
+    path: '/user/:id',
+    name: 'userProfile',
+    component: () => import('@/views/user/ProfileView.vue'),
+    props: true,
+    meta: {
+      title: '用户主页',
+      requiresAuth: false,
+      layout: 'DefaultLayout'
+    }
+  },
+  {
     path: '/submit',
     name: 'submitContent',
     component: () => import('@/views/content/SubmitView.vue'),

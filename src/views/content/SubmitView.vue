@@ -1,7 +1,9 @@
 <template>
   <div class="submit-container">
     <div class="editor-header">
-      <h1>创建文章</h1>
+      <div class="header-left">
+        <h1>{{ isEditing ? '编辑文章' : '创建文章' }}</h1>
+      </div>
       <div class="header-actions">
         <button class="draft-btn" @click="saveDraft" :disabled="isSubmitting">
           保存草稿
@@ -55,22 +57,84 @@
 
       <!-- Markdown 编辑器集成 -->
       <div class="markdown-editor">
-        <MdEditor
-          v-model="articleData.content"
-          :preview="true"
-          :toolbars="[
-            'bold', 'italic', 'strikethrough', 'sub', 'sup', 
-            '-',
-            'quote', 'unordered-list', 'ordered-list', 'task',
-            '-',
-            'link', 'image', 'code', 'table',
-            '-',
-            'preview', 'fullscreen'
-          ]"
-          @onChange="handleEditorChange"
-          placeholder="开始创作..."
-          class="md-editor"
-        />
+        <div class="editor-container">
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <button 
+                :class="['mode-btn', { active: !isMarkdownMode }]" 
+                @click="isMarkdownMode = false"
+                title="纯文本模式"
+              >
+                Aa
+              </button>
+              <button 
+                :class="['mode-btn', { active: isMarkdownMode }]" 
+                @click="isMarkdownMode = true"
+                title="Markdown模式"
+              >
+                Md
+              </button>
+            </div>
+            
+            <span class="divider" v-if="isMarkdownMode"></span>
+            
+            <div class="toolbar-group" v-if="isMarkdownMode">
+              <button @click="insertMd('**', '**')" title="粗体">B</button>
+              <button @click="insertMd('*', '*')" title="斜体">I</button>
+              <button @click="insertMd('~~', '~~')" title="删除线">S</button>
+              <span class="divider"></span>
+              <button @click="insertMd('\n> ', '')" title="引用">"</button>
+              <button @click="insertList('- ')" title="无序列表">•</button>
+              <button @click="insertList('1. ')" title="有序列表">1.</button>
+              <span class="divider"></span>
+              <button @click="insertMd('[', ']()')" title="链接">🔗</button>
+              <button @click="insertMd('![', ']()')" title="图片">🖼</button>
+              <button @click="insertMd('```\n', '\n```')" title="代码块">{}</button>
+              <button @click="insertMd('|  |  |\n|--|--|\n|  |  |', '')" title="表格">⊞</button>
+            </div>
+
+            <div class="toolbar-group toolbar-right" v-if="isMarkdownMode">
+              <button 
+                :class="['preview-btn', { active: showPreview }]" 
+                @click="showPreview = !showPreview"
+                title="显示/隐藏预览"
+              >
+                👁
+              </button>
+              <button 
+                :class="['sync-btn', { active: syncScroll }]" 
+                @click="syncScroll = !syncScroll"
+                title="同步滚动"
+              >
+                ⇅
+              </button>
+            </div>
+          </div>
+          <div 
+            class="edit-preview-container" 
+            :class="{ 
+              'plain-text': !isMarkdownMode,
+              'hide-preview': !showPreview && isMarkdownMode
+            }"
+          >
+            <textarea
+              ref="editor"
+              v-model="articleData.content"
+              class="markdown-input"
+              :class="{ 'plain-text': !isMarkdownMode }"
+              :placeholder="isMarkdownMode ? '开始创作(Markdown模式)...' : '开始创作(纯文本模式)...'"
+              @input="handleEditorChange"
+              @scroll="handleEditorScroll"
+            ></textarea>
+            <div 
+              v-if="isMarkdownMode && showPreview" 
+              ref="preview"
+              class="preview markdown-body" 
+              v-html="renderedContent"
+              @scroll="handlePreviewScroll"
+            ></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -82,31 +146,67 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, watch, watchEffect } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { uploadArticle_post } from '@/api/article'
+import { getArticleById_get, updateArticle_put, createArticle_post } from '@/api/article'
 import { uploadFile } from '@/utils/upload'
 import { ArticleStatus } from '@/pojo/article'
-import { MdEditor } from 'md-editor-v3'
-import 'md-editor-v3/lib/style.css'
+import { renderMarkdown } from '@/utils/markdown'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const fileInput = ref(null)
 const isSubmitting = ref(false)
 const error = ref('')
+const isMarkdownMode = ref(true)
+const showPreview = ref(true)
+const syncScroll = ref(true)
+const editor = ref(null)
+const preview = ref(null)
+const isEditorScrolling = ref(false)
+const isPreviewScrolling = ref(false)
+const loading = ref(false)
+
+const isEditing = computed(() => Boolean(route.params.id))
 
 const articleData = reactive({
   title: '',
-  content: '',
+  content: '', 
   coverImg: '',
   status: ArticleStatus.DRAFT
 })
 
+// 初始化文章数据
+const initArticle = async () => {
+  if (!isEditing.value) return
+  
+  loading.value = true
+  try {
+    const response = await getArticleById_get(authStore.token, route.params.id)
+    const article = response.data
+    articleData.title = article.title
+    articleData.content = article.content
+    articleData.coverImg = article.coverImg
+    articleData.status = article.status
+  } catch (err) {
+    error.value = err.message || '获取文章失败'
+    router.push('/article')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听编辑状态更新页面标题
+watchEffect(() => {
+  document.title = `${isEditing.value ? '编辑' : '创建'}文章 - 存续院`;
+});
+
 // 处理编辑器内容变化
-const handleEditorChange = (content) => {
-  articleData.content = content
+const handleEditorChange = (event) => {
+  const newContent = event?.target?.value ?? event
+  articleData.content = String(newContent || '')
 }
 
 // 触发文件选择
@@ -162,19 +262,123 @@ const submitArticle = async (status) => {
   error.value = ''
 
   try {
-    await uploadArticle_post(
-      authStore.token,
-      articleData.title,
-      articleData.content,
-      articleData.coverImg,
-      status
-    )
-    router.push('/article-list')
+    const content = isMarkdownMode.value 
+      ? articleData.content 
+      : articleData.content.split('\n').join('<br>')
+      
+    if (isEditing.value) {
+      await updateArticle_put(
+        authStore.token,
+        route.params.id,
+        {
+          title: articleData.title,
+          content,
+          coverImg: articleData.coverImg,
+          status
+        }
+      )
+    } else {
+      await createArticle_post(
+        authStore.token,
+        {
+          title: articleData.title,
+          content,
+          coverImg: articleData.coverImg,
+          status
+        }
+      )
+    }
+    router.push('/article')
   } catch (err) {
-    error.value = err.message || '发布失败，请重试'
+    error.value = err.message || '保存失败，请重试'
   } finally {
     isSubmitting.value = false
   }
+}
+
+// 监听路由参数变化重新加载文章
+watch(() => route.params.id, initArticle, { immediate: true })
+
+// 处理编辑器滚动
+const handleEditorScroll = (e) => {
+  if (!syncScroll.value || !showPreview.value || isPreviewScrolling.value) return
+  
+  isEditorScrolling.value = true
+  const percentage = e.target.scrollTop / (e.target.scrollHeight - e.target.clientHeight)
+  const previewEl = preview.value
+  if (previewEl) {
+    previewEl.scrollTop = percentage * (previewEl.scrollHeight - previewEl.clientHeight)
+  }
+  setTimeout(() => {
+    isEditorScrolling.value = false
+  }, 100)
+}
+
+// 处理预览滚动
+const handlePreviewScroll = (e) => {
+  if (!syncScroll.value || isEditorScrolling.value) return
+  
+  isPreviewScrolling.value = true
+  const percentage = e.target.scrollTop / (e.target.scrollHeight - e.target.clientHeight)
+  const editorEl = editor.value
+  if (editorEl) {
+    editorEl.scrollTop = percentage * (editorEl.scrollHeight - editorEl.clientHeight)
+  }
+  setTimeout(() => {
+    isPreviewScrolling.value = false
+  }, 100)
+}
+
+// 计算属性：实时渲染预览
+const renderedContent = computed(() => {
+  if (!articleData.content) return ''
+  if (!isMarkdownMode.value) {
+    // 纯文本模式下直接显示内容，保留换行符
+    return articleData.content
+  }
+  return renderMarkdown(String(articleData.content))
+})
+
+// Markdown 编辑器功能
+function insertMd(before, after) {
+  if (!isMarkdownMode.value) return
+  const textarea = document.querySelector('.markdown-input')
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const text = String(articleData.content || '')
+  const selectedText = text.substring(start, end)
+  
+  articleData.content = text.substring(0, start) + 
+                       before + selectedText + after + 
+                       text.substring(end)
+  
+  // 保持选中状态
+  setTimeout(() => {
+    textarea.focus()
+    textarea.setSelectionRange(
+      start + before.length,
+      end + before.length
+    )
+  })
+}
+
+function insertList(prefix) {
+  if (!isMarkdownMode.value) return
+  const textarea = document.querySelector('.markdown-input')
+  const start = textarea.selectionStart
+  const text = String(articleData.content || '')
+  const lineStart = Math.max(text.lastIndexOf('\n', start - 1), -1) + 1
+  
+  articleData.content = text.substring(0, lineStart) + 
+                       prefix + 
+                       text.substring(lineStart)
+  
+  // 将光标移到行末
+  setTimeout(() => {
+    textarea.focus()
+    const newPos = lineStart + prefix.length
+    textarea.setSelectionRange(newPos, newPos)
+  })
 }
 </script>
 
@@ -184,6 +388,7 @@ const submitArticle = async (status) => {
   width: 100%;
   margin: 0 auto;
   padding: 2rem;
+  background: var(--background-color);
 }
 
 .editor-header {
@@ -191,6 +396,17 @@ const submitArticle = async (status) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding: 1rem;
+  background: var(--surface-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header-left h1 {
+  font-size: 1.75rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin: 0;
 }
 
 .header-actions {
@@ -199,16 +415,20 @@ const submitArticle = async (status) => {
 }
 
 .draft-btn, .publish-btn {
-  padding: 0.5rem 1.5rem;
+  padding: 0.625rem 1.5rem;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .draft-btn {
   background: var(--surface-color);
-  border: 1px solid var(--border-color);
+  border: 1.5px solid var(--border-color);
   color: var(--text-secondary);
 }
 
@@ -220,10 +440,21 @@ const submitArticle = async (status) => {
 
 .draft-btn:hover {
   background: var(--hover-bg);
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
 }
 
 .publish-btn:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.draft-btn:disabled, .publish-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .input-group {
@@ -233,18 +464,25 @@ const submitArticle = async (status) => {
 
 .title-input {
   width: 100%;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   font-size: 1.5rem;
   border: none;
-  border-bottom: 2px solid var(--border-color);
-  background: transparent;
+  border-radius: 8px;
+  background: var(--surface-color);
   color: var(--text-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.title-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--secondary-color);
 }
 
 .char-count {
   position: absolute;
-  right: 0;
-  bottom: -1.5rem;
+  right: 0.5rem;
+  bottom: -1.75rem;
   font-size: 0.875rem;
   color: var(--text-secondary);
 }
@@ -315,63 +553,189 @@ const submitArticle = async (status) => {
   margin-bottom: 2rem;
 }
 
-.md-editor {
-  min-height: 500px;
-  border-radius: 8px;
+.editor-container {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
   overflow: hidden;
+  background: var(--surface-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.md-editor :deep(.md-editor-toolbar) {
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+.toolbar {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-color);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
-.md-editor :deep(.md-editor-input),
-.md-editor :deep(.md-editor-preview) {
-  min-height: 500px;
+.toolbar-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.toolbar button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+}
+
+.toolbar button:hover {
+  background: var(--hover-bg);
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.toolbar .divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-color);
+  margin: 0 4px;
+}
+
+.mode-btn.active, .preview-btn.active, .sync-btn.active {
+  background: var(--secondary-color);
+  color: white;
+  border-color: var(--secondary-color);
+}
+
+.edit-preview-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 600px;
+  background: var(--background-color);
+}
+
+.edit-preview-container.plain-text,
+.edit-preview-container.hide-preview {
+  grid-template-columns: 1fr;
+}
+
+.markdown-input {
+  padding: 1.5rem;
+  border: none;
+  border-right: 1px solid var(--border-color);
+  resize: none;
   background: var(--background-color);
   color: var(--text-primary);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  line-height: 1.6;
+  font-size: 1rem;
 }
 
-.md-editor :deep(.md-editor-input):focus {
+.markdown-input.plain-text {
+  border-right: none;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.markdown-input:focus {
   outline: none;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .md-editor :deep(.md-editor-toolbar) {
-    background: var(--surface-color);
-    border-color: var(--border-color);
-  }
-  
-  .md-editor :deep(.md-editor-input),
-  .md-editor :deep(.md-editor-preview) {
-    background: var(--background-color);
-    color: var(--text-primary);
-  }
+.preview {
+  padding: 1.5rem;
+  overflow-y: auto;
+  background: var(--background-color);
+  color: var(--text-primary);
+  line-height: 1.6;
 }
 
-/* 响应式设计 */
+.error-message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .submit-container {
     padding: 1rem;
+  }
+
+  .editor-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .header-actions {
+    justify-content: stretch;
+  }
+
+  .draft-btn, .publish-btn {
+    flex: 1;
+    justify-content: center;
   }
 
   .markdown-editor {
     min-height: 400px;
   }
   
-  .md-editor {
-    min-height: 400px;
+  .toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px;
+    gap: 4px;
   }
   
-  .md-editor :deep(.md-editor-input),
-  .md-editor :deep(.md-editor-preview) {
-    min-height: 400px;
+  .toolbar::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .toolbar::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+  }
+  
+  .toolbar button {
+    padding: 6px 8px;
+    min-width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+  
+  .toolbar-group {
+    flex-shrink: 0;
+    gap: 4px;
+  }
+  
+  .edit-preview-container {
+    grid-template-columns: 1fr;
+    height: 500px;
+  }
+  
+  .preview {
+    display: none;
+  }
+  
+  .markdown-input {
+    border-right: none;
+    padding: 1rem;
   }
 
-  .header-actions {
-    flex-direction: column;
+  .title-input {
+    font-size: 1.25rem;
+    padding: 0.875rem 1rem;
   }
 }
 </style>
