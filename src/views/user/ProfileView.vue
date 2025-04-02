@@ -267,6 +267,10 @@ function showNotification(message, type = 'info') {
   background-attachment: fixed;
   transition: background-image 0.5s ease;
   background-color: rgba(var(--primary-color-rgb), 0.05);
+  padding-top: calc(var(--header-height) + 1rem);
+  /* Add padding for header */
+  z-index: 1;
+  /* Ensure base z-index for proper stacking */
 }
 
 .profile-card {
@@ -278,8 +282,9 @@ function showNotification(message, type = 'info') {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  margin-top: 2rem;
   position: relative;
+  z-index: 2;
+  /* Increase z-index to ensure clickability */
 }
 
 .profile-card:hover {
@@ -446,11 +451,15 @@ function showNotification(message, type = 'info') {
 @media (max-width: 768px) {
   .user-profile {
     padding: 1rem;
+    padding-top: calc(var(--header-height) + 0.5rem);
+    /* Adjust top padding for mobile */
   }
 
   .profile-card {
     padding: 1.5rem;
     margin-top: 1rem;
+    z-index: 5;
+    /* Higher z-index for mobile */
   }
 
   .profile-section {
@@ -468,6 +477,12 @@ function showNotification(message, type = 'info') {
 
   .info-item {
     padding: 0.6rem 0.8rem;
+  }
+
+  .profile-actions {
+    position: relative;
+    z-index: 5;
+    /* Increase from 1 to ensure visibility and clickability */
   }
 }
 
@@ -492,6 +507,12 @@ function showNotification(message, type = 'info') {
 
   .info-item {
     justify-content: center;
+  }
+
+  .profile-actions .action-buttons {
+    position: relative;
+    z-index: 5;
+    /* Increase from 1 to ensure visibility and clickability */
   }
 }
 </style>

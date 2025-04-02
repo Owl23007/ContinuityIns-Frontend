@@ -103,8 +103,8 @@
       <!-- 登录后显示用户信息和直接操作按钮 -->
       <div v-if="isLoggedIn" class="mobile-user-card">
         <div class="mobile-user-info">
-          <el-avatar :size="50" :src="authStore.userAvatar">{{ authStore.currentUser?.username?.charAt(0) }}</el-avatar>
-          <span class="mobile-username">{{ authStore.currentUser?.username || '用户' }}</span>
+          <el-avatar :size="50" :src="authStore.user.avatarImage">{{ authStore.user.nickname }}</el-avatar>
+          <span class="mobile-username">{{ authStore.user.nickname + " #" + authStore.user.username || '用户' }}</span>
         </div>
         <div class="mobile-user-actions">
           <router-link to="/profile" class="mobile-action-button" @click="closeMobileMenu">
@@ -512,7 +512,7 @@ const handleLogout = () => {
   display: none;
   /* Initially hidden on all screens */
   cursor: pointer;
-  z-index: 999;
+  z-index: 9999;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -520,6 +520,7 @@ const handleLogout = () => {
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .hamburger-menu:hover {
@@ -597,7 +598,7 @@ const handleLogout = () => {
   opacity: 0;
   visibility: hidden;
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  z-index: 999;
+  z-index: 9997;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   border-radius: 0 0 20px 20px;
   overflow-y: auto;
@@ -869,8 +870,6 @@ const handleLogout = () => {
   .header_style {
     padding: 0 1.5rem;
   }
-
-  .nav_links {}
 
   .nav_links {
     gap: 0.5rem;

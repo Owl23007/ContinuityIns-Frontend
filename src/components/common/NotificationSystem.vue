@@ -1,16 +1,7 @@
 <template>
   <Teleport to="body">
-    <transition-group 
-      name="notification" 
-      tag="div" 
-      class="notification-container"
-    >
-      <div 
-        v-for="notification in notifications" 
-        :key="notification.id" 
-        class="notification" 
-        :class="notification.type"
-      >
+    <transition-group name="notification" tag="div" class="notification-container">
+      <div v-for="notification in notifications" :key="notification.id" class="notification" :class="notification.type">
         <span class="notification-icon">{{ getIcon(notification.type) }}</span>
         <span class="notification-message">{{ notification.message }}</span>
         <button class="notification-close" @click="close(notification.id)">
@@ -30,22 +21,22 @@ let nextId = 1;
 // 显示通知
 function show(message, type = 'info', duration = 3000) {
   const id = nextId++;
-  
+
   const notification = {
     id,
     message,
     type
   };
-  
+
   notifications.value.push(notification);
-  
+
   // 自动关闭
   if (duration > 0) {
     setTimeout(() => {
       close(id);
     }, duration);
   }
-  
+
   return id;
 }
 
@@ -59,7 +50,7 @@ function close(id) {
 
 // 根据类型获取图标
 function getIcon(type) {
-  switch(type) {
+  switch (type) {
     case 'success': return '✓';
     case 'error': return '✗';
     case 'warning': return '⚠';
@@ -78,36 +69,49 @@ defineExpose({
 <style scoped>
 .notification-container {
   position: fixed;
-  top: 80px; /* 改为顶部显示 */
+  top: 80px;
+  /* 改为顶部显示 */
   right: 20px;
-  z-index: 9999;
+  z-index: 9000;
+  /* Slightly lower z-index to prevent overlapping modal elements */
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 400px; /* 增加最大宽度 */
-  width: calc(100% - 40px); /* 响应式宽度 */
+  max-width: 400px;
+  /* 增加最大宽度 */
+  width: calc(100% - 40px);
+  /* 响应式宽度 */
+  pointer-events: none;
+  /* Allow clicking through the container itself */
 }
 
 .notification {
-  padding: 14px 16px; /* 增加内边距 */
-  border-radius: 6px; /* 增加圆角 */
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15); /* 加强阴影效果 */
+  padding: 14px 16px;
+  /* 增加内边距 */
+  border-radius: 6px;
+  /* 增加圆角 */
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  /* 加强阴影效果 */
   display: flex;
   align-items: center;
   position: relative;
   animation: fadeIn 0.3s;
+  pointer-events: auto;
+  /* Re-enable pointer events for each notification */
 }
 
 .notification-icon {
   margin-right: 12px;
   font-weight: bold;
-  font-size: 16px; /* 增加图标大小 */
+  font-size: 16px;
+  /* 增加图标大小 */
 }
 
 .notification-message {
   flex-grow: 1;
   padding-right: 30px;
-  font-size: 14px; /* 设置消息字体大小 */
+  font-size: 14px;
+  /* 设置消息字体大小 */
   line-height: 1.4;
 }
 
@@ -117,7 +121,8 @@ defineExpose({
   right: 12px;
   background: transparent;
   border: none;
-  font-size: 20px; /* 增加关闭按钮大小 */
+  font-size: 20px;
+  /* 增加关闭按钮大小 */
   cursor: pointer;
   opacity: 0.6;
   transition: opacity 0.2s;
@@ -173,6 +178,7 @@ defineExpose({
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -182,18 +188,32 @@ defineExpose({
 /* 添加移动设备的响应式布局 */
 @media (max-width: 768px) {
   .notification-container {
-    bottom: 10px;
+    top: auto;
+    /* Reset top position */
+    bottom: 70px;
+    /* Position more toward bottom on mobile */
     right: 10px;
     width: calc(100% - 20px);
-    max-width: none;
+    max-width: 300px;
+    /* Narrower on mobile */
   }
-  
+
   .notification {
     padding: 12px 14px;
+    font-size: 13px;
   }
-  
+
   .notification-message {
     font-size: 13px;
+  }
+}
+
+/* Even smaller screens */
+@media (max-width: 480px) {
+  .notification-container {
+    bottom: 60px;
+    /* Move up a bit for very small screens */
+    max-width: 280px;
   }
 }
 </style>

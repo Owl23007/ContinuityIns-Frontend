@@ -72,7 +72,7 @@ const userName = computed(() => authStore.currentUser?.username || '用户')
 const userEmail = computed(() => authStore.currentUser?.email || null)
 const userAvatar = computed(() => {
     // 如果头像地址是相对路径（不包含http或https），添加API基础URL
-    const avatar = authStore.userAvatar
+    const avatar = authStore.user.avatarImage
     if (avatar && !avatar.startsWith('http')) {
         return import.meta.env.VITE_API_BASE_URL + avatar
     }
@@ -80,7 +80,7 @@ const userAvatar = computed(() => {
 })
 const userBackground = computed(() => {
     // 同样处理背景图片
-    const background = authStore.currentUser?.background
+    const background = authStore.user.backgroundImage
     if (background && !background.startsWith('http')) {
         return import.meta.env.VITE_API_BASE_URL + background
     }
