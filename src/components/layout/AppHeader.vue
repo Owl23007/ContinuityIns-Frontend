@@ -99,12 +99,107 @@
         <input type="text" placeholder="世界在你脚下..." class="mobile-search-input">
         <button class="search_button">搜索</button>
       </div>
-      <router-link to="/" class="mobile-menu-item" @click="closeMobileMenu">主页</router-link>
-      <router-link to="/article" class="mobile-menu-item" @click="closeMobileMenu">文章</router-link>
-      <router-link to="/chat" class="mobile-menu-item" @click="closeMobileMenu">对话</router-link>
 
-      <router-link to="/auth" class="login-button no-underline">
+      <!-- 登录后显示用户信息和直接操作按钮 -->
+      <div v-if="isLoggedIn" class="mobile-user-card">
+        <div class="mobile-user-info">
+          <el-avatar :size="50" :src="authStore.userAvatar">{{ authStore.currentUser?.username?.charAt(0) }}</el-avatar>
+          <span class="mobile-username">{{ authStore.currentUser?.username || '用户' }}</span>
+        </div>
+        <div class="mobile-user-actions">
+          <router-link to="/profile" class="mobile-action-button" @click="closeMobileMenu">
+            <el-icon>
+              <User />
+            </el-icon>
+            <span>个人信息</span>
+          </router-link>
+          <router-link to="/settings" class="mobile-action-button" @click="closeMobileMenu">
+            <el-icon>
+              <Setting />
+            </el-icon>
+            <span>系统设置</span>
+          </router-link>
+          <div class="mobile-action-button logout-button" @click="handleLogout">
+            <el-icon>
+              <SwitchButton />
+            </el-icon>
+            <span>退出登录</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 未登录时显示登录按钮 -->
+      <router-link v-else to="/auth" class="login-button no-underline" @click="closeMobileMenu">
         <span>登录/注册</span>
+      </router-link>
+
+      <router-link to="/" class="mobile-menu-item" @click="closeMobileMenu">
+        <div class="menu-item-content">
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18V42H39V18L24 6L9 18Z" fill="none" stroke="currentColor" stroke-width="4"
+              stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M19 29V42H29V29H19Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+            <path d="M9 42H39" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+          </svg>
+          <span>主页</span>
+        </div>
+        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </router-link>
+      <router-link to="/article" class="mobile-menu-item" @click="closeMobileMenu">
+        <div class="menu-item-content">
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M39 4H11C9.89543 4 9 4.89543 9 6V42C9 43.1046 9.89543 44 11 44H39C40.1046 44 41 43.1046 41 42V6C41 4.89543 40.1046 4 39 4Z"
+              fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M17 30L31 30" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M17 36H24" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <rect x="17" y="12" width="14" height="10" fill="none" stroke="currentColor" stroke-width="4"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>文章</span>
+        </div>
+        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </router-link>
+      <router-link to="/chat" class="mobile-menu-item" @click="closeMobileMenu">
+        <div class="menu-item-content">
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 8h40v24H13l-9 8V8z" />
+          </svg>
+          <span>对话</span>
+        </div>
+        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </router-link>
+
+      <!-- 投稿按钮 - 仅在登录状态显示 -->
+      <router-link v-if="isLoggedIn" to="/submit" class="mobile-menu-item" @click="closeMobileMenu">
+        <div class="menu-item-content">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>投稿</span>
+        </div>
+        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
       </router-link>
     </div>
   </header>
@@ -116,6 +211,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import UserDropdown from '@/components/layout/UserDropdown.vue'
 import logoPic from '@/assets/svg/logo.svg'
+import { User, Setting, SwitchButton } from '@element-plus/icons-vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -135,6 +231,11 @@ const toggleMobileMenu = () => {
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
   document.body.style.overflow = ''
+}
+
+const handleLogout = () => {
+  authStore.logout()
+  closeMobileMenu()
 }
 </script>
 
@@ -406,120 +507,370 @@ const closeMobileMenu = () => {
   transform: scale(0.95);
 }
 
-/* 移动端特殊样式 */
-.mobile-menu .login-button {
-  width: calc(100% - 2rem);
-  margin: 1.5rem 1rem;
-  padding: 1rem;
-  font-size: 1.1rem;
-  background: linear-gradient(135deg, #00c6fb, #005bea);
-  box-shadow: 0 4px 15px rgba(0, 91, 234, 0.15);
-}
-
+/* 美化移动端汉堡菜单样式 */
 .hamburger-menu {
   display: none;
+  /* Initially hidden on all screens */
   cursor: pointer;
   z-index: 999;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(18, 194, 233, 0.1), rgba(196, 113, 237, 0.1));
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.hamburger-menu:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, rgba(18, 194, 233, 0.2), rgba(196, 113, 237, 0.2));
+  box-shadow: 0 0 15px rgba(18, 194, 233, 0.15);
 }
 
 .hamburger-icon {
-  width: 30px;
+  width: 24px;
   height: 20px;
   position: relative;
-  transition: 0.3s;
+  transition: 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
 }
 
 .hamburger-icon span {
   display: block;
   position: absolute;
-  height: 2px;
+  height: 3px;
   width: 100%;
-  background: var(--text-color);
-  transition: 0.3s;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #12c2e9, #c471ed);
+  transition: 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
 }
 
 .hamburger-icon span:nth-child(1) {
   top: 0;
+  width: 60%;
+  right: 0;
 }
 
 .hamburger-icon span:nth-child(2) {
-  top: 9px;
+  top: 8px;
+  width: 100%;
 }
 
 .hamburger-icon span:nth-child(3) {
-  top: 18px;
+  top: 16px;
+  width: 80%;
+  right: 0;
 }
 
 .hamburger-icon.active span:nth-child(1) {
+  top: 8px;
   transform: rotate(45deg);
-  top: 9px;
+  width: 100%;
+  right: auto;
 }
 
 .hamburger-icon.active span:nth-child(2) {
   opacity: 0;
+  transform: translateX(20px);
 }
 
 .hamburger-icon.active span:nth-child(3) {
+  top: 8px;
   transform: rotate(-45deg);
-  top: 9px;
+  width: 100%;
+  right: auto;
 }
 
+/* 美化移动端菜单 */
 .mobile-menu {
-  height: 470px;
+  height: auto;
+  max-height: 80vh;
   display: none;
   position: fixed;
   top: var(--header-height);
   left: 0;
   right: 0;
-  bottom: 0;
   background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(10px);
-  padding: 2rem;
-  transform: translateX(100%);
-  transition: 0.3s;
+  backdrop-filter: blur(15px);
+  padding: 1.5rem;
+  transform: translateY(-20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   z-index: 999;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  border-radius: 0 0 20px 20px;
   overflow-y: auto;
 }
 
 .mobile-menu.active {
-  transform: translateX(0);
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
 }
 
 .mobile-menu-item {
-  display: block;
-  padding: 1rem;
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
   color: var(--text-color);
   text-decoration: none;
-  border-bottom: 1px solid var(--border-color);
+  border-radius: 12px;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  background: transparent;
 }
 
+.mobile-menu-item:hover {
+  background-color: rgba(18, 194, 233, 0.08);
+  transform: translateX(6px);
+  box-shadow: 0 4px 12px rgba(18, 194, 233, 0.1);
+}
+
+.menu-item-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menu-item-content svg {
+  width: 24px;
+  height: 24px;
+  color: var(--text-color);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-item:hover .menu-item-content svg {
+  color: #12c2e9;
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.menu-item-content span {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-item:hover .menu-item-content span {
+  background: linear-gradient(90deg, #12c2e9, #c471ed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.arrow-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-color);
+  opacity: 0.6;
+  transition: transform 0.3s ease;
+}
+
+.mobile-menu-item:hover .arrow-icon {
+  transform: translateX(4px);
+  opacity: 0.9;
+  color: #c471ed;
+}
+
+/* 美化移动端搜索框 */
 .mobile-search {
   display: flex;
-  margin-top: 2rem;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin: 0.5rem 0 1.5rem;
 }
 
 .mobile-search-input {
   width: 100%;
-  padding: 0.8rem;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  padding: 0.9rem 1.5rem;
+  border: 2px solid transparent;
+  border-radius: 15px;
+  font-size: 1rem;
+  background: rgba(18, 194, 233, 0.05);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
 }
 
+.mobile-search-input:focus {
+  border-color: rgba(18, 194, 233, 0.4);
+  background: white;
+  box-shadow: 0 8px 20px rgba(18, 194, 233, 0.15);
+  outline: none;
+}
+
+.mobile-search-input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: 400;
+}
+
+.mobile-menu .search_button {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #12c2e9, #c471ed);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 4px 15px rgba(18, 194, 233, 0.2);
+}
+
+.mobile-menu .search_button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(18, 194, 233, 0.25);
+}
+
+.mobile-menu .search_button:active {
+  transform: translateY(1px);
+}
+
+/* 美化用户卡片 */
+.mobile-user-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 1.8rem;
+  padding: 1.5rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(18, 194, 233, 0.05), rgba(196, 113, 237, 0.08));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.mobile-user-card:hover {
+  box-shadow: 0 12px 30px rgba(18, 194, 233, 0.1);
+  transform: translateY(-3px);
+}
+
+.mobile-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.mobile-user-info .el-avatar {
+  border: 3px solid rgba(18, 194, 233, 0.2);
+  box-shadow: 0 8px 15px rgba(18, 194, 233, 0.15);
+  transition: all 0.3s ease;
+}
+
+.mobile-user-info:hover .el-avatar {
+  transform: scale(1.05);
+  border-color: rgba(18, 194, 233, 0.5);
+}
+
+.mobile-username {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #12c2e9, #c471ed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.mobile-user-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.mobile-action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.9rem 1.2rem;
+  background: white;
+  color: var(--text-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.mobile-action-button .el-icon {
+  background: linear-gradient(90deg, #12c2e9, #c471ed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.mobile-action-button:hover {
+  background: linear-gradient(135deg, rgba(18, 194, 233, 0.1), rgba(196, 113, 237, 0.1));
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(18, 194, 233, 0.1);
+}
+
+.mobile-action-button:hover .el-icon {
+  transform: scale(1.2);
+}
+
+.logout-button {
+  cursor: pointer;
+  background: rgba(255, 99, 99, 0.05) !important;
+}
+
+.logout-button:hover {
+  background: rgba(255, 99, 99, 0.1) !important;
+  box-shadow: 0 8px 20px rgba(255, 99, 99, 0.1) !important;
+}
+
+.logout-button .el-icon {
+  background: linear-gradient(90deg, #ff6363, #ff8585) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* 修改登录按钮在移动菜单中的样式 */
 .mobile-menu .login-button {
   width: 100%;
-  margin-top: 1rem;
-  text-align: center;
+  margin: 1rem 0;
+  padding: 1rem;
   font-size: 1.1rem;
-  padding: 0.8rem;
+  background: linear-gradient(135deg, #12c2e9, #c471ed);
+  box-shadow: 0 8px 20px rgba(18, 194, 233, 0.15);
+  border-radius: 15px;
+  text-align: center;
+}
+
+.mobile-menu .login-button:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(18, 194, 233, 0.2);
+}
+
+.mobile-menu .login-button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.mobile-menu .login-button span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 1px;
 }
 
 @media (max-width: 1024px) {
   .header_style {
     padding: 0 1.5rem;
   }
+
+  .nav_links {}
 
   .nav_links {
     gap: 0.5rem;
@@ -540,6 +891,10 @@ const closeMobileMenu = () => {
   .nav_search {
     margin-left: 1rem;
     /* 减小搜索框左边距 */
+  }
+
+  .hamburger-icon {
+    display: block;
   }
 
   .search_button {
@@ -600,6 +955,10 @@ const closeMobileMenu = () => {
     padding: 0.5rem 1rem;
   }
 
+  .hamburger-icon {
+    display: block;
+  }
+
   .login-button span {
     font-size: 0.85rem;
     white-space: nowrap;
@@ -624,6 +983,11 @@ const closeMobileMenu = () => {
   }
 
   .hamburger-menu {
+    display: flex;
+    /* 只在移动端显示汉堡菜单 */
+  }
+
+  .hamburger-icon {
     display: block;
   }
 

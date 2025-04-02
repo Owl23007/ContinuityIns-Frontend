@@ -122,18 +122,16 @@ export const useAuthStore = defineStore('auth', {
         if (res.code !== 0) {
           throw new Error(res.message || '登录失败：未知错误')
         }
-
-        // Set token
+ 
         this.setToken({
           token: res.data,
           rememberMe
         })
-
-        // Get user info
+ 
         try {
           await this.fetchUserInfo()
         } catch (fetchError) {
-          // Rollback if user info fetch fails
+    
           this.clearAuth()
           throw new Error('获取用户信息失败: ' + fetchError.message)
         }
