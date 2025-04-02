@@ -1,5 +1,7 @@
 import axios from 'axios';
 import sha256 from 'crypto-js/sha256';
+import { useAuthStore }from '@/stores/auth';
+
 
 // 从.env文件中获取VITE_APP_BASE_API的值
 const baseURL = import.meta.env.VITE_APP_BASE_API;
@@ -96,12 +98,12 @@ export const resetPassword_post = (email, token, password) =>
     token, 
     password: encryptPassword(password)
   });
-
-//修改密码    
+   
 //获取OSS直链
-export const getOssUrl_get = (type, token) => {
+export const getOssUrl_get = (type) => {
   if (!['avatar', 'background', 'article'].includes(type)) {
     throw new Error('不支持的上传类型');
   }
+  const token = useAuthStore().token;
   return request('GET', '/user/oss/policy', { type }, token);
 };

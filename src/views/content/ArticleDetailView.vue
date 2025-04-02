@@ -27,7 +27,7 @@
           <div class="article-info">
             <span class="publish-time">{{ formatDate(article.createTime) }}</span>
             <span class="reading-time" v-if="article.duration">
-              · {{ article.duration }} 分钟阅读
+              · {{ article.duration }} 字
             </span>
           </div>
         </div>
@@ -176,9 +176,21 @@ onMounted(() => {
 
 <style scoped>
 .article-detail {
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .loading-state, .error-state {
@@ -186,17 +198,17 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  min-height: 400px;
   text-align: center;
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 3px solid #eee;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
   border-top-color: var(--primary-color);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -204,80 +216,155 @@ onMounted(() => {
 }
 
 .article-header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   text-align: center;
+  position: relative;
 }
 
 .article-title {
-  font-size: 2.5rem;
-  margin-bottom: 1.5rem;
+  font-size: 2.8rem;
+  margin-bottom: 2rem;
   line-height: 1.3;
   color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .article-meta {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: 2.5rem;
   color: var(--text-secondary);
 }
 
 .author-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
   text-decoration: none;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
+  padding: 0.75rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: var(--surface-color);
 }
 
 .author-info:hover {
-  background-color: var(--hover-bg);
+  background: var(--hover-bg);
+  transform: translateY(-2px);
+}
+
+.author-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
 }
 
 .author-details {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
 .author-name {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .author-signature {
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  max-width: 200px;
+  font-size: 0.9rem;
+  max-width: 240px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .cover-image {
-  margin: 2rem 0;
-  border-radius: 12px;
+  margin: 3rem auto;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  max-width: 1000px;
+  transition: transform 0.3s ease;
+}
+
+.cover-image:hover {
+  transform: scale(1.02);
 }
 
 .cover-image img {
   width: 100%;
-  max-height: 500px;
+  max-height: 600px;
   object-fit: cover;
 }
 
 .article-content {
-  margin: 2rem 0;
+  margin: 3rem auto;
   line-height: 1.8;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+}
+
+.article-content :deep(h1),
+.article-content :deep(h2),
+.article-content :deep(h3) {
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.article-content :deep(h1) {
+  font-size: 2.2rem;
+}
+
+.article-content :deep(h2) {
+  font-size: 1.8rem;
+}
+
+.article-content :deep(h3) {
+  font-size: 1.5rem;
+}
+
+.article-content :deep(p) {
+  margin-bottom: 1.5rem;
+}
+
+.article-content :deep(img) {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 2rem auto;
+  display: block;
+}
+
+.article-content :deep(pre) {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: var(--code-bg);
+  overflow-x: auto;
+}
+
+.article-content :deep(code) {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9em;
+}
+
+.article-content :deep(blockquote) {
+  margin: 2rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid var(--primary-color);
+  background: var(--quote-bg);
+  border-radius: 4px;
 }
 
 .article-footer {
-  margin-top: 3rem;
+  margin-top: 4rem;
   padding-top: 2rem;
   border-top: 1px solid var(--border-color);
 }
@@ -289,48 +376,81 @@ onMounted(() => {
 }
 
 .edit-btn {
-  padding: 0.75rem 2rem;
+  padding: 0.9rem 2.5rem;
   background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .edit-btn:hover {
   opacity: 0.9;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .article-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  background: var(--surface-color);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
 }
 
 .reading-time {
   color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* 响应式布局 */
 @media (max-width: 768px) {
   .article-detail {
-    padding: 1rem;
+    padding: 1.5rem;
   }
 
   .article-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .article-meta {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
+  }
+
+  .author-info {
+    width: 100%;
+    justify-content: center;
   }
 
   .article-content {
-    font-size: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .article-content :deep(h1) {
+    font-size: 1.8rem;
+  }
+
+  .article-content :deep(h2) {
+    font-size: 1.5rem;
+  }
+
+  .article-content :deep(h3) {
+    font-size: 1.3rem;
+  }
+
+  .cover-image {
+    margin: 2rem -1.5rem;
+    border-radius: 0;
+  }
+
+  .edit-btn {
+    width: 100%;
   }
 }
 </style>

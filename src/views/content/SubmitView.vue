@@ -150,7 +150,7 @@ import { ref, reactive, computed, watch, watchEffect } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { getArticleById_get, updateArticle_put, createArticle_post } from '@/api/article'
-import { uploadFile } from '@/utils/upload'
+import { uploadFile } from '@/api/file'
 import { ArticleStatus } from '@/pojo/article'
 import { renderMarkdown } from '@/utils/markdown'
 
@@ -220,13 +220,12 @@ const handleCoverUpload = async (event) => {
   if (!file) return
 
   try {
-    const url = await uploadFile(file, 'article', authStore.token)
+    const { url } = await uploadFile(file)
     articleData.coverImg = url
     error.value = ''
   } catch (err) {
     error.value = err.message || '图片上传失败'
   } finally {
-    // 清空input的value，确保能重复选择同一文件
     event.target.value = ''
   }
 }

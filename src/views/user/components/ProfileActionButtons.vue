@@ -18,13 +18,13 @@
         更换头像
       </button>
       
-      <!--button 
+      <button 
         class="primary-btn" 
         @click="$emit('change-background')"
         :disabled="disabled">
         <i class="fas fa-image"></i>
         更换背景
-      </button-->
+      </button>
       
       <button 
         class="danger-btn" 

@@ -39,20 +39,16 @@ export const useAuthStore = defineStore('auth', {
     },
 
     setToken({ token, rememberMe }) {
-      // Clear old tokens
       localStorage.removeItem('token')
       sessionStorage.removeItem('token')
 
-      // Set new storage
       const storage = rememberMe ? localStorage : sessionStorage
       storage.setItem('token', token)
       storage.setItem('rememberMe', rememberMe)
 
-      // Update state
       this.token = token
       this.rememberMe = rememberMe
 
-      // Clear opposite storage user data
       const oppositeStorage = rememberMe ? sessionStorage : localStorage
       oppositeStorage.removeItem('token')
       oppositeStorage.removeItem('user')

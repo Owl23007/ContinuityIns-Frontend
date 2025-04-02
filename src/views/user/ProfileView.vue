@@ -11,13 +11,9 @@
         <div class="profile-section">
           <!-- 头像显示部分 -->
           <div class="avatar-container">
-            <img 
-              :src="user.avatarImage || defaultAvatar" 
-              alt="用户头像" 
-              class="avatar" 
-              @error="handleAvatarError">
+            <img :src="user.avatarImage || defaultAvatar" alt="用户头像" class="avatar" @error="handleAvatarError">
           </div>
-          
+
           <div class="user-info">
             <h2 class="user-name">{{ user.nickname || user.username }}</h2>
             <div class="info-item">
@@ -36,14 +32,9 @@
         </div>
 
         <!-- 仅在查看自己的主页时显示设置按钮 -->
-        <profile-action-buttons 
-          v-if="isOwnProfile"
-          :disabled="isUpdating || isDeleting"
-          @edit-profile="openModal('profile')" 
-          @change-background="openModal('background')"
-          @delete-account="openModal('logout')" 
-          @change-avatar="openModal('avatar')" 
-        />
+        <profile-action-buttons v-if="isOwnProfile" :disabled="isUpdating || isDeleting"
+          @edit-profile="openModal('profile')" @change-background="openModal('background')"
+          @delete-account="openModal('logout')" @change-avatar="openModal('avatar')" />
       </template>
       <div v-else class="error-container">
         <i class="fas fa-exclamation-circle error-icon"></i>
@@ -61,22 +52,14 @@
 
       <!-- 头像上传模态框 -->
       <modal-dialog v-if="activeModal === 'avatar' && authStore.token" title="更换头像" @close="closeModal">
-        <avatar-uploader 
-          @avatar-updated="handleAvatarUpdated" 
-          @cancel="closeModal" 
-          :is-submitting="isUpdating"
-          :token="authStore.token"
-        />
+        <avatar-uploader @avatar-updated="handleAvatarUpdated" @cancel="closeModal" :is-submitting="isUpdating"
+          :token="authStore.token" />
       </modal-dialog>
 
       <!-- 背景上传模态框 -->
       <modal-dialog v-if="activeModal === 'background' && authStore.token" title="更换背景" @close="closeModal">
-        <background-uploader 
-          @background-updated="handleBackgroundUpdated" 
-          @cancel="closeModal"
-          :is-submitting="isUpdating"
-          :token="authStore.token"
-        />
+        <background-uploader @background-updated="handleBackgroundUpdated" @cancel="closeModal"
+          :is-submitting="isUpdating" :token="authStore.token" />
       </modal-dialog>
 
       <!-- 注销账户模态框 -->
@@ -98,7 +81,6 @@ import { getUserById_get } from '@/api/user'
 import defaultAvatar from '@/assets/image/default_avatar.png'
 import defaultBackground from '@/assets/image/default_cover.jpg'
 
-// Import components
 import ModalDialog from '@/views/user/components/ModalDialog.vue'
 import ProfileForm from '@/views/user/components/ProfileForm.vue'
 import AvatarUploader from '@/views/user/components/AvatarUploader.vue'
@@ -153,7 +135,6 @@ const fetchUserProfile = async (userId) => {
   }
 }
 
-// Initialize
 onMounted(async () => {
   try {
     loading.value = true
@@ -238,13 +219,11 @@ async function handleProfileUpdate(data) {
   }
 }
 
-// Handle avatar update complete
 function handleAvatarUpdated() {
   showNotification('头像更新成功', 'success')
   closeModal()
 }
 
-// Handle background update complete
 function handleBackgroundUpdated(newBackground) {
   backgroundImage.value = newBackground
   showNotification('背景更新成功', 'success')

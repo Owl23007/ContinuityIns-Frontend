@@ -24,13 +24,12 @@
       <image-cropper
         :image-file="selectedFile"
         :aspect-ratio="16/9" 
-        :min-width="50"
-        :min-height="50"
-        :lock-aspect-ratio="false"
+        :min-width="100"
+        :min-height="100"
+        :lock-aspect-ratio="true"
         @crop-complete="handleCropComplete"
         @cancel="resetUpload"
       />
-
     </div>
 
     <div v-if="isUploading" class="uploading-feedback">
@@ -54,7 +53,7 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import ImageCropper from '@/components/common/ImageCropper.vue';
-import { uploadFile, validateFile } from '@/utils/upload';
+import { uploadFile,validateFile } from '@/api/file';
 
 const authStore = useAuthStore();
 const emit = defineEmits(['background-updated', 'cancel']);
@@ -80,7 +79,7 @@ function handleFileSelect(event) {
   const file = event.target.files[0];
   if (file) {
     try {
-      validateFile(file, 'background');  // Added 'background' as type parameter
+      validateFile(file, 'background'); 
       selectedFile.value = file;
       uploadError.value = '';
     } catch (error) {
@@ -104,35 +103,17 @@ async function handleCropComplete(cropResult) {
   isUploading.value = true;
   uploadError.value = '';
   
-  let retryCount = 0;
-  const maxRetries = 3;
-
-  while (retryCount < maxRetries) {
-    try {
-      const accessUrl = await uploadFile(cropResult.file, 'background', props.token);
-      await authStore.updateUserProfile({ backgroundImage: accessUrl });
-      emit('background-updated', accessUrl);
-      return;
-    } catch (error) {
-      console.error('上传背景图片失败:', error);
-      retryCount++;
-      
-      if (error.message.includes('401') || error.message.includes('未登录')) {
-        uploadError.value = '登录已过期，请重新登录';
-        break;
-      }
-      
-      if (error.message.includes('网络连接失败') && retryCount < maxRetries) {
-        uploadError.value = `网络连接失败，正在重试(${retryCount}/${maxRetries})...`;
-        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-        continue;
-      }
-      
-      uploadError.value = error.message || '上传失败，请重试';
-      break;
-    }
+  try {
+    const { url: accessUrl } = await uploadFile(cropResult.file, "background");
+    await authStore.updateUserProfile({ backgroundImage: accessUrl });
+    emit('background-updated');
+    return;
+  } catch (error) {
+    console.error('上传背景图片失败:', error);
+    uploadError.value = error.message || '上传失败，请重试';
+  } finally {
+    isUploading.value = false;
   }
-  isUploading.value = false;
 }
 
 // 重置上传状态
@@ -142,7 +123,6 @@ function resetUpload() {
   if (fileInput.value) {
     fileInput.value.value = '';
   }
-  emit('cancel');
 }
 </script>
 

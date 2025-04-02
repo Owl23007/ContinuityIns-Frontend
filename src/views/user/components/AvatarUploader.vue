@@ -2,7 +2,8 @@
   <div class="avatar-uploader">
     <div v-if="!selectedFile && !isUploading" class="file-upload-area">
       <div class="upload-instructions">
-        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#42b983" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+          fill="none" stroke="#42b983" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="17 8 12 3 7 8"></polyline>
           <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -10,27 +11,13 @@
         <p>点击或拖拽图片到这里上传</p>
         <p class="upload-hint">支持 JPG, PNG 格式图片</p>
       </div>
-      <input 
-        type="file" 
-        ref="fileInput" 
-        accept="image/jpeg,image/png" 
-        @change="handleFileSelect" 
-        class="file-input"
-      />
+      <input type="file" ref="fileInput" accept="image/jpeg,image/png" @change="handleFileSelect" class="file-input" />
     </div>
 
     <!-- 图片剪切区域 -->
     <div v-if="selectedFile && !isUploading" class="cropper-area">
-      <image-cropper
-        :image-file="selectedFile"
-        :aspect-ratio="1"
-        :circular-crop="true"
-        :min-width="100"
-        :min-height="100"
-        :lock-aspect-ratio="true"
-        @crop-complete="handleCropComplete"
-        @cancel="resetUpload"
-      />
+      <image-cropper :image-file="selectedFile" :aspect-ratio="1" :circular-crop="true" :min-width="100"
+        :min-height="100" :lock-aspect-ratio="true" @crop-complete="handleCropComplete" @cancel="resetUpload" />
     </div>
 
     <div v-if="isUploading" class="uploading-feedback">
@@ -39,7 +26,8 @@
     </div>
 
     <div class="upload-error" v-if="uploadError">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="12" y1="8" x2="12" y2="12"></line>
         <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -54,7 +42,7 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import ImageCropper from '@/components/common/ImageCropper.vue';
-import { uploadFile, validateFile } from '@/utils/upload';
+import { uploadFile, validateFile } from '@/api/file';
 
 const authStore = useAuthStore();
 
@@ -104,26 +92,15 @@ async function handleCropComplete(cropResult) {
 
   isUploading.value = true;
   uploadError.value = '';
-  
+
   try {
-    const accessUrl = await uploadFile(cropResult.file, 'avatar', props.token);
-    
-    // 使用专门的avatar更新方法
+    const { url: accessUrl } = await uploadFile(cropResult.file, "avatar");
     await authStore.updateAvatar(accessUrl);
-    
     emit('avatar-updated');
     return;
   } catch (error) {
     console.error('上传头像失败:', error);
-    if (error.message.includes('401') || error.message.includes('未登录')) {
-      uploadError.value = '登录已过期，请重新登录';
-    } else if (error.message.includes('OSS策略数据不完整')) {
-      uploadError.value = '服务器配置错误，请联系管理员';
-    } else if (error.message.includes('网络连接失败')) {
-      uploadError.value = '网络连接失败，请检查网络后重试';
-    } else {
-      uploadError.value = error.message || '上传失败，请重试';
-    }
+    uploadError.value = error.message || '上传失败，请重试';
   } finally {
     isUploading.value = false;
   }
