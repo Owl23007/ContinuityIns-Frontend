@@ -79,15 +79,39 @@
       </div>
       <div v-else>
         <router-link to="/auth" class="login-button no-underline">
-          登录/注册
+          <span>登录/注册</span>
         </router-link>
       </div>
+    </div>
+
+    <!--汉堡菜单按钮-->
+    <div class="hamburger-menu" @click="toggleMobileMenu">
+      <div class="hamburger-icon" :class="{ 'active': isMobileMenuOpen }">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <!--移动端菜单-->
+    <div class="mobile-menu" :class="{ 'active': isMobileMenuOpen }">
+      <div class="mobile-search">
+        <input type="text" placeholder="世界在你脚下..." class="mobile-search-input">
+        <button class="search_button">搜索</button>
+      </div>
+      <router-link to="/" class="mobile-menu-item" @click="closeMobileMenu">主页</router-link>
+      <router-link to="/article" class="mobile-menu-item" @click="closeMobileMenu">文章</router-link>
+      <router-link to="/chat" class="mobile-menu-item" @click="closeMobileMenu">对话</router-link>
+
+      <router-link to="/auth" class="login-button no-underline">
+        <span>登录/注册</span>
+      </router-link>
     </div>
   </header>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import UserDropdown from '@/components/layout/UserDropdown.vue'
@@ -99,6 +123,18 @@ const isLoggedIn = computed(() => authStore.isAuthenticated)
 
 const tohome = () => {
   router.push('/')
+}
+
+const isMobileMenuOpen = ref(false)
+
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+  document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : ''
+}
+
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false
+  document.body.style.overflow = ''
 }
 </script>
 
@@ -113,7 +149,7 @@ const tohome = () => {
   background: rgba(255, 255, 255, var(--header-bg-alpha));
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-color);
-  z-index: 100;
+  z-index: 9998;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -305,17 +341,179 @@ const tohome = () => {
 }
 
 .login-button {
+  position: relative;
   padding: 0.6rem 1.8rem;
-  background: var(--primary-color);
-  color: var(--background-color);
+  background: linear-gradient(135deg, #00c6fb, #005bea);
+  color: white;
   border-radius: 30px;
   font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 91, 234, 0.1);
+}
+
+.login-button span {
+  position: relative;
+  z-index: 2;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: linear-gradient(to right, #ffffff, #e6e6e6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   transition: all 0.3s ease;
 }
 
+.login-button:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #005bea, #00c6fb);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
 .login-button:hover {
-  transform: scale(1.05);
-  opacity: 0.95;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 91, 234, 0.15);
+}
+
+.login-button:hover:before {
+  opacity: 1;
+}
+
+.login-button:hover span {
+  transform: scale(1.02);
+  letter-spacing: 1px;
+}
+
+.login-button:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 10px rgba(0, 91, 234, 0.1);
+}
+
+.login-button:active span {
+  transform: scale(0.95);
+}
+
+/* 移动端特殊样式 */
+.mobile-menu .login-button {
+  width: calc(100% - 2rem);
+  margin: 1.5rem 1rem;
+  padding: 1rem;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, #00c6fb, #005bea);
+  box-shadow: 0 4px 15px rgba(0, 91, 234, 0.15);
+}
+
+.hamburger-menu {
+  display: none;
+  cursor: pointer;
+  z-index: 999;
+}
+
+.hamburger-icon {
+  width: 30px;
+  height: 20px;
+  position: relative;
+  transition: 0.3s;
+}
+
+.hamburger-icon span {
+  display: block;
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  background: var(--text-color);
+  transition: 0.3s;
+}
+
+.hamburger-icon span:nth-child(1) {
+  top: 0;
+}
+
+.hamburger-icon span:nth-child(2) {
+  top: 9px;
+}
+
+.hamburger-icon span:nth-child(3) {
+  top: 18px;
+}
+
+.hamburger-icon.active span:nth-child(1) {
+  transform: rotate(45deg);
+  top: 9px;
+}
+
+.hamburger-icon.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-icon.active span:nth-child(3) {
+  transform: rotate(-45deg);
+  top: 9px;
+}
+
+.mobile-menu {
+  height: 470px;
+  display: none;
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  transform: translateX(100%);
+  transition: 0.3s;
+  z-index: 999;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.mobile-menu.active {
+  transform: translateX(0);
+}
+
+.mobile-menu-item {
+  display: block;
+  padding: 1rem;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mobile-search {
+  display: flex;
+  margin-top: 2rem;
+}
+
+.mobile-search-input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.mobile-menu .login-button {
+  width: 100%;
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 1.1rem;
+  padding: 0.8rem;
 }
 
 @media (max-width: 1024px) {
@@ -324,11 +522,87 @@ const tohome = () => {
   }
 
   .nav_links {
-    gap: 1rem;
+    gap: 0.5rem;
+    /* 减小导航项之间的间距 */
+  }
+
+  .header_button a {
+    padding: 0.6rem 1rem;
+    /* 减小按钮内边距 */
+    font-size: 0.9rem;
+    /* 稍微减小字体大小 */
   }
 
   .search_input {
-    width: 200px;
+    width: 180px;
+  }
+
+  .nav_search {
+    margin-left: 1rem;
+    /* 减小搜索框左边距 */
+  }
+
+  .search_button {
+    padding: 0.6rem 1.2rem;
+    /* 调整搜索按钮内边距 */
+  }
+}
+
+/* 添加平板特定的样式 */
+@media (min-width: 769px) and (max-width: 1240px) {
+  .nav_links {
+    gap: 0.1rem;
+  }
+
+  .header_button a {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    gap: 0.2rem;
+    white-space: nowrap;
+    min-width: auto;
+  }
+
+  .nav_search {
+    margin-left: 0.3rem;
+    gap: 0.3rem;
+  }
+
+  .search_input {
+    width: 110px;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.8rem;
+  }
+
+  .search_button {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .nav_title {
+    white-space: nowrap;
+  }
+
+  .nav_title::after {
+    display: none;
+  }
+
+  .button-with-icon a {
+    padding: 0.5rem 0.8rem;
+  }
+
+  .button-with-icon a p {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .login-button {
+    padding: 0.5rem 1rem;
+  }
+
+  .login-button span {
+    font-size: 0.85rem;
+    white-space: nowrap;
   }
 }
 
@@ -342,7 +616,19 @@ const tohome = () => {
   }
 
   .nav_search {
-    margin-left: auto;
+    display: none;
+  }
+
+  .nav_right {
+    display: none;
+  }
+
+  .hamburger-menu {
+    display: block;
+  }
+
+  .mobile-menu {
+    display: block;
   }
 
   .search_input {
@@ -354,6 +640,15 @@ const tohome = () => {
   .search_button {
     padding: 0.5rem 1.2rem;
     font-size: 14px;
+  }
+
+  .nav_title::after {
+    display: none;
+  }
+
+  .nav_title {
+    font-size: 1.3rem;
+    /* 适当调小字号 */
   }
 }
 </style>
