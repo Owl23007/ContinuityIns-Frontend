@@ -1,48 +1,55 @@
 <template>
-  <div class="user-profile" :style="{ backgroundImage: `url(${backgroundImage})` }">
-    <!-- 主内容区 -->
-    <div class="profile-card">
+  <main class="user-profile" :style="{ backgroundImage: `url(${backgroundImage})` }">
+    <section class="profile-card">
       <h1 class="profile-title">个人主页</h1>
+
+      <!-- 加载中提示 -->
       <div v-if="loading" class="loading-container">
         <div class="spinner"></div>
         <p>加载中...</p>
       </div>
-      <template v-else-if="user">
-        <div class="profile-section">
-          <!-- 头像显示部分 -->
-          <div class="avatar-container">
-            <img :src="user.avatarImage || defaultAvatar" alt="用户头像" class="avatar" @error="handleAvatarError">
-          </div>
 
-          <div class="user-info">
+      <!-- 用户信息内容 -->
+      <template v-else-if="user">
+        <article class="profile-content">
+          <!-- 用户头像 -->
+          <img :src="user.avatarImage || defaultAvatar" alt="用户头像" class="avatar" @error="handleAvatarError">
+
+          <!-- 用户信息 -->
+          <ul class="user-info">
             <h2 class="user-name">{{ user.nickname || user.username }}</h2>
-            <div class="info-item">
+
+            <li class="info-item">
               <i class="fas fa-user"></i>
               <span><strong>用户名：</strong>{{ user.username }}</span>
-            </div>
-            <div class="info-item" v-if="isOwnProfile">
+            </li>
+
+            <li class="info-item" v-if="isOwnProfile">
               <i class="fas fa-envelope"></i>
               <span><strong>邮箱：</strong>{{ user.email }}</span>
-            </div>
-            <div class="info-item">
+            </li>
+
+            <li class="info-item">
               <i class="fas fa-comment"></i>
               <span><strong>签名：</strong>{{ user.signature || '暂无签名' }}</span>
-            </div>
-          </div>
-        </div>
+            </li>
+          </ul>
+        </article>
 
-        <!-- 仅在查看自己的主页时显示设置按钮 -->
+        <!-- 操作按钮 -->
         <profile-action-buttons v-if="isOwnProfile" :disabled="isUpdating || isDeleting"
           @edit-profile="openModal('profile')" @change-background="openModal('background')"
           @delete-account="openModal('logout')" @change-avatar="openModal('avatar')" />
       </template>
+
+      <!-- 错误状态 -->
       <div v-else class="error-container">
         <i class="fas fa-exclamation-circle error-icon"></i>
         <p>获取用户信息失败，请<a @click="reloadUserInfo" href="javascript:void(0)">重试</a></p>
       </div>
-    </div>
+    </section>
 
-    <!-- 模态框容器 -->
+    <!-- 模态框 -->
     <Teleport to="body">
       <!-- 编辑资料模态框 -->
       <modal-dialog v-if="activeModal === 'profile'" title="编辑个人资料" @close="closeModal">
@@ -70,7 +77,7 @@
 
     <!-- 通知消息 -->
     <notification-system ref="notificationSystem" />
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -94,7 +101,6 @@ const router = useRouter()
 const authStore = useAuthStore()
 const notificationSystem = ref(null)
 
-// State variables
 const loading = ref(true)
 const profileUser = ref(null)
 const activeModal = ref(null)
@@ -152,7 +158,7 @@ onMounted(async () => {
   }
 })
 
-// Watch for route param changes
+// 监听路由参数变化
 watch(() => route.params.id, async (newId) => {
   if (newId && !isOwnProfile.value) {
     await fetchUserProfile(newId)
@@ -161,7 +167,7 @@ watch(() => route.params.id, async (newId) => {
   }
 }, { immediate: true })
 
-// Update local state from store or profile
+// 更新本地状态从存储或个人资料
 function updateUserDataFromStore() {
   if (user.value) {
     formData.nickname = user.value.nickname || ''
@@ -170,7 +176,7 @@ function updateUserDataFromStore() {
   }
 }
 
-// Reload user info
+// 重新加载用户信息
 async function reloadUserInfo() {
   loading.value = true
   try {
@@ -187,22 +193,22 @@ async function reloadUserInfo() {
   }
 }
 
-// Handle avatar load error
+//  处理头像加载错误
 function handleAvatarError(e) {
   e.target.src = defaultAvatar
 }
 
-// Open modal
+// 打开模态框
 function openModal(type) {
   activeModal.value = type
 }
 
-// Close modal
+// 关闭模态框
 function closeModal() {
   activeModal.value = null
 }
 
-// Update user profile
+// 处理个人资料更新
 async function handleProfileUpdate(data) {
   if (isUpdating.value) return
 
@@ -230,7 +236,7 @@ function handleBackgroundUpdated(newBackground) {
   closeModal()
 }
 
-// Delete account
+// 处理账户注销
 async function performLogout(password) {
   if (isDeleting.value) return
 
@@ -248,7 +254,7 @@ async function performLogout(password) {
   }
 }
 
-// Show notification
+// 显示通知消息
 function showNotification(message, type = 'info') {
   notificationSystem.value.show(message, type)
 }
@@ -268,23 +274,20 @@ function showNotification(message, type = 'info') {
   transition: background-image 0.5s ease;
   background-color: rgba(var(--primary-color-rgb), 0.05);
   padding-top: calc(var(--header-height) + 1rem);
-  /* Add padding for header */
   z-index: 1;
-  /* Ensure base z-index for proper stacking */
 }
 
 .profile-card {
   background: rgba(255, 255, 255, 0.85);
-  border-radius: 15px;
+  border-radius: 20px;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 2.5rem;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   position: relative;
   z-index: 2;
-  /* Increase z-index to ensure clickability */
 }
 
 .profile-card:hover {
@@ -295,13 +298,14 @@ function showNotification(message, type = 'info') {
 .profile-title {
   color: var(--primary-color);
   font-size: 2rem;
-  border-bottom: 3px solid #42b983;
   padding-bottom: 0.8rem;
   margin-bottom: 2rem;
   font-weight: 700;
   text-align: center;
   letter-spacing: 0.5px;
   position: relative;
+  display: inline-block;
+  width: 100%;
 }
 
 .profile-title::after {
@@ -316,50 +320,16 @@ function showNotification(message, type = 'info') {
   border-radius: 2px;
 }
 
-.loading-container,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 2rem 0;
-  padding: 1.5rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(66, 185, 131, 0.1);
-  border-radius: 50%;
-  border-top-color: #42b983;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 1.5rem;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.profile-section {
-  display: flex;
-  flex-wrap: wrap;
+.profile-content {
+  display: grid;
+  grid-template-columns: auto 1fr;
   gap: 2rem;
   margin: 1.5rem 0;
   align-items: center;
-  justify-content: center;
-  position: relative;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.avatar-container {
-  display: flex;
-  justify-content: center;
-  padding: 0.5rem;
 }
 
 .avatar {
@@ -371,6 +341,7 @@ function showNotification(message, type = 'info') {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   background-color: #f8f8f8;
+  justify-self: center;
 }
 
 .avatar:hover {
@@ -379,14 +350,14 @@ function showNotification(message, type = 'info') {
 }
 
 .user-info {
-  flex-grow: 1;
+  list-style-type: none;
+  padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 280px;
-  padding: 2rem;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 16px;
+  padding: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -419,6 +390,7 @@ function showNotification(message, type = 'info') {
 .info-item:hover {
   background: rgba(255, 255, 255, 0.9);
   transform: translateX(5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .info-item i {
@@ -439,6 +411,32 @@ function showNotification(message, type = 'info') {
   font-weight: 600;
 }
 
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(66, 185, 131, 0.1);
+  border-radius: 50%;
+  border-top-color: #42b983;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .error-container {
   color: #e74c3c;
 }
@@ -448,27 +446,29 @@ function showNotification(message, type = 'info') {
   text-decoration: underline;
 }
 
+/* Responsive styles */
 @media (max-width: 768px) {
   .user-profile {
     padding: 1rem;
     padding-top: calc(var(--header-height) + 0.5rem);
-    /* Adjust top padding for mobile */
   }
 
   .profile-card {
     padding: 1.5rem;
     margin-top: 1rem;
     z-index: 5;
-    /* Higher z-index for mobile */
   }
 
-  .profile-section {
-    padding: 1rem;
+  .profile-content {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+    gap: 1.5rem;
   }
 
   .avatar {
     width: 140px;
     height: 140px;
+    margin: 0 auto;
   }
 
   .user-name {
@@ -476,43 +476,32 @@ function showNotification(message, type = 'info') {
   }
 
   .info-item {
-    padding: 0.6rem 0.8rem;
-  }
-
-  .profile-actions {
-    position: relative;
-    z-index: 5;
-    /* Increase from 1 to ensure visibility and clickability */
+    padding: 0.7rem;
   }
 }
 
 @media (max-width: 480px) {
   .user-profile {
-    padding: 1rem;
+    padding: 0.8rem;
   }
 
-  .profile-section {
-    flex-direction: column;
-    text-align: center;
+  .profile-card {
+    padding: 1.2rem;
+    border-radius: 15px;
   }
 
-  .avatar-container {
-    margin-bottom: 1rem;
+  .profile-content {
+    padding: 1.2rem;
   }
 
   .user-info {
+    padding: 1.5rem;
     align-items: center;
-    width: 100%;
   }
 
   .info-item {
-    justify-content: center;
-  }
-
-  .profile-actions .action-buttons {
-    position: relative;
-    z-index: 5;
-    /* Increase from 1 to ensure visibility and clickability */
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 </style>
