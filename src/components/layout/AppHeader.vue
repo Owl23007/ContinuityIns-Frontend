@@ -6,7 +6,9 @@
         <nav>
           <router-link to="/" class="logo no-underline">
             <img :src="logoPic" alt="logo">
-            <span class="nav_title">存续院</span>
+            <div class="title-container">
+              <span class="nav_title">存续院</span>
+            </div>
           </router-link>
         </nav>
       </div>
@@ -17,8 +19,8 @@
       <div class="header_button">
         <router-link to="/" class="no-underline">
           <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18V42H39V18L24 6L9 18Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-              stroke-linejoin="round" />
+            <path d="M9 18V42H39V18L24 6L9 18Z" fill="none" stroke="currentColor" stroke-width="4"
+              stroke-linecap="round" stroke-linejoin="round" />
             <path d="M19 29V42H29V29H19Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
             <path d="M9 42H39" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
           </svg>
@@ -29,9 +31,11 @@
       <div class="header_button">
         <router-link to="/article" class="no-underline">
           <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M39 4H11C9.89543 4 9 4.89543 9 6V42C9 43.1046 9.89543 44 11 44H39C40.1046 44 41 43.1046 41 42V6C41 4.89543 40.1046 4 39 4Z"
+            <path
+              d="M39 4H11C9.89543 4 9 4.89543 9 6V42C9 43.1046 9.89543 44 11 44H39C40.1046 44 41 43.1046 41 42V6C41 4.89543 40.1046 4 39 4Z"
               fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M17 30L31 30" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M17 30L31 30" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+              stroke-linejoin="round" />
             <path d="M17 36H24" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
             <rect x="17" y="12" width="14" height="10" fill="none" stroke="currentColor" stroke-width="4"
               stroke-linecap="round" stroke-linejoin="round" />
@@ -144,10 +148,58 @@ const tohome = () => {
   transform: scale(1.08) rotate(-5deg);
 }
 
+.title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
 .nav_title {
   font-size: 1.5rem;
+  font-family: 'Montserrat', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-weight: 550;
+  letter-spacing: 0.5px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(90deg, #12c2e9, #c471ed, #f64f59);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: textflow 5s linear infinite;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.nav_title::after {
+  content: 'Contins';
+  font-size: 1.6rem;
   font-weight: 700;
-  color: var(--text-color);
+  font-family: 'Poppins', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  opacity: 0.9;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #007cf0, #00dfd8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: textflow 4s linear infinite;
+}
+
+@keyframes textflow {
+  0% {
+    background-position: 0% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.logo:hover .nav_title,
+.logo:hover .nav_subtitle {
+  animation-play-state: paused;
 }
 
 .nav_links {
@@ -217,16 +269,39 @@ const tohome = () => {
 
 .button-with-icon a {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  /* 改为水平排列 */
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.5rem;
+  gap: 0.5rem;
+  /* 调整间距 */
+  padding: 0.6rem 1.2rem;
   color: var(--text-color);
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #12c2e9, #c471ed);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.button-with-icon:hover svg {
-  transform: translateY(-3px);
+.button-with-icon a p {
+  margin: 0;
+  font-weight: 500;
+  color: white;
+  line-height: 1;
+  /* 调整文字行高 */
+}
+
+.button-with-icon a svg {
+  color: white;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button-with-icon a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(18, 194, 233, 0.2);
+}
+
+.button-with-icon a:hover svg {
+  transform: translateX(-2px);
+  /* 改为水平方向的移动效果 */
 }
 
 .login-button {
