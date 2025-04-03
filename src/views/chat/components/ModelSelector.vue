@@ -1,25 +1,17 @@
 <template>
   <div class="model-selector" ref="modelSelectorRef">
-    <button 
-      type="button" 
-      class="selector-button" 
-      :class="{ active: isOpen }"
-      @click="toggleDropdown"
-    >
+    <button type="button" class="selector-button" :class="{ active: isOpen }" @click="toggleDropdown"
+      ref="selectorButtonRef">
       <span>{{ selectedModelName }}</span>
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 9l6 6 6-6"/>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9l6 6 6-6" />
       </svg>
     </button>
-    
+
     <div class="model-list" :class="{ active: isOpen }">
-      <div 
-        v-for="model in models" 
-        :key="model.id"
-        class="model-option" 
-        :class="{ selected: modelId === model.id }"
-        @click="selectModel(model.id)"
-      >
+      <div v-for="model in models" :key="model.id" class="model-option" :class="{ selected: modelId === model.id }"
+        @click="selectModel(model.id)">
         <div class="model-option-header">
           <span class="model-name">{{ model.name }}</span>
           <div class="model-tags">
@@ -73,6 +65,7 @@ const models = [
 
 const isOpen = ref(false)
 const modelSelectorRef = ref(null)
+const selectorButtonRef = ref(null)
 
 const selectedModelName = computed(() => {
   const model = models.find(m => m.id === props.modelId)
@@ -142,7 +135,8 @@ const selectModel = (id) => {
 .model-selector {
   width: 100%;
   position: relative;
-  z-index: 20; /* 增加z-index确保下拉菜单显示在其他元素之上 */
+  z-index: 20;
+  /* 增加z-index确保下拉菜单显示在其他元素之上 */
 }
 
 .selector-button {
@@ -159,7 +153,8 @@ const selectModel = (id) => {
   align-items: center;
   justify-content: space-between;
   transition: all 0.2s ease;
-  height: 44px; /* 匹配输入框高度 */
+  height: 44px;
+  /* 匹配输入框高度 */
 }
 
 .selector-button:hover {
@@ -182,7 +177,8 @@ const selectModel = (id) => {
   bottom: 100%;
   left: 0;
   width: 300%;
-  max-height: 380px; /* 限制最大高度 */
+  max-height: 380px;
+  /* 限制最大高度 */
   overflow-y: auto;
   background: white;
   border: 1px solid #e2e8f0;
@@ -285,15 +281,33 @@ const selectModel = (id) => {
 /* 响应式调整 */
 @media (max-width: 768px) {
   .model-list {
-    bottom: auto;
-    top: 100%;
-    margin-bottom: 0;
-    margin-top: 4px;
+    bottom: 100%;
+    top: auto;
+    margin-bottom: 4px;
+    margin-top: 0;
     max-height: 320px;
+    width: 100vw;
+    max-width: calc(100vw - 2rem);
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    overflow-y: auto;
+    z-index: 9999;
+    /* 确保在移动设备上显示在最上层 */
   }
-  
+
+  .model-list.active {
+    transform: translateX(-50%) translateY(0);
+  }
+
   .selector-button {
     height: 40px;
+  }
+}
+
+/* 修复特小屏幕手机上的显示问题 */
+@media (max-width: 480px) {
+  .model-list {
+    max-width: calc(100vw - 1.5rem);
   }
 }
 
@@ -304,41 +318,41 @@ const selectModel = (id) => {
     border-color: rgba(51, 65, 85, 0.8);
     color: #e2e8f0;
   }
-  
+
   .selector-button:hover {
     background: rgba(30, 41, 59, 0.95);
     border-color: rgba(71, 85, 105, 0.8);
   }
-  
+
   .model-list {
     background: rgba(30, 41, 59, 0.95);
     border-color: rgba(51, 65, 85, 0.8);
   }
-  
+
   .model-option {
     color: #cbd5e0;
     border-bottom-color: rgba(51, 65, 85, 0.8);
   }
-  
+
   .model-option:hover {
     background: rgba(51, 65, 85, 0.5);
     color: #60a5fa;
   }
-  
+
   .model-option.selected {
     background: rgba(30, 58, 138, 0.3);
     color: #60a5fa;
   }
-  
+
   .model-name {
     color: #e2e8f0;
   }
-  
+
   .model-tag {
     background: rgba(59, 130, 246, 0.2);
     color: #60a5fa;
   }
-  
+
   .model-description {
     color: #94a3b8;
   }
