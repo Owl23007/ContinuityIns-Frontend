@@ -1,12 +1,9 @@
 <template>
   <div class="chat-container">
     <!-- 添加会话列表切换按钮 -->
-    <button 
-      class="toggle-sessions-btn"
-      @click="toggleSessionList"
-      :title="isSessionListOpen ? '收起会话列表' : '展开会话列表'"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="toggle-sessions-btn" @click="toggleSessionList" :title="isSessionListOpen ? '收起会话列表' : '展开会话列表'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" y1="12" x2="21" y2="12"></line>
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -14,31 +11,18 @@
     </button>
 
     <!-- 会话列表组件 -->
-    <chat-session-list 
-      :is-open="isSessionListOpen"
-      @session-switched="handleSessionSwitch"
-    />
+    <chat-session-list :is-open="isSessionListOpen" @session-switched="handleSessionSwitch" />
 
     <div ref="chatContainer" class="messages" :class="{ 'with-session-list': isSessionListOpen }">
-      <chat-message
-        v-for="(msg, index) in messages"
-        :key="index"
-        :role="msg.role"
-        :content="msg.content"
-        :loading="msg.loading"
-        :reasoning="msg.reasoning"
-      />
+      <chat-message v-for="(msg, index) in messages" :key="index" :role="msg.role" :content="msg.content"
+        :loading="msg.loading" :reasoning="msg.reasoning" />
     </div>
 
     <!-- 简化滚动控制按钮 -->
-    <button 
-      v-show="showScrollBottom"
-      class="scroll-btn" 
-      @click="scrollToBottom" 
-      title="滚动到底部"
-      :class="{ 'with-session-list': isSessionListOpen }"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button v-show="showScrollBottom" class="scroll-btn" @click="scrollToBottom" title="滚动到底部"
+      :class="{ 'with-session-list': isSessionListOpen }">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
     </button>
@@ -46,17 +30,10 @@
     <div class="input-section" :class="{ 'with-session-list': isSessionListOpen }">
       <div class="input-container">
         <div class="input-left">
-          <model-selector 
-            v-model:modelId="selectedModel" 
-            class="model-selector"
-          />
+          <model-selector v-model:modelId="selectedModel" class="model-selector" />
         </div>
         <div class="input-right">
-          <chat-input
-            :disabled="isLoading"
-            @submit="handleMessageSubmit"
-            @abort="handleAbort"
-          />
+          <chat-input :disabled="isLoading" @submit="handleMessageSubmit" @abort="handleAbort" />
         </div>
       </div>
     </div>
@@ -135,7 +112,7 @@ const isSessionListOpen = ref(false)
 const checkScrollPosition = () => {
   if (!chatContainer.value) return
   const { scrollTop, scrollHeight, clientHeight } = chatContainer.value
-  
+
   // 当距离底部超过100px时显示滚动按钮
   showScrollBottom.value = (scrollHeight - scrollTop - clientHeight) > 100
 }
@@ -184,7 +161,7 @@ async function autoScroll() {
     const now = Date.now()
     const scrollPosition = chatContainer.value.scrollTop + chatContainer.value.clientHeight
     const isNearBottom = chatContainer.value.scrollHeight - scrollPosition < 100
-    
+
     if (now - lastUserMessageTime.value < 30000 || isNearBottom) {
       chatContainer.value.scrollTo({
         top: chatContainer.value.scrollHeight,
@@ -214,7 +191,7 @@ async function processStream(response, aiIndex) {
       }
 
       buffer += decoder.decode(value, { stream: true })
-      
+
       let boundary
       while ((boundary = buffer.indexOf('\n')) !== -1) {
         const chunk = buffer.slice(0, boundary).trim()
@@ -288,10 +265,10 @@ const handleMessageSubmit = async (messageText) => {
     router.push('/auth?redirect=' + encodeURIComponent(router.currentRoute.value.fullPath))
     return
   }
-  
+
   lastUserMessageTime.value = Date.now()
   let aiIndex = -1
-  
+
   try {
     isLoading.value = true
     controller?.abort()
@@ -303,7 +280,7 @@ const handleMessageSubmit = async (messageText) => {
       content: messageText
     }
     chatStore.addMessage(userMessage)
-    
+
     // 添加 AI 消息占位
     const aiMessage = {
       role: 'assistant',
@@ -319,17 +296,17 @@ const handleMessageSubmit = async (messageText) => {
       })
     })
     aiIndex = messages.value.length - 1
-    
+
     await autoScroll()
 
     const url = import.meta.env.VITE_APP_BASE_API + '/ai/chat'
-    
+
     // 发送完整上下文
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json', 
-        'Authorization': `Duel ${authStore.token}` 
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Duel ${authStore.token}`
       },
       body: JSON.stringify({
         messages: messages.value
@@ -339,7 +316,7 @@ const handleMessageSubmit = async (messageText) => {
       }),
       signal: controller.signal
     })
-    
+
     if (!res.ok) {
       throw new Error('网络响应失败')
     }
@@ -388,7 +365,7 @@ const handleAbort = async () => {
     } finally {
       controller.abort()
       isLoading.value = false
-      
+
       // 确保在中断时清除最后一条消息的加载状态
       const lastMessage = messages.value[messages.value.length - 1]
       if (lastMessage && lastMessage.role === 'assistant' && lastMessage.loading) {
@@ -626,7 +603,7 @@ const scrollToBottom = () => {
   .messages::-webkit-scrollbar-thumb {
     background: rgba(148, 163, 184, 0.2);
   }
-  
+
   .messages::-webkit-scrollbar-thumb:hover {
     background: rgba(148, 163, 184, 0.4);
   }
@@ -634,12 +611,12 @@ const scrollToBottom = () => {
   .input-section {
     border-top-color: rgba(255, 255, 255, 0.1);
   }
-  
+
   .scroll-btn {
     background: rgba(30, 41, 59, 0.8);
     border-color: rgba(51, 65, 85, 0.8);
   }
-  
+
   .scroll-btn:hover {
     background: rgba(30, 41, 59, 0.95);
   }
@@ -648,7 +625,7 @@ const scrollToBottom = () => {
     background: rgba(30, 41, 59, 0.8);
     border-color: rgba(51, 65, 85, 0.8);
   }
-  
+
   .toggle-sessions-btn:hover {
     background: rgba(30, 41, 59, 0.95);
   }
@@ -659,7 +636,8 @@ const scrollToBottom = () => {
   .messages {
     margin-bottom: 120px;
     padding: 0.5rem 0;
-    margin-left: 0 !important; /* 确保移动端没有左边距 */
+    margin-left: 0 !important;
+    /* 确保移动端没有左边距 */
   }
 
   .messages.with-session-list {
@@ -668,17 +646,24 @@ const scrollToBottom = () => {
 
   .input-section {
     padding: 0.75rem 0;
-    width: 100% !important; /* 确保移动端输入框占满宽度 */
+    width: 100% !important;
+    /* 确保移动端输入框占满宽度 */
     margin-left: 0 !important;
+    bottom: 0;
   }
 
   .input-container {
-    padding: 0 0.5rem;
+    padding: 0 0.75rem;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    max-width: 100%;
   }
-  
+
   .input-left {
+    width: 100%;
+  }
+
+  .input-right {
     width: 100%;
   }
 
@@ -690,29 +675,59 @@ const scrollToBottom = () => {
     margin-left: 0 !important;
   }
 
-  .session-list {
-    z-index: 1000; /* 确保在移动端显示在最上层 */
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  .toggle-sessions-btn {
+    top: calc(var(--header-height) + 0.75rem);
+    left: 0.75rem;
+    width: 36px;
+    height: 36px;
+    z-index: 1002;
+    /* 确保按钮在会话列表上层 */
+  }
+}
+
+/* 小屏幕手机适配 */
+@media (max-width: 480px) {
+  .messages {
+    margin-bottom: 110px;
+    padding: 0.5rem 0;
   }
 
-  /* 添加遮罩层 */
-  .session-list::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
+  .input-section {
+    padding: 0.5rem 0;
   }
 
-  .session-list.session-list-open::before {
-    opacity: 1;
-    pointer-events: auto;
+  .input-container {
+    padding: 0 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .toggle-sessions-btn {
+    top: calc(var(--header-height) + 0.5rem);
+    left: 0.5rem;
+    width: 32px;
+    height: 32px;
+  }
+
+  .scroll-btn {
+    right: 0.75rem;
+    bottom: 120px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* 高度较低的设备（如横屏手机） */
+@media (max-height: 500px) {
+  .messages {
+    margin-bottom: 100px;
+  }
+
+  .input-section {
+    padding: 0.5rem 0;
+  }
+
+  .input-container {
+    max-width: 100%;
   }
 }
 </style>

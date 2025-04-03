@@ -1,13 +1,14 @@
 <template>
   <div class="session-list" :class="{ 'session-list-open': isOpen }">
-    <!-- 添加遮罩层 -->
-    <div class="session-list-overlay" @click="handleOverlayClick"></div>
-    
+    <!-- 添加遮罩层，只在isOpen时才显示和捕获事件 -->
+    <div class="session-list-overlay" @click="handleOverlayClick" v-if="isOpen"></div>
+
     <div class="session-list-content">
       <div class="session-header">
         <h3>聊天记录</h3>
         <button class="new-chat-btn" @click="createNewChat" title="新建对话">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
@@ -16,23 +17,15 @@
       </div>
 
       <div class="sessions-container">
-        <div 
-          v-for="session in sessions" 
-          :key="session.id"
-          class="session-item"
-          :class="{ active: currentSessionId === session.id }"
-          @click="switchSession(session.id)"
-        >
+        <div v-for="session in sessions" :key="session.id" class="session-item"
+          :class="{ active: currentSessionId === session.id }" @click="switchSession(session.id)">
           <div class="session-info">
             <span class="session-title">{{ session.title }}</span>
             <span class="session-time">{{ formatTime(session.updatedAt) }}</span>
           </div>
-          <button 
-            class="delete-btn" 
-            @click.stop="deleteSession(session.id)"
-            title="删除对话"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button class="delete-btn" @click.stop="deleteSession(session.id)" title="删除对话">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 6h18"></path>
               <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
               <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -62,7 +55,7 @@ const chatStore = useChatStore()
 const { chatSessions, currentSessionId } = storeToRefs(chatStore)
 
 const sessions = computed(() => {
-  return chatSessions.value.sort((a, b) => 
+  return chatSessions.value.sort((a, b) =>
     new Date(b.updatedAt) - new Date(a.updatedAt)
   )
 })
@@ -121,6 +114,12 @@ function handleOverlayClick() {
   height: 100vh;
   width: 280px;
   z-index: 1000;
+  /* 删除display: none，使用可见性控制替代 */
+  visibility: hidden;
+}
+
+.session-list.session-list-open {
+  visibility: visible;
 }
 
 .session-list-content {
@@ -145,15 +144,10 @@ function handleOverlayClick() {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.4);
-  opacity: 0;
-  pointer-events: none;
   transition: opacity 0.3s ease;
   z-index: 1000;
-}
-
-.session-list.session-list-open .session-list-overlay {
+  /* 确保遮罩层在未打开状态下不会阻止交互 */
   opacity: 1;
-  pointer-events: auto;
 }
 
 .session-header {
