@@ -3,10 +3,13 @@
     <section class="profile-card">
       <h1 class="profile-title">个人主页</h1>
 
-      <!-- 加载中提示 -->
+      <!-- 加载中提示改进 -->
       <div v-if="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>加载中...</p>
+        <div class="loading-ripple">
+          <div></div>
+          <div></div>
+        </div>
+        <p class="loading-text">正在加载用户信息...</p>
       </div>
 
       <!-- 用户信息内容 -->
@@ -47,6 +50,14 @@
         <i class="fas fa-exclamation-circle error-icon"></i>
         <p>获取用户信息失败，请<a @click="reloadUserInfo" href="javascript:void(0)">重试</a></p>
       </div>
+    </section>
+
+    <!-- 添加文章列表部分 -->
+    <section v-if="user" class="articles-section">
+      <div class="tab-header">
+        <h2 class="section-title">{{ isOwnProfile ? '我的文章' : '发布的文章' }}</h2>
+      </div>
+      <profile-articles :user-id="user.id" :is-own-profile="isOwnProfile" />
     </section>
 
     <!-- 模态框 -->
@@ -95,6 +106,7 @@ import BackgroundUploader from '@/views/user/components/BackgroundUploader.vue'
 import AccountDeleteConfirm from '@/views/user/components/AccountDeleteConfirm.vue'
 import NotificationSystem from '@/components/common/NotificationSystem.vue'
 import ProfileActionButtons from '@/views/user/components/ProfileActionButtons.vue'
+import ProfileArticles from './components/ProfileArticles.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -178,16 +190,19 @@ function updateUserDataFromStore() {
 
 // 重新加载用户信息
 async function reloadUserInfo() {
-  loading.value = true
+  if (loading.value) return
+
   try {
+    loading.value = true
     if (isOwnProfile.value) {
       await authStore.fetchUserInfo()
     } else if (route.params.id) {
       await fetchUserProfile(route.params.id)
     }
     updateUserDataFromStore()
+    showNotification('刷新成功', 'success')
   } catch (error) {
-    showNotification('获取用户信息失败', 'error')
+    showNotification('获取用户信息失败，请稍后再试', 'error')
   } finally {
     loading.value = false
   }
@@ -196,6 +211,13 @@ async function reloadUserInfo() {
 //  处理头像加载错误
 function handleAvatarError(e) {
   e.target.src = defaultAvatar
+  showNotification('头像加载失败，已使用默认头像', 'warning')
+}
+
+// 添加背景图加载错误处理
+const handleBackgroundError = () => {
+  backgroundImage.value = defaultBackground
+  showNotification('背景图片加载失败，已使用默认背景', 'warning')
 }
 
 // 打开模态框
@@ -265,34 +287,70 @@ function showNotification(message, type = 'info') {
   max-width: 1000px;
   width: 100%;
   margin: 0 auto;
+  /* 修改边距为居中 */
   min-height: 100vh;
   padding: 2rem;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   position: relative;
   background-attachment: fixed;
   transition: background-image 0.5s ease;
-  background-color: rgba(var(--primary-color-rgb), 0.05);
   padding-top: calc(var(--header-height) + 1rem);
   z-index: 1;
+  /* 移除 overflow: hidden */
+}
+
+.user-profile::before {
+  content: '';
+  position: fixed;
+  /* 改回 fixed */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  /* 添加此行 */
+  height: 100vh;
+  /* 添加此行 */
+  background-image: inherit;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  /* 添加此行 */
+  z-index: -1;
+  /* 移除 filter、transform 和其他模糊相关属性 */
+}
+
+/* 移除之前添加的 isolation 相关样式 */
+.profile-card,
+.articles-section {
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.95);
+  /* 增加不透明度，提高可读性 */
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
+  /* 增加不透明度 */
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 2.5rem;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 2;
+  margin-bottom: 2rem;
+  /* 添加底部间距 */
 }
 
 .profile-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.2);
+  transform: translateY(-8px);
+  box-shadow: 0 15px 45px rgba(31, 38, 135, 0.25);
 }
 
 .profile-title {
@@ -446,11 +504,91 @@ function showNotification(message, type = 'info') {
   text-decoration: underline;
 }
 
-/* Responsive styles */
+/* 新的加载动画样式 */
+.loading-ripple {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.loading-ripple div {
+  position: absolute;
+  border: 4px solid var(--primary-color);
+  opacity: 1;
+  border-radius: 50%;
+  animation: loading-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.loading-ripple div:nth-child(2) {
+  animation-delay: -0.5s;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+@keyframes loading-ripple {
+  0% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  4.9% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  5% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+
+  100% {
+    top: 0px;
+    left: 0px;
+    width: 72px;
+    height: 72px;
+    opacity: 0;
+  }
+}
+
+/* 文章列表部分样式 */
+.articles-section {
+  margin-top: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  /* 增加不透明度 */
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* 在媒体查询中添加以下样式 */
 @media (max-width: 768px) {
   .user-profile {
     padding: 1rem;
     padding-top: calc(var(--header-height) + 0.5rem);
+    background-attachment: scroll;
+    /* 移动端禁用固定背景 */
+  }
+
+  .user-profile::before {
+    background-attachment: scroll;
   }
 
   .profile-card {
@@ -477,6 +615,15 @@ function showNotification(message, type = 'info') {
 
   .info-item {
     padding: 0.7rem;
+  }
+
+  .articles-section {
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
   }
 }
 

@@ -52,7 +52,8 @@
 
 <style scoped>
 .footer {
-  background-color: var(--surface-color);
+  background-color: white;
+  z-index: 10;
   color: var(--text-secondary);
   padding: 3rem 1rem 1rem;
   margin-top: auto;
