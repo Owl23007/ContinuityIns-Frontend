@@ -44,7 +44,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { getMyArticles_get, getUserArticles_get, deleteArticle_delete } from '@/api/article'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import ArticleCard from '@/components/common/ArticleCard.vue'
 
 const props = defineProps({
@@ -91,13 +91,13 @@ const handleDeleteArticle = async (article) => {
 
         await deleteArticle_delete(authStore.token, article.id)
         articles.value = articles.value.filter(a => a.id !== article.id)
-        ElMessageBox.message({
+        ElMessage({
             message: '删除成功',
             type: 'success'
         })
     } catch (error) {
         if (error !== 'cancel') {
-            ElMessageBox.message({
+            ElMessage({
                 message: '删除失败',
                 type: 'error'
             })

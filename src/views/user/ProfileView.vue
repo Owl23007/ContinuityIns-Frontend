@@ -1,7 +1,7 @@
 <template>
   <main class="user-profile" :style="{ backgroundImage: `url(${backgroundImage})` }">
     <section class="profile-card">
-      <h1 class="profile-title">个人主页</h1>
+
 
       <!-- 加载中提示改进 -->
       <div v-if="loading" class="loading-container">
@@ -14,30 +14,8 @@
 
       <!-- 用户信息内容 -->
       <template v-else-if="user">
-        <article class="profile-content">
-          <!-- 用户头像 -->
-          <img :src="user.avatarImage || defaultAvatar" alt="用户头像" class="avatar" @error="handleAvatarError">
-
-          <!-- 用户信息 -->
-          <ul class="user-info">
-            <h2 class="user-name">{{ user.nickname || user.username }}</h2>
-
-            <li class="info-item">
-              <i class="fas fa-user"></i>
-              <span><strong>用户名：</strong>{{ user.username }}</span>
-            </li>
-
-            <li class="info-item" v-if="isOwnProfile">
-              <i class="fas fa-envelope"></i>
-              <span><strong>邮箱：</strong>{{ user.email }}</span>
-            </li>
-
-            <li class="info-item">
-              <i class="fas fa-comment"></i>
-              <span><strong>签名：</strong>{{ user.signature || '暂无签名' }}</span>
-            </li>
-          </ul>
-        </article>
+        <user-info-card :user="user" :is-own-profile="isOwnProfile" :default-avatar="defaultAvatar"
+          @avatar-error="handleAvatarError" />
 
         <!-- 操作按钮 -->
         <profile-action-buttons v-if="isOwnProfile" :disabled="isUpdating || isDeleting"
@@ -107,6 +85,7 @@ import AccountDeleteConfirm from '@/views/user/components/AccountDeleteConfirm.v
 import NotificationSystem from '@/components/common/NotificationSystem.vue'
 import ProfileActionButtons from '@/views/user/components/ProfileActionButtons.vue'
 import ProfileArticles from './components/ProfileArticles.vue'
+import UserInfoCard from './components/UserInfoCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -278,7 +257,11 @@ async function performLogout(password) {
 
 // 显示通知消息
 function showNotification(message, type = 'info') {
-  notificationSystem.value.show(message, type)
+  if (notificationSystem.value) {
+    notificationSystem.value.show(message, type)
+  } else {
+    console.warn('通知系统未初始化:', message)
+  }
 }
 </script>
 
@@ -376,97 +359,6 @@ function showNotification(message, type = 'info') {
   height: 3px;
   background: linear-gradient(90deg, #42b983, #3498db);
   border-radius: 2px;
-}
-
-.profile-content {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 2rem;
-  margin: 1.5rem 0;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.avatar {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #fff;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-  background-color: #f8f8f8;
-  justify-self: center;
-}
-
-.avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-}
-
-.user-info {
-  list-style-type: none;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.user-name {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(120deg, var(--primary-color), #3498db);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 700;
-  text-align: center;
-}
-
-.info-item {
-  margin: 1rem 0;
-  font-size: 1.1rem;
-  line-height: 1.5;
-  display: flex;
-  align-items: center;
-  padding: 0.8rem 1rem;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-.info-item:hover {
-  background: rgba(255, 255, 255, 0.9);
-  transform: translateX(5px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.info-item i {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #42b983, #3498db);
-  border-radius: 8px;
-  color: white;
-  margin-right: 15px;
-}
-
-.info-item strong {
-  color: var(--primary-color);
-  margin-right: 8px;
-  font-weight: 600;
 }
 
 .loading-container,
@@ -597,26 +489,6 @@ function showNotification(message, type = 'info') {
     z-index: 5;
   }
 
-  .profile-content {
-    grid-template-columns: 1fr;
-    padding: 1.5rem;
-    gap: 1.5rem;
-  }
-
-  .avatar {
-    width: 140px;
-    height: 140px;
-    margin: 0 auto;
-  }
-
-  .user-name {
-    font-size: 1.5rem;
-  }
-
-  .info-item {
-    padding: 0.7rem;
-  }
-
   .articles-section {
     padding: 1.5rem;
     margin-top: 1.5rem;
@@ -635,20 +507,6 @@ function showNotification(message, type = 'info') {
   .profile-card {
     padding: 1.2rem;
     border-radius: 15px;
-  }
-
-  .profile-content {
-    padding: 1.2rem;
-  }
-
-  .user-info {
-    padding: 1.5rem;
-    align-items: center;
-  }
-
-  .info-item {
-    width: 100%;
-    justify-content: flex-start;
   }
 }
 </style>

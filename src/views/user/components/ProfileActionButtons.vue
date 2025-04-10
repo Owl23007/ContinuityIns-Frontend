@@ -2,34 +2,22 @@
   <div class="profile-actions">
     <!-- 操作按钮部分 -->
     <div class="action-buttons">
-      <button 
-        class="primary-btn" 
-        @click="$emit('edit-profile')"
-        :disabled="disabled">
+      <button class="primary-btn" @click="$emit('edit-profile')" :disabled="disabled">
         <i class="fas fa-edit"></i>
         编辑资料
       </button>
-      
-      <button 
-        class="primary-btn" 
-        @click="$emit('change-avatar')"
-        :disabled="disabled">
+
+      <button class="primary-btn" @click="$emit('change-avatar')" :disabled="disabled">
         <i class="fas fa-camera"></i>
         更换头像
       </button>
-      
-      <button 
-        class="primary-btn" 
-        @click="$emit('change-background')"
-        :disabled="disabled">
+
+      <button class="primary-btn" @click="$emit('change-background')" :disabled="disabled">
         <i class="fas fa-image"></i>
         更换背景
       </button>
-      
-      <button 
-        class="danger-btn" 
-        @click="$emit('delete-account')"
-        :disabled="disabled">
+
+      <button class="danger-btn" @click="$emit('delete-account')" :disabled="disabled">
         <i class="fas fa-trash-alt"></i>
         注销账户
       </button>
@@ -39,25 +27,15 @@
 
 <script setup>
 import { ref } from 'vue';
-import defaultAvatar from '@/assets/image/default_avatar.png';
 
 const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
-  },
-  avatarSrc: {
-    type: String,
-    default: ''
   }
 });
 
 defineEmits(['edit-profile', 'change-background', 'delete-account', 'change-avatar']);
-
-// 处理头像加载错误
-function handleAvatarError(e) {
-  e.target.src = defaultAvatar;
-}
 </script>
 
 <style scoped>
@@ -95,7 +73,8 @@ function handleAvatarError(e) {
   padding: 0 1rem;
 }
 
-.primary-btn, .danger-btn {
+.primary-btn,
+.danger-btn {
   position: relative;
   padding: 0.9rem 1.8rem;
   border: none;
@@ -124,12 +103,10 @@ function handleAvatarError(e) {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
+  background: linear-gradient(120deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent);
   transition: 0.5s;
 }
 
@@ -159,12 +136,10 @@ function handleAvatarError(e) {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
+  background: linear-gradient(120deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent);
   transition: 0.5s;
 }
 
@@ -181,7 +156,8 @@ function handleAvatarError(e) {
   transform: translateY(-1px);
 }
 
-.primary-btn i, .danger-btn i {
+.primary-btn i,
+.danger-btn i {
   margin-right: 8px;
   font-size: 1.1rem;
 }
@@ -205,7 +181,8 @@ button:disabled::before {
     padding: 0 0.5rem;
   }
 
-  .primary-btn, .danger-btn {
+  .primary-btn,
+  .danger-btn {
     width: 100%;
     padding: 0.8rem 1.5rem;
     font-size: 0.95rem;
@@ -217,8 +194,9 @@ button:disabled::before {
     flex-direction: column;
     width: 100%;
   }
-  
-  .primary-btn, .danger-btn {
+
+  .primary-btn,
+  .danger-btn {
     width: 100%;
   }
 }
