@@ -1,104 +1,81 @@
-import axios from 'axios';
-import { useAuthStore } from '@/stores/auth';
-
-const baseURL = import.meta.env.VITE_APP_BASE_API;
+import axios from 'axios'
 
 // 创建axios实例
 const service = axios.create({
-  baseURL,
-  timeout: 15000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+  baseURL: import.meta.env.VITE_APP_BASE_API,
+  timeout: 10000
+})
 
-// 无需token的请求
-export const publicRequest = async (method, url, data = {}) => {
-  try {
-    const config = {
-      method,
-      url,
-      ...(method.toUpperCase() === 'GET' ? { params: data } : { data })
-    };
-    
-    const response = await service(config);
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-// 需要token的请求
-export const privateRequest = async (method, url, data = {}) => {
-  const authStore = useAuthStore();
-  if (!authStore.token) {
-    throw new Error('未登录或登录已过期');
-  }
-
-  try {
-    const config = {
-      method,
-      url,
-      headers: {
-        Authorization: `Duel ${authStore.token}`
-      },
-      ...(method.toUpperCase() === 'GET' ? { params: data } : { data })
-    };
-    
-    const response = await service(config);
-    return response.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-// 表单数据请求
-export const formRequest = async (method, url, data = {}, needToken = false) => {
-  try {
-    const headers = {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    };
-
-    if (needToken) {
-      const authStore = useAuthStore();
-      if (!authStore.token) {
-        throw new Error('未登录或登录已过期');
-      }
-      headers.Authorization = `Duel ${authStore.token}`;
+// 请求拦截器
+service.interceptors.request.use(
+  config => {
+    // 从存储中获取token
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+    if (token) {
+      config.headers['Authorization'] = `Duel ${token}`
     }
-
-    const config = {
-      method,
-      url,
-      headers,
-      data: new URLSearchParams(data)
-    };
-    
-    const response = await service(config);
-    return response.data;
-  } catch (error) {
-    handleError(error);
+    return config
+  },
+  error => {
+    return Promise.reject(error)
   }
-};
+)
 
-// 错误处理函数
-function handleError(error) {
-  if (error.response) {
-    switch (error.response.status) {
-      case 401:
-        const authStore = useAuthStore();
-        authStore.clearAuth();
-        window.location.href = '/auth';
-        break;
-      case 403:
-        throw new Error('没有权限访问该资源');
-      case 404:
-        throw new Error('请求的资源不存在');
-      default:
-        throw new Error(error.response.data?.message || '请求失败');
+// 响应拦截器
+service.interceptors.response.use(
+  response => {
+    return response.data
+  },
+  error => {
+    if (error.response?.status === 401) {
+      // token过期或无效，清除本地存储并重定向到登录页
+      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
+      window.location.href = '/auth'
     }
+    return Promise.reject(error)
   }
-  throw error;
+)
+
+// 封装GET请求
+export const publicRequest = (method, url, data = null) => {
+  const config = {
+    method,
+    url,
+    [method.toLowerCase() === 'get' ? 'params' : 'data']: data
+  }
+  return service(config)
 }
 
-export default service;
+// 封装需要token的请求
+export const privateRequest = (method, url, data = null) => {
+  const config = {
+    method,
+    url,
+    [method.toLowerCase() === 'get' ? 'params' : 'data']: data
+  }
+  return service(config)
+}
+
+// 封装表单请求
+export const formRequest = (method, url, data = null, requiresAuth = false) => {
+  const config = {
+    method,
+    url,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    [method.toLowerCase() === 'get' ? 'params' : 'data']: new URLSearchParams(data)
+  }
+
+  if (requiresAuth) {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
+  }
+
+  return service(config)
+}
+
+export default service

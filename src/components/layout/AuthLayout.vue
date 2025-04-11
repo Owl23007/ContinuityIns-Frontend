@@ -135,21 +135,23 @@ import logoPic from '@/assets/svg/logo.svg'
   margin-left: clamp(0.8rem, 2.5vw, 1.2rem);
   font-size: clamp(1.4rem, 3.5vw, 2rem);
   font-weight: 800;
-  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 0.5px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.15);
   position: relative;
   transition: all 0.4s ease;
+  filter: brightness(1.2) contrast(1.1);
 }
 
 .logo-container a:hover .site-name {
   transform: translateX(5px);
-  background: linear-gradient(135deg, #ffffff 30%, #e8e8e8 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 70%);
   -webkit-background-clip: text;
   background-clip: text;
+  filter: brightness(1.3) contrast(1.2);
 }
 
 .auth-content {

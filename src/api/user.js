@@ -47,7 +47,9 @@ export const deleteAccount_post = (password) => {
 
 export const getUserInfo_get = () => privateRequest('GET', '/user/userinfo');
 
-export const getUserById_get = (userId) => privateRequest('GET', `/user/${userId}`);
+export const getUserById_get = async (userId) => {
+  return privateRequest('GET', `/user/${userId}`)
+}
 
 export const updateAvatar_patch = (avatarUrl) => 
   formRequest('PATCH', '/user/updateAvatar', { url: avatarUrl }, true);

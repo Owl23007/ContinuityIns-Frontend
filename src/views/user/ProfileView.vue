@@ -117,7 +117,13 @@ const user = computed(() => {
 const fetchUserProfile = async (userId) => {
   try {
     loading.value = true
-    const response = await getUserById_get(authStore.token, userId)
+    // 确保userId是数字
+    const numericUserId = parseInt(userId, 10)
+    if (isNaN(numericUserId)) {
+      throw new Error('无效的用户ID')
+    }
+
+    const response = await getUserById_get(numericUserId)
     if (response.code === 0) {
       profileUser.value = response.data
       updateUserDataFromStore()
@@ -127,6 +133,7 @@ const fetchUserProfile = async (userId) => {
   } catch (error) {
     showNotification('获取用户信息失败: ' + error.message, 'error')
     console.error('获取用户信息失败:', error)
+    router.push('/404') // 添加错误重定向
   } finally {
     loading.value = false
   }
@@ -151,9 +158,18 @@ onMounted(async () => {
 
 // 监听路由参数变化
 watch(() => route.params.id, async (newId) => {
-  if (newId && !isOwnProfile.value) {
-    await fetchUserProfile(newId)
-  } else if (!newId) {
+  if (newId) {
+    // 验证ID是否为有效数字
+    const numericId = parseInt(newId, 10)
+    if (isNaN(numericId)) {
+      router.push('/404')
+      return
+    }
+
+    if (!isOwnProfile.value) {
+      await fetchUserProfile(numericId)
+    }
+  } else if (!newId && authStore.isAuthenticated) {
     await authStore.fetchUserInfo()
   }
 }, { immediate: true })

@@ -32,11 +32,32 @@
                 </div>
             </div>
         </div>
+        <div v-if="isOwnProfile" class="settings-dropdown">
+            <button class="settings-btn" @click.stop="toggleDropdown">
+                设置
+                <i class="fas fa-caret-down" :class="{ 'rotate': isDropdownOpen }"></i>
+            </button>
+
+            <div v-show="isDropdownOpen" class="dropdown-menu" v-click-outside="closeDropdown">
+                <button @click="$emit('edit-profile')" :disabled="isUpdating">
+                    <i class="fas fa-user-edit"></i> 编辑资料
+                </button>
+                <button @click="$emit('change-avatar')" :disabled="isUpdating">
+                    <i class="fas fa-camera"></i> 更换头像
+                </button>
+                <button @click="$emit('change-background')" :disabled="isUpdating">
+                    <i class="fas fa-image"></i> 更换背景
+                </button>
+                <button class="danger" @click="$emit('delete-account')" :disabled="isDeleting">
+                    <i class="fas fa-user-times"></i> 注销账户
+                </button>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { Message, ChatDotRound } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -51,12 +72,45 @@ const props = defineProps({
     defaultAvatar: {
         type: String,
         required: true
+    },
+    isUpdating: {
+        type: Boolean,
+        default: false
+    },
+    isDeleting: {
+        type: Boolean,
+        default: false
     }
 })
 
-defineEmits(['avatar-error'])
+defineEmits(['avatar-error', 'edit-profile', 'change-avatar', 'change-background', 'delete-account'])
 
 const avatarUrl = computed(() => props.user.avatarImage || props.defaultAvatar)
+const isDropdownOpen = ref(false)
+
+// 点击外部关闭指令
+const vClickOutside = {
+    mounted(el, binding) {
+        el.clickOutsideEvent = (event) => {
+            if (!(el === event.target || el.contains(event.target))) {
+                binding.value(event)
+            }
+        }
+        document.addEventListener('click', el.clickOutsideEvent)
+    },
+    unmounted(el) {
+        document.removeEventListener('click', el.clickOutsideEvent)
+    }
+}
+
+const toggleDropdown = () => {
+    isDropdownOpen.value = !isDropdownOpen.value
+}
+
+const closeDropdown = () => {
+    isDropdownOpen.value = false
+}
+
 </script>
 
 <style scoped>
@@ -222,6 +276,71 @@ const avatarUrl = computed(() => props.user.avatarImage || props.defaultAvatar)
     line-height: 1.5;
 }
 
+.settings-dropdown {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.settings-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.settings-btn i {
+    transition: transform 0.3s ease;
+}
+
+.settings-btn i.rotate {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem;
+    min-width: 150px;
+    z-index: 1000;
+}
+
+.dropdown-menu button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-color);
+}
+
+.dropdown-menu button:hover {
+    background: var(--background-hover);
+}
+
+.dropdown-menu button.danger {
+    color: var(--danger-color);
+}
+
+.dropdown-menu button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
     .user-card {
         flex-direction: column;
@@ -248,6 +367,13 @@ const avatarUrl = computed(() => props.user.avatarImage || props.defaultAvatar)
 
     .name {
         font-size: 1.3rem;
+    }
+
+    .settings-dropdown {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-top: 1rem;
     }
 }
 </style>

@@ -1,5 +1,14 @@
 export default [
   {
+    path: '/user/:id(\\d+)?',  // 使用可选的数字ID参数
+    name: 'UserProfile',
+    component: () => import('@/views/user/ProfileView.vue'),
+    meta: {
+      requiresAuth: true,
+      title: '个人主页'
+    }
+  },
+  {
     path: '/profile',
     name: 'userinfoPage',
     component: () => import('@/views/user/ProfileView.vue'),
