@@ -1,20 +1,6 @@
-import axios from "axios";
 import service from './http';
 import { getOssUrl_get } from "@/api/user.js";
 import { useAuthStore } from "@/stores/auth";
-
-const userId = useAuthStore().user.userId;
-
-const ossConfig = {
-  OSSAccessKeyId: "",
-  OSSAccessKeySecret: "",
-  signature: "",
-  expire: "",
-  host: "",
-  dir: "",
-  policy: "",
-  securityToken: "",
-};
 
 export function validateFile(file, type) {
   if (!file.type.match(/^image\/(jpeg|png)$/)) {

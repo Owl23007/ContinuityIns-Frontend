@@ -1,6 +1,5 @@
 import sha256 from 'crypto-js/sha256';
 import { publicRequest, privateRequest, formRequest } from './http';
-import { useAuthStore } from '@/stores/auth';
 
 // 密码加密处理
 const encryptPassword = (password) => sha256(password).toString();

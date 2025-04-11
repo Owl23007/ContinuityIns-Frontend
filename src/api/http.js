@@ -71,7 +71,7 @@ export const formRequest = (method, url, data = null, requiresAuth = false) => {
   if (requiresAuth) {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token')
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
+      config.headers['Authorization'] = `Duel ${token}`
     }
   }
 

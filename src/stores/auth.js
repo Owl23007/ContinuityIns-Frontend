@@ -89,7 +89,7 @@ export const useAuthStore = defineStore('auth', {
     async updateAvatar(avatarUrl) {
       if (!this.token) throw new Error('未登录');
       try {
-        const res = await updateAvatar_patch(this.token, avatarUrl);
+        const res = await updateAvatar_patch(avatarUrl);
         if (res.code === 0) {
           // 更新用户数据，使用新的头像
           this.setUser({ ...this.user, avatar: avatarUrl });
@@ -104,7 +104,7 @@ export const useAuthStore = defineStore('auth', {
     async updateBackground(backgroundUrl) {
       if (!this.token) throw new Error('未登录');
       try {
-        const res = await updateBackground_patch(this.token, backgroundUrl);
+        const res = await updateBackground_patch(backgroundUrl);
         if (res.code === 0) {
           // Update the user data in store with the new background
           this.setUser({ ...this.user, backgroundImage: backgroundUrl });
@@ -200,15 +200,15 @@ export const useAuthStore = defineStore('auth', {
       
       if (token) {
         try {
-          // 先验证token有效性，添加错误处理
-          const validationResult = await validateToken_post(token)
-          if (!validationResult) {
-            throw new Error('Token validation failed')
-          }
-
           // 设置token状态
           this.setToken({ token, rememberMe })
           
+          // 验证token有效性
+          const validationResult = await validateToken_post()
+          if (validationResult.code !== 0) {
+            throw new Error('Token validation failed')
+          }
+
           // 获取用户信息
           await this.fetchUserInfo()
           return true

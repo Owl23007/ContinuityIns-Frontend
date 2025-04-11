@@ -4,7 +4,8 @@
       <div class="modal-header">
         <h2 class="modal-title" :class="{ danger: theme === 'danger' }">{{ title }}</h2>
         <button class="close-button" @click="$emit('close')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -40,7 +41,7 @@ let cropperElement = null;
 onMounted(() => {
   document.addEventListener('mousedown', startCropTracking);
   document.addEventListener('mouseup', endCropTracking);
-  
+
   // 延迟一下，确保模态框内容已渲染
   nextTick(() => {
     // 查找裁剪器元素（带有cropper类的元素）
@@ -99,15 +100,20 @@ function handleBackdropClick(event) {
   padding: 1.5rem;
   max-width: 90%;
   width: 500px;
-  max-height: 90vh;
+  max-height: 85vh;
+  /* 减小最大高度 */
+  margin: 2rem auto;
+  /* 添加上下边距 */
   overflow-y: auto;
   position: relative;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  transform: scale(1);
+  transform: translateY(-2%);
+  /* 略微向上偏移 */
   transition: all 0.3s ease;
 }
 
+/* 调整滚动条样式 */
 .modal-container::-webkit-scrollbar {
   width: 6px;
 }
@@ -200,6 +206,9 @@ function handleBackdropClick(event) {
   .modal-container {
     width: 95%;
     padding: 1.25rem;
+    margin: 1rem auto;
+    /* 移动端减小边距 */
+    max-height: 90vh;
   }
 
   .modal-title {
