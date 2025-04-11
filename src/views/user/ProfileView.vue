@@ -15,12 +15,9 @@
       <!-- 用户信息内容 -->
       <template v-else-if="user">
         <user-info-card :user="user" :is-own-profile="isOwnProfile" :default-avatar="defaultAvatar"
-          @avatar-error="handleAvatarError" />
-
-        <!-- 操作按钮和统计信息 -->
-        <profile-action-buttons v-if="user" :disabled="isUpdating || isDeleting" :is-own-profile="isOwnProfile"
-          :user-id="user.id" @edit-profile="openModal('profile')" @change-background="openModal('background')"
-          @delete-account="openModal('logout')" @change-avatar="openModal('avatar')" />
+          :is-updating="isUpdating" :is-deleting="isDeleting" @avatar-error="handleAvatarError"
+          @edit-profile="openModal('profile')" @change-avatar="openModal('avatar')"
+          @change-background="openModal('background')" @delete-account="openModal('logout')" />
       </template>
 
       <!-- 错误状态 -->
@@ -83,7 +80,6 @@ import AvatarUploader from '@/views/user/components/AvatarUploader.vue'
 import BackgroundUploader from '@/views/user/components/BackgroundUploader.vue'
 import AccountDeleteConfirm from '@/views/user/components/AccountDeleteConfirm.vue'
 import NotificationSystem from '@/components/common/NotificationSystem.vue'
-import ProfileActionButtons from '@/views/user/components/ProfileActionButtons.vue'
 import ProfileArticles from './components/ProfileArticles.vue'
 import UserInfoCard from './components/UserInfoCard.vue'
 
@@ -335,29 +331,20 @@ function showNotification(message, type = 'info') {
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.75);
-  /* 降低不透明度 */
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  /* 更透明的边框 */
-  padding: 2rem;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  z-index: 2;
-  margin-bottom: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 1.5rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  margin-bottom: 1.5rem;
 }
 
 .profile-card:hover {
-  background: rgba(255, 255, 255, 0.85);
-  /* 悬停时稍微不透明一些 */
-  transform: translateY(-8px);
-  box-shadow: 0 15px 45px rgba(31, 38, 135, 0.25);
+  background: rgba(255, 255, 255, 0.95);
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .profile-title {

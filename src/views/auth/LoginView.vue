@@ -8,7 +8,9 @@
 
       <form @submit.prevent="handleSubmit">
         <!-- 用户名输入 -->
-        <base-input v-model="formData.main.identifier" :label="uiState.isLogin ? '用户名/邮箱' : '用户名'" required>
+        <base-input v-model="formData.main.identifier" :label="uiState.isLogin ? '用户名/邮箱' : '用户名'" required
+          :has-error="!!errors.username" :error-message="errors.username"
+          @input="!uiState.isLogin && validateUsername()" @blur="!uiState.isLogin && validateUsername()">
           <template #icon>
             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user"
               role="img" viewBox="0 0 448 512" width="16" height="16">
@@ -39,12 +41,14 @@
         <password-input v-model="formData.main.password" label="密码" required :has-error="!!errors.password"
           :error-message="errors.password" />
 
+        <!-- 密码强度条 -->
+        <PasswordStrength v-if="!uiState.isLogin" :password="formData.main.password" />
+
+
         <!-- 验证码输入框 -->
         <CaptchaInput v-if="!uiState.isLogin" v-model="formData.main.captcha" :image-url="uiState.captchaUrl"
           :has-error="!!errors.captcha" :error-message="errors.captcha" @refresh="refreshCaptcha" />
 
-        <!-- 密码强度条 -->
-        <PasswordStrength v-if="!uiState.isLogin" :password="formData.main.password" />
 
         <!-- 重复密码输入（注册模式） -->
         <div class="input-group" :class="{ error: errors.passwordConfirm }" v-if="!uiState.isLogin">
@@ -216,6 +220,7 @@ const uiState = reactive({
   processingReset: false,
   showPasswordConfirm: false,
   captchaUrl: '',
+  resetCaptchaUrl: ''
 })
 
 // 表单数据
@@ -228,7 +233,9 @@ const formData = reactive({
     captcha: '',
   },
   reset: {
-    email: ''
+    email: '',
+    captcha: '',
+    captchaId: ''
   }
 })
 
@@ -239,6 +246,8 @@ const errors = reactive({
   resetEmail: '',
   passwordConfirm: '',
   captcha: '',
+  resetCaptcha: '',
+  username: ''
 })
 
 // 消息提示
@@ -261,7 +270,18 @@ const validators = {
   },
   username: (value) => {
     if (!value.trim()) return '请输入用户名'
-    if (value.length < 4) return '用户名不能少于4位'
+    const usernameRegex = /^[a-zA-Z0-9]{5,16}$/
+    if (!usernameRegex.test(value)) {
+      if (value.length < 5 || value.length > 16) {
+        return '用户名长度必须在5-16位之间'
+      }
+      return '用户名只能包含英文字母和数字'
+    }
+    return ''
+  },
+  resetCaptcha: (value) => {
+    if (!value) return '请输入验证码'
+    if (value.length !== 4) return '验证码长度不正确'
     return ''
   }
 }
@@ -340,25 +360,33 @@ const validatePasswordConfirm = () => {
   errors.passwordConfirm = ''
   return true
 }
-// 验证码相关方法
-const refreshCaptcha = async () => {
+
+// 合并后的验证码刷新方法
+const refreshCaptcha = async (type = 'main') => {
   try {
     // 先清空当前验证码url
-    uiState.captchaUrl = ''
+    if (type === 'main') {
+      uiState.captchaUrl = ''
+    } else {
+      uiState.resetCaptchaUrl = ''
+    }
+
     const response = await getCaptcha()
-    // 后端返回的是完整的 data URL，需要分离UUID和base64数据
     if (response) {
-      // 保存UUID部分
-      const uuid = response.data.split(':')[0]
-      // 获取base64图片数据部分
-      const imageData = response.data.split(':').slice(1).join(':')
+      const [uuid, ...imageParts] = response.split(':')
+      if (!uuid || imageParts.length === 0) {
+        throw new Error('验证码数据格式无效')
+      }
 
-      // 保存UUID到formData中供后续验证使用
-      formData.main.captchaId = uuid
-      // 设置验证码图片URL
-      uiState.captchaUrl = imageData
+      const imageData = imageParts.join(':')
 
-      console.log('验证码获取成功', uuid)
+      if (type === 'main') {
+        formData.main.captchaId = uuid
+        uiState.captchaUrl = imageData
+      } else {
+        formData.reset.captchaId = uuid
+        uiState.resetCaptchaUrl = imageData
+      }
     } else {
       throw new Error('验证码获取失败')
     }
@@ -385,7 +413,7 @@ const validateCaptcha = async () => {
 // 表单提交
 const handleSubmit = async () => {
   if (!validateMainForm() || uiState.processing) {
-    if (!validateMainForm()) showMessage('请填写完整信息')
+    if (!validateMainForm()) showMessage('请检查输入的内容')
     return
   }
 
@@ -434,24 +462,51 @@ const handleRegister = async () => {
   }
 }
 
-// 密码重置处理
+// 修改发送重置邮件方法
 const sendResetEmail = async () => {
   if (!validateResetEmail() || uiState.processingReset) return
 
+  // 验证验证码
+  const captchaError = validators.resetCaptcha(formData.reset.captcha)
+  if (captchaError) {
+    errors.resetCaptcha = captchaError
+    setTimer(() => errors.resetCaptcha = '')
+    return
+  }
+
   uiState.processingReset = true
   try {
-    const res = await sendResetEmail_post(formData.reset.email)
+    const res = await sendResetEmail_post({
+      email: formData.reset.email,
+      captchaCode: formData.reset.captcha,
+      captchaId: formData.reset.captchaId
+    })
     if (res.code === -1) throw new Error(res.message)
 
     showMessage('重置链接已发送至邮箱', 'success')
     uiState.showForgotPassword = false
     formData.reset.email = ''
+    formData.reset.captcha = ''
     errors.resetEmail = ''
+    errors.resetCaptcha = ''
   } catch (error) {
     showMessage(error.message || '发送失败，请稍后重试')
+    refreshCaptcha('reset')  // 修改这里，使用 reset 类型
   } finally {
     uiState.processingReset = false
   }
+}
+
+// 添加用户名验证方法
+const validateUsername = () => {
+  const error = validators.username(formData.main.identifier)
+  if (error) {
+    errors.username = error
+    setTimer(() => errors.username = '', 3000)
+    return false
+  }
+  errors.username = ''
+  return true
 }
 
 // 辅助函数
@@ -500,7 +555,14 @@ watch(
 // 在注册模式切换时刷新验证码
 watch(() => uiState.isLogin, (newVal) => {
   if (!newVal) {
-    refreshCaptcha()
+    refreshCaptcha('main')  // 修改这里，使用 main 类型
+  }
+})
+
+// 在 watch 部分修改监听
+watch(() => uiState.showForgotPassword, (newVal) => {
+  if (newVal) {
+    refreshCaptcha('reset')  // 修改这里，使用 reset 类型
   }
 })
 
