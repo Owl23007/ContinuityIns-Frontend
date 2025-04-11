@@ -1,9 +1,9 @@
 import axios from "axios";
+import service from './http';
 import { getOssUrl_get } from "@/api/user.js";
 import { useAuthStore } from "@/stores/auth";
 
 const userId = useAuthStore().user.userId;
-
 
 const ossConfig = {
   OSSAccessKeyId: "",
@@ -44,55 +44,43 @@ export function validateFile(file, type) {
 export const uploadFile = async (file, type) => {
   const res = await getOssUrl_get(type);
   
-  if (res.message!="success") {
+  if (res.code !== 0) {
     throw new Error("获取OSS直链失败");
   }
 
   const ossUrl = res.data;
-  ossConfig.OSSAccessKeyId = ossUrl.OSSAccessKeyId;
-  ossConfig.OSSAccessKeySecret = ossUrl.OSSAccessKeySecret;
-  ossConfig.signature = ossUrl.signature;
-  ossConfig.expire = ossUrl.expire;
-  ossConfig.host = ossUrl.host;
-  ossConfig.dir = ossUrl.dir;
-  ossConfig.policy = ossUrl.policy;
-  ossConfig.securityToken = ossUrl.securityToken;
-
   const formData = new FormData();
   
-  formData.append('OSSAccessKeyId', ossConfig.OSSAccessKeyId);
-  formData.append('signature', ossConfig.signature);
-  formData.append('policy', ossConfig.policy);
-  formData.append('x-oss-security-token', ossConfig.securityToken);
+  formData.append('OSSAccessKeyId', ossUrl.OSSAccessKeyId);
+  formData.append('signature', ossUrl.signature);
+  formData.append('policy', ossUrl.policy);
+  formData.append('x-oss-security-token', ossUrl.securityToken);
 
+  const userId = useAuthStore().user?.userId;
   let fileName;
   
   switch (type) {
     case 'avatar':
-      fileName = `${type}/${type}-${userId}`; 
-      break;
     case 'background':
-      fileName = `${type}/${type}-${userId}`;  
-      formData.append('success_action_status', '201');
+      fileName = `${type}/${type}-${userId}`; 
       break;
     case 'article':
       fileName = `${type}/${type}-${userId}-${Date.now()}`;
-      formData.append('success_action_status', '200');
       break;
     default:
       throw new Error('不支持的上传类型');
   }
 
-  formData.append('key', fileName); 
+  formData.append('key', fileName);
   formData.append('file', file);
 
   try {
     const headers = {
-      'x-oss-security-token': ossConfig.securityToken
+      'x-oss-security-token': ossUrl.securityToken
     };
-    const response = await axios.post(ossConfig.host, formData, { headers });
+    await service.post(ossUrl.host, formData, { headers });
     return {
-      url: `${fileName}`,
+      url: fileName,
       key: fileName
     };
   } catch (error) {

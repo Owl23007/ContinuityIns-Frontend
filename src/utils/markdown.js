@@ -29,7 +29,7 @@ export const renderMarkdown = (content) => {
   return md.render(content);
 };
 
-// 如果需要复制按钮功能，可增加如下包装函数
+// 复制按钮功能
 export const renderMarkdownWithCopy = (content) => {
   const rendered = renderMarkdown(content);
   return rendered.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, attr, codeContent) =>

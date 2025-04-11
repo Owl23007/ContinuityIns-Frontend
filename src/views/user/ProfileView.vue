@@ -17,9 +17,9 @@
         <user-info-card :user="user" :is-own-profile="isOwnProfile" :default-avatar="defaultAvatar"
           @avatar-error="handleAvatarError" />
 
-        <!-- 操作按钮 -->
-        <profile-action-buttons v-if="isOwnProfile" :disabled="isUpdating || isDeleting"
-          @edit-profile="openModal('profile')" @change-background="openModal('background')"
+        <!-- 操作按钮和统计信息 -->
+        <profile-action-buttons v-if="user" :disabled="isUpdating || isDeleting" :is-own-profile="isOwnProfile"
+          :user-id="user.id" @edit-profile="openModal('profile')" @change-background="openModal('background')"
           @delete-account="openModal('logout')" @change-avatar="openModal('avatar')" />
       </template>
 
@@ -311,27 +311,35 @@ function showNotification(message, type = 'info') {
 .articles-section {
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.95);
-  /* 增加不透明度，提高可读性 */
+  background: rgba(255, 255, 255, 0.479);
+  /* 降低不透明度 */
+  backdrop-filter: blur(5px);
+  /* 增加背景模糊效果 */
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.9);
-  /* 增加不透明度 */
+  background: rgba(255, 255, 255, 0.75);
+  /* 降低不透明度 */
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 2.5rem;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* 更透明的边框 */
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 2;
   margin-bottom: 2rem;
-  /* 添加底部间距 */
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .profile-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  /* 悬停时稍微不透明一些 */
   transform: translateY(-8px);
   box-shadow: 0 15px 45px rgba(31, 38, 135, 0.25);
 }
@@ -460,14 +468,15 @@ function showNotification(message, type = 'info') {
 /* 文章列表部分样式 */
 .articles-section {
   margin-top: 2rem;
-  background: rgba(255, 255, 255, 0.9);
-  /* 增加不透明度 */
+  background: rgba(255, 255, 255, 0.75);
+  /* 降低不透明度 */
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* 更透明的边框 */
   padding: 2rem;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* 在媒体查询中添加以下样式 */

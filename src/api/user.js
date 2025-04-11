@@ -1,24 +1,9 @@
-import axios from 'axios';
 import sha256 from 'crypto-js/sha256';
-import { useAuthStore }from '@/stores/auth';
+import { publicRequest, privateRequest, formRequest } from './http';
+import { useAuthStore } from '@/stores/auth';
 
-
-// 从.env文件中获取VITE_APP_BASE_API的值
-const baseURL = import.meta.env.VITE_APP_BASE_API;
-const commonHeaders = { 'Content-Type': 'application/x-www-form-urlencoded' };
-
-// 封装请求函数
-const request = async (method, endpoint, data = {}, token) => {
-  const headers = token ? { ...commonHeaders, Authorization: `Duel ${token}` } : commonHeaders;
-  const response = await axios({
-    method,
-    url: `${baseURL}${endpoint}`,
-    data: new URLSearchParams(data),
-    headers,
-    params: method === 'GET' ? data : undefined
-  });
-  return response.data;
-};
+// 密码加密处理
+const encryptPassword = (password) => sha256(password).toString();
 
 // 封装验证函数
 const validateField = (value, alertMsg) => {
@@ -26,84 +11,69 @@ const validateField = (value, alertMsg) => {
   return !!value;
 };
 
-// 密码加密处理
-const encryptPassword = (password) => sha256(password).toString();
-
 // 导出API
-export const register_post = (username, email, password) => {
+export const register_post = (username, email, password, captchaCode, captchaId) => {
   if (!validateField(username, '请输入用户名') ||
     !validateField(email, '请输入邮箱') ||
-    !validateField(password, '请输入密码')) return;
-  return request('POST', '/user/register', {
+    !validateField(password, '请输入密码') ||
+    !validateField(captchaCode, '请输入验证码') ||
+    !validateField(captchaId, '验证码ID不能为空')) return;
+    
+  return formRequest('POST', '/user/register', {
     username,
     email,
-    password: encryptPassword(password)
+    password: encryptPassword(password),
+    captchaCode,
+    captchaId
   });
 };
 
 export const login_post = (identifier, password) => {
   if (!validateField(identifier, '请输入用户名或邮箱') ||
     !validateField(password, '请输入密码')) return;
-  return request('POST', '/user/login', {
+    
+  return formRequest('POST', '/user/login', {
     identifier,
     password: encryptPassword(password)
   });
 };
 
-export const deleteAccount_post = (token, password) => {
+export const deleteAccount_post = (password) => {
   if (!validateField(password, '请输入密码')) return;
-  return request('POST', '/user/deleteAcc', {
+  return formRequest('POST', '/user/deleteAcc', {
     password: encryptPassword(password)
-  }, token);
+  }, true);
 };
 
-export const getUserInfo_get = (token) =>
-  request('GET', '/user/userinfo', {}, token);
+export const getUserInfo_get = () => privateRequest('GET', '/user/userinfo');
 
-export const getUserById_get = (token, userId) =>
-  request('GET', `/user/${userId}`, {}, token);
+export const getUserById_get = (userId) => privateRequest('GET', `/user/${userId}`);
 
-const updateMedia = (endpoint, token, url) =>
-  request('PATCH', endpoint, { url }, token);
+export const updateAvatar_patch = (avatarUrl) => 
+  formRequest('PATCH', '/user/updateAvatar', { url: avatarUrl }, true);
 
-export const updateAvatar_patch = (token, avatarUrl) =>
-  request('PATCH', '/user/updateAvatar', { url: avatarUrl }, token);
+export const updateBackground_patch = (backgroundUrl) => 
+  formRequest('PATCH', '/user/updateBackground', { url: backgroundUrl }, true);
 
-export const updateBackground_patch = (token, backgroundUrl) =>
-  request('PATCH', '/user/updateBackground', { url: backgroundUrl }, token);
+export const updateUserInfo_put = (nickname, signature) => 
+  formRequest('PUT', '/user/update', { nickname, signature }, true);
 
-export const updateUserInfo_put = (token, nickname, signature) =>
-  request('PUT', '/user/update', { nickname, signature }, token);
+export const sendResetEmail_post = (email) => 
+  publicRequest('POST', '/user/sendResetEmail', { email });
 
-//发送重置密码邮件
-export const sendResetEmail_post = email =>
-  request('POST', '/user/sendResetEmail', { email });
+export const validateToken_post = () => 
+  privateRequest('POST', '/user/validateToken');
 
-export const validateToken_post = async (token) => {
-  try {
-    const res = await request('POST', '/user/validateToken', { token }, token);
-    return res.code === 0;
-  } catch (error) {
-    // 验证失败时主动清理存储
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
-    throw error;
-  }
-};
-
-//重置密码
 export const resetPassword_post = (email, token, password) =>
-  request('POST', '/user/resetPassword', { 
+  publicRequest('POST', '/user/resetPassword', { 
     email, 
     token, 
     password: encryptPassword(password)
   });
    
-//获取OSS直链
 export const getOssUrl_get = (type) => {
   if (!['avatar', 'background', 'article'].includes(type)) {
     throw new Error('不支持的上传类型');
   }
-  const token = useAuthStore().token;
-  return request('GET', '/user/oss/policy', { type }, token);
+  return privateRequest('GET', '/user/oss/policy', { type });
 };

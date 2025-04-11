@@ -1,203 +1,301 @@
 <template>
   <div class="profile-actions">
-    <!-- 操作按钮部分 -->
-    <div class="action-buttons">
-      <button class="primary-btn" @click="$emit('edit-profile')" :disabled="disabled">
-        <i class="fas fa-edit"></i>
-        编辑资料
-      </button>
+    <!-- 主要操作按钮 -->
+    <div class="main-actions">
+      <el-dropdown v-if="isOwnProfile" trigger="click" class="settings-dropdown">
+        <button class="primary-btn">
+          <i class="fas fa-cog"></i>
+          账户设置
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="$emit('edit-profile')">
+              <i class="fas fa-edit"></i> 编辑资料
+            </el-dropdown-item>
+            <el-dropdown-item @click="$emit('change-avatar')">
+              <i class="fas fa-camera"></i> 更换头像
+            </el-dropdown-item>
+            <el-dropdown-item @click="$emit('change-background')">
+              <i class="fas fa-image"></i> 更换背景
+            </el-dropdown-item>
+            <el-dropdown-item divided @click="$emit('delete-account')" class="danger-item">
+              <i class="fas fa-trash-alt"></i> 注销账户
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
 
-      <button class="primary-btn" @click="$emit('change-avatar')" :disabled="disabled">
-        <i class="fas fa-camera"></i>
-        更换头像
+      <button v-else class="follow-btn" :class="{ 'is-following': isFollowing }" @click="handleFollow">
+        <i :class="isFollowing ? 'fas fa-user-check' : 'fas fa-user-plus'"></i>
+        {{ isFollowing ? '已关注' : '关注' }}
       </button>
+    </div>
 
-      <button class="primary-btn" @click="$emit('change-background')" :disabled="disabled">
-        <i class="fas fa-image"></i>
-        更换背景
-      </button>
+    <!-- 用户统计信息 -->
+    <div class="stats-container">
+      <div class="stat-box">
+        <div class="stat-item">
+          <h3>{{ stats.articles }}</h3>
+          <span>文章</span>
+        </div>
+        <div class="stat-item clickable" @click="showFollowers">
+          <h3>{{ stats.followers }}</h3>
+          <span>粉丝</span>
+        </div>
+        <div class="stat-item clickable" @click="showFollowing">
+          <h3>{{ stats.following }}</h3>
+          <span>关注</span>
+        </div>
+      </div>
+    </div>
 
-      <button class="danger-btn" @click="$emit('delete-account')" :disabled="disabled">
-        <i class="fas fa-trash-alt"></i>
-        注销账户
-      </button>
+    <!-- 收藏列表预览 -->
+    <div class="favorites-preview" v-if="isOwnProfile">
+      <h3 class="section-title">我的收藏</h3>
+      <div class="favorites-grid">
+        <div v-if="favorites.length === 0" class="empty-favorites">
+          暂无收藏内容
+        </div>
+        <div v-else v-for="item in favorites.slice(0, 4)" :key="item.id" class="favorite-item">
+          <i class="fas fa-bookmark"></i>
+          <span>{{ item.title }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineProps, defineEmits } from 'vue';
+import { ElMessage } from 'element-plus';
 
 const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  isOwnProfile: {
+    type: Boolean,
+    default: false
+  },
+  userId: {
+    type: [String, Number],
+    required: true
   }
 });
 
-defineEmits(['edit-profile', 'change-background', 'delete-account', 'change-avatar']);
+const emits = defineEmits([
+  'edit-profile',
+  'change-background',
+  'delete-account',
+  'change-avatar'
+]);
+
+const isFollowing = ref(false);
+const stats = ref({
+  articles: 0,
+  followers: 0,
+  following: 0
+});
+
+const favorites = ref([]);
+
+const handleFollow = () => {
+  // 关注/取消关注的逻辑
+  isFollowing.value = !isFollowing.value;
+  ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注');
+};
+
+const showFollowers = () => {
+  // 显示粉丝列表
+};
+
+const showFollowing = () => {
+  // 显示关注列表
+};
 </script>
 
 <style scoped>
 .profile-actions {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-  margin-top: 2.5rem;
+  gap: 1.5rem;
+  padding: 1rem;
 }
 
-/* 头像部分样式 */
-.avatar-container {
-  position: relative;
-  margin-bottom: 0.5rem;
-}
-
-.avatar {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 5px solid #fff;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-}
-
-/* 按钮部分样式 */
-.action-buttons {
+.main-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.2rem;
-  justify-content: center;
-  width: 100%;
-  padding: 0 1rem;
+  justify-content: flex-end;
+  padding: 0.5rem;
 }
 
-.primary-btn,
-.danger-btn {
+.settings-dropdown {
   position: relative;
-  padding: 0.9rem 1.8rem;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 160px;
-  overflow: hidden;
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, #42b983 0%, #3498db 100%);
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  background: var(--primary-color);
   color: white;
-  box-shadow: 0 4px 15px rgba(66, 185, 131, 0.2);
-}
-
-.primary-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(120deg,
-      transparent,
-      rgba(255, 255, 255, 0.3),
-      transparent);
-  transition: 0.5s;
-}
-
-.primary-btn:hover::before {
-  left: 100%;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .primary-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(66, 185, 131, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.primary-btn:active {
-  transform: translateY(-1px);
-}
-
-.danger-btn {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+.follow-btn {
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  background: var(--primary-color);
   color: white;
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.danger-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(120deg,
-      transparent,
-      rgba(255, 255, 255, 0.3),
-      transparent);
-  transition: 0.5s;
+.follow-btn.is-following {
+  background: #e5e7eb;
+  color: #374151;
 }
 
-.danger-btn:hover::before {
-  left: 100%;
+.stats-container {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-.danger-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+.stat-box {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1rem;
 }
 
-.danger-btn:active {
-  transform: translateY(-1px);
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
-.primary-btn i,
-.danger-btn i {
-  margin-right: 8px;
+.stat-item.clickable {
+  cursor: pointer;
+}
+
+.stat-item.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-item h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.stat-item span {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.3rem;
+}
+
+.favorites-preview {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
   font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2d3748;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
 }
 
-button:disabled::before {
-  display: none;
+.favorite-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-/* 添加响应式设计 */
+.favorite-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-item i {
+  color: var(--primary-color);
+}
+
+.empty-favorites {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  background: white;
+  border-radius: 12px;
+}
+
+.danger-item {
+  color: #dc2626;
+}
+
 @media (max-width: 768px) {
-  .action-buttons {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 0 0.5rem;
+  .stat-box {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
   }
 
-  .primary-btn,
-  .danger-btn {
-    width: 100%;
-    padding: 0.8rem 1.5rem;
-    font-size: 0.95rem;
+  .favorites-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-item {
+    padding: 0.8rem;
+  }
+
+  .stat-item h3 {
+    font-size: 1.2rem;
   }
 }
 
 @media (max-width: 480px) {
-  .action-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .primary-btn,
-  .danger-btn {
-    width: 100%;
+  .favorites-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

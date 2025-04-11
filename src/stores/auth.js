@@ -26,13 +26,13 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     clearAuth() {
-      // Clear all storage
+      // 清理token和用户信息
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       sessionStorage.removeItem('token')
       sessionStorage.removeItem('user')
 
-      // Reset state
+      // 清理rememberMe状态
       this.token = null
       this.user = null
       this.rememberMe = false
@@ -63,7 +63,7 @@ export const useAuthStore = defineStore('auth', {
     async updateUserProfile({ nickname, signature, avatarImage, backgroundImage }) {
       if (!this.token) throw new Error('未登录');
       
-      // If avatar or background is being updated, use the specific methods
+      //  检查是否提供了头像或背景图片
       if (avatarImage) {
         return this.updateAvatar(avatarImage);
       }
@@ -72,11 +72,11 @@ export const useAuthStore = defineStore('auth', {
         return this.updateBackground(backgroundImage);
       }
       
-      // Otherwise update the profile info
+      //   更新用户信息
       try {
         const res = await updateUserInfo_put(this.token, nickname, signature);
         if (res.code === 0) {
-          // Update the user data in store
+          //  更新用户数据，使用新的昵称和签名
           this.setUser({ ...this.user, nickname, signature });
           return true;
         }
@@ -91,7 +91,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const res = await updateAvatar_patch(this.token, avatarUrl);
         if (res.code === 0) {
-          // Update the user data in store with the new avatar
+          // 更新用户数据，使用新的头像
           this.setUser({ ...this.user, avatar: avatarUrl });
           return true;
         }
@@ -141,9 +141,9 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async register({ username, email, password }) {
+    async register({ username, email, password, captchaCode, captchaId }) {
       try {
-        const res = await register_post(username, email, password)
+        const res = await register_post(username, email, password, captchaCode, captchaId)
         if (res.code === 0) return true
         throw new Error(res.message || '注册失败：服务器未返回成功状态')
       } catch (error) {

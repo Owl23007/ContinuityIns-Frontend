@@ -1,8 +1,5 @@
-import axios from 'axios';
-import { ArticleStatus } from '../pojo/article';
-const baseURL = import.meta.env.VITE_APP_BASE_API;
+import { publicRequest, privateRequest } from './http';
 
-// Transform API response to frontend model
 const transformArticleData = (article) => ({
   id: article.articleId,
   title: article.title,
@@ -18,119 +15,59 @@ const transformArticleData = (article) => ({
 
 // 获取每日推荐
 export const getDailyRecommendations_get = async () => {
-  const response = await axios.get(`${baseURL}/article/daily`, { 
-    headers: { "Content-Type": "application/json" } 
-  });
-  const articles = response.data.data.map(transformArticleData);
-  return { data: articles };
+  const res = await publicRequest('GET', '/article/daily');
+  return { data: res.data.map(transformArticleData) };
 };
 
 // 获取我的文章列表
-export const getMyArticles_get = async (token) => {
-  const response = await axios.get(`${baseURL}/article/mine`, {
-    headers: {
-      Authorization: `Duel ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  const articles = response.data.data.map(transformArticleData);
-  return { data: articles };
+export const getMyArticles_get = async () => {
+  const res = await privateRequest('GET', '/article/mine');
+  return { data: res.data.map(transformArticleData) };
 };
 
 // 获取用户的文章列表
-export const getUserArticles_get = async (token, userId, status = '') => {
-  let url = `${baseURL}/article/user/${userId}`;
-  if (status) {
-    url += `?status=${status}`;
-  }
-  const response = await axios.get(url, {
-    headers: {
-      Authorization: `Duel ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  const articles = response.data.data.map(transformArticleData);
-  return { data: articles };
+export const getUserArticles_get = async (userId, status = '') => {
+  const res = await privateRequest('GET', `/article/user/${userId}`, { status });
+  return { data: res.data.map(transformArticleData) };
 };
 
 // 获取文章详情
-export const getArticleById_get = async (token, id) => {
-  const response = await axios.get(`${baseURL}/article/${id}`, {
-    headers: {
-      Authorization: `Duel ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  const article = transformArticleData(response.data.data);
-  return { data: article };
+export const getArticleById_get = async (id) => {
+  const res = await privateRequest('GET', `/article/${id}`);
+  return { data: transformArticleData(res.data) };
 };
 
 // 创建文章
-export const createArticle_post = async (token, articleData) => {
+export const createArticle_post = async (articleData) => {
   const data = {
     title: articleData.title,
     content: articleData.content,
     coverImage: articleData.coverImg,
     status: articleData.status
   };
-  
-  const response = await axios.post(`${baseURL}/article/create`, 
-    data,
-    {
-      headers: {
-        Authorization: `Duel ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-  );
-  const article = transformArticleData(response.data.data);
-  return { data: article };
+  const res = await privateRequest('POST', '/article/create', data);
+  return { data: transformArticleData(res.data) };
 };
 
 // 更新文章
-export const updateArticle_put = async (token, articleId, updates) => {
+export const updateArticle_put = async (articleId, updates) => {
   const data = {
     title: updates.title,
     content: updates.content,
     coverImage: updates.coverImg,
     status: updates.status
   };
-
-  const response = await axios.put(`${baseURL}/article/${articleId}`, 
-    data,
-    {
-      headers: {
-        Authorization: `Duel ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-  );
-  const article = transformArticleData(response.data.data);
-  return { data: article };
+  const res = await privateRequest('PUT', `/article/${articleId}`, data);
+  return { data: transformArticleData(res.data) };
 };
 
 // 更新文章状态
-export const updateArticleStatus_put = async (token, articleId, status) => {
-  const response = await axios.put(`${baseURL}/article/${articleId}/status`, 
-    { status },
-    {
-      headers: {
-        Authorization: `Duel ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-  );
-  const article = transformArticleData(response.data.data);
-  return { data: article };
+export const updateArticleStatus_put = async (articleId, status) => {
+  const res = await privateRequest('PUT', `/article/${articleId}/status`, { status });
+  return { data: transformArticleData(res.data) };
 };
 
 // 删除文章
-export const deleteArticle_delete = async (token, articleId) => {
-  const response = await axios.delete(`${baseURL}/article/${articleId}`, {
-    headers: {
-      Authorization: `Duel ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  return response.data;
+export const deleteArticle_delete = async (articleId) => {
+  return privateRequest('DELETE', `/article/${articleId}`);
 };
