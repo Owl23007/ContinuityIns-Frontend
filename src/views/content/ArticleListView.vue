@@ -130,7 +130,7 @@ const fetchArticles = async () => {
   loading.value = true
   error.value = ''
   try {
-    const response = await getMyArticles_get(authStore.token)
+    const response = await getMyArticles_get()
     // 确保文章数据格式正确
     articles.value = response.data?.map(article => ({
       ...article,
@@ -167,7 +167,7 @@ const deleteArticle = async () => {
 
   isDeleting.value = true
   try {
-    await deleteArticle_delete(authStore.token, articleToDelete.value.id)
+    await deleteArticle_delete(articleToDelete.value.id)
     articles.value = articles.value.filter(a => a.id !== articleToDelete.value.id)
     showDeleteConfirm.value = false
     articleToDelete.value = null

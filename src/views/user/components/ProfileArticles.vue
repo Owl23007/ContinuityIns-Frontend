@@ -66,8 +66,8 @@ const fetchArticles = async () => {
     loading.value = true
     try {
         const response = props.isOwnProfile
-            ? await getMyArticles_get(authStore.token)
-            : await getUserArticles_get(authStore.token, props.userId)
+            ? await getMyArticles_get()
+            : await getUserArticles_get(props.userId)
 
         articles.value = response.data || []
     } catch (error) {
@@ -89,7 +89,7 @@ const handleDeleteArticle = async (article) => {
             }
         )
 
-        await deleteArticle_delete(authStore.token, article.id)
+        await deleteArticle_delete(article.id)
         articles.value = articles.value.filter(a => a.id !== article.id)
         ElMessage({
             message: '删除成功',

@@ -13,11 +13,8 @@
       <header class="article-header">
         <h1 class="article-title">{{ article.title }}</h1>
         <div class="article-meta">
-          <router-link 
-            :to="{ name: 'userProfile', params: { id: article.createUser?.id }}" 
-            class="author-info" 
-            v-if="article.createUser?.id"
-          >
+          <router-link :to="{ name: 'userProfile', params: { id: article.createUser?.id } }" class="author-info"
+            v-if="article.createUser?.id">
             <img :src="authorAvatar" class="author-avatar" @error="handleAvatarError" />
             <div class="author-details">
               <span class="author-name">{{ authorName }}</span>
@@ -40,7 +37,7 @@
 
       <!-- 文章内容 -->
       <article class="article-content markdown-body" v-html="renderedContent"></article>
-      
+
       <!-- 文章底部 -->
       <footer class="article-footer">
         <div class="article-actions">
@@ -101,7 +98,7 @@ const isAuthor = computed(() => {
 // 获取作者信息
 const fetchAuthorInfo = async (userId) => {
   try {
-    const response = await getUserById_get(authStore.token, userId);
+    const response = await getUserById_get(userId);
     if (response.code === 0) {
       authorInfo.value = response.data;
     }
@@ -115,7 +112,7 @@ const fetchArticle = async () => {
   loading.value = true;
   error.value = '';
   try {
-    const response = await getArticleById_get(authStore.token, route.params.id);
+    const response = await getArticleById_get(route.params.id);
     if (!response.data) {
       error.value = '文章不存在或已被删除';
       return;
@@ -187,13 +184,15 @@ onMounted(() => {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.loading-state, .error-state {
+.loading-state,
+.error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -212,7 +211,9 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .article-header {

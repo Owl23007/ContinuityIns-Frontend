@@ -26,8 +26,8 @@ export const getMyArticles_get = async () => {
 };
 
 // 获取用户的文章列表
-export const getUserArticles_get = async (userId, status = '') => {
-  const res = await privateRequest('GET', `/article/user/${userId}`, { status });
+export const getUserArticles_get = async (userId) => {
+  const res = await privateRequest('GET', `/article/user/${userId}`);
   return { data: res.data.map(transformArticleData) };
 };
 
