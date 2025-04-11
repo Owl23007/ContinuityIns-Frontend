@@ -681,56 +681,76 @@ const handleLogout = () => {
 /* 美化移动端搜索框 */
 .mobile-search {
   display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+  align-items: stretch;
+  gap: 0.5rem;
   margin: 0.5rem 0 1.5rem;
+  position: relative;
 }
 
 .mobile-search-input {
-  width: 100%;
+  flex: 1;
   padding: 0.9rem 1.5rem;
-  border: 2px solid transparent;
+  padding-right: 1rem;
+  border: 2px solid var(--border-color);
   border-radius: 15px;
   font-size: 1rem;
-  background: rgba(18, 194, 233, 0.05);
+  background: var(--background-color);
   color: var(--text-color);
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
 }
 
 .mobile-search-input:focus {
-  border-color: rgba(18, 194, 233, 0.4);
-  background: white;
-  box-shadow: 0 8px 20px rgba(18, 194, 233, 0.15);
-  outline: none;
-}
-
-.mobile-search-input::placeholder {
-  color: rgba(0, 0, 0, 0.5);
-  font-weight: 400;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(18, 194, 233, 0.1);
 }
 
 .mobile-menu .search_button {
-  width: 100%;
-  padding: 0.9rem;
+  min-width: 70px;
+  padding: 0.8rem 1.2rem;
   font-size: 1rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #12c2e9, #c471ed);
-  color: white;
-  border: none;
-  border-radius: 15px;
+  font-weight: 500;
+  color: var(--primary-color);
+  background: transparent;
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  box-shadow: 0 4px 15px rgba(18, 194, 233, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu .search_button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: var(--primary-color);
+  transition: all 0.3s ease;
+  z-index: 0;
 }
 
 .mobile-menu .search_button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(18, 194, 233, 0.25);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(18, 194, 233, 0.2);
+}
+
+.mobile-menu .search_button:hover::before {
+  width: 100%;
 }
 
 .mobile-menu .search_button:active {
   transform: translateY(1px);
+}
+
+.mobile-menu .search_button span {
+  position: relative;
+  z-index: 1;
 }
 
 /* 美化用户卡片 */

@@ -33,9 +33,17 @@ import logoPic from '@/assets/svg/logo.svg'
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .auth-layout::before {
@@ -45,7 +53,7 @@ import logoPic from '@/assets/svg/logo.svg'
   height: 200%;
   top: -50%;
   left: -50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.07) 8%, transparent 8%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 8%, transparent 8%);
   background-size: 25px 25px;
   transform: rotate(30deg);
   animation: moveBackground 60s linear infinite;
@@ -64,17 +72,23 @@ import logoPic from '@/assets/svg/logo.svg'
   0% {
     transform: rotate(30deg) translateY(0);
   }
+
   100% {
     transform: rotate(30deg) translateY(-100px);
   }
 }
 
 .logo-container {
-  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  margin-bottom: clamp(2rem, 5vw, 3rem);
   text-align: center;
   position: relative;
   z-index: 1;
-  animation: fadeInDown 1s ease;
+  animation: fadeInDown 1.2s ease;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes fadeInDown {
@@ -82,6 +96,7 @@ import logoPic from '@/assets/svg/logo.svg'
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -94,35 +109,47 @@ import logoPic from '@/assets/svg/logo.svg'
   justify-content: center;
   text-decoration: none;
   color: #ffffff;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.5rem 1.5rem;
 }
 
 .logo-container a:hover {
-  transform: scale(1.05) translateY(-2px);
+  transform: scale(1.02) translateY(-3px);
 }
 
 .logo-container img {
-  width: clamp(40px, 5vw, 48px);
-  height: clamp(40px, 5vw, 48px);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  width: clamp(44px, 6vw, 52px);
+  height: clamp(44px, 6vw, 52px);
+  border-radius: 14px;
+
+  transition: all 0.4s ease;
+  filter: brightness(1.05);
 }
 
 .logo-container a:hover img {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+
+  transform: rotate(-5deg);
 }
 
 .site-name {
-  margin-left: clamp(0.5rem, 2vw, 1rem);
-  font-size: clamp(1.2rem, 3vw, 1.8rem);
-  font-weight: 700;
-  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+  margin-left: clamp(0.8rem, 2.5vw, 1.2rem);
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.5px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  transition: all 0.4s ease;
+}
+
+.logo-container a:hover .site-name {
+  transform: translateX(5px);
+  background: linear-gradient(135deg, #ffffff 30%, #e8e8e8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .auth-content {
@@ -130,7 +157,7 @@ import logoPic from '@/assets/svg/logo.svg'
   padding: clamp(1.25rem, 3vw, 2.5rem);
   margin: 0 auto;
   background: rgba(255, 255, 255, 0);
-  
+
   backdrop-filter: blur(20px);
   position: relative;
   z-index: 1;
@@ -142,6 +169,7 @@ import logoPic from '@/assets/svg/logo.svg'
     opacity: 0;
     transform: translateY(40px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -150,9 +178,7 @@ import logoPic from '@/assets/svg/logo.svg'
 
 /* 平板电脑布局 */
 @media (max-width: 768px) {
-  .auth-layout {
-    padding: 1rem;
-  }
+
 
   .auth-content {
     width: min(92%, 500px);
@@ -162,36 +188,35 @@ import logoPic from '@/assets/svg/logo.svg'
 
 /* 移动设备布局 */
 @media (max-width: 480px) {
-  .auth-layout {
-    padding: 0.5rem;
-    background: linear-gradient(45deg, #2c3e50 0%, #3498db 100%);
-  }
-
   .auth-content {
     width: 100%;
-    padding: 1.25rem;
+    /* 改为全宽 */
+    padding: 1rem;
     margin: 0;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border-radius: 0;
+    /* 移除圆角 */
   }
 
   .site-name {
-    font-size: 1.3rem;
+    font-size: 1.6rem;
+    /* 增大字体 */
   }
 
   .logo-container {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    /* 增加底部间距 */
   }
 
   .logo-container img {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 48px;
+    /* 增大logo尺寸 */
+    height: 48px;
   }
 }
 
 /* 确保在小屏幕设备上的触摸友好性 */
 @media (hover: none) and (pointer: coarse) {
+
   .logo-container a,
   .auth-content button {
     padding: 0.5rem;
@@ -204,9 +229,6 @@ import logoPic from '@/assets/svg/logo.svg'
 
 /* 处理横屏模式 */
 @media (max-height: 600px) and (orientation: landscape) {
-  .auth-layout {
-    padding: 0.5rem;
-  }
 
   .logo-container {
     margin-bottom: 1rem;

@@ -41,23 +41,22 @@ const errorMessage = ref('')
 const verifyEmail = async () => {
   const baseUrl = import.meta.env.VITE_APP_BASE_API
   const url = `${baseUrl}/user/active?email=${email.value}&token=${token.value}`
-  
+
   try {
     const response = await axios.get(url)
     if (response.data.code === 0) {
       success.value = true
       setTimeout(() => {
-        router.push({ name: 'homePage' })
+        router.push('/')
       }, 2000)
     } else {
       throw new Error(response.data.message || '验证失败，请重试。')
     }
   } catch (err) {
-    console.error('请求失败:', err)
-    errorMessage.value = err.response?.data?.message || err.message || '验证失败，请重试。'
     error.value = true
+    errorMessage.value = err.response?.data?.message || err.message || '验证失败，请重试。'
     setTimeout(() => {
-      router.push({ name: 'loginPage' })
+      router.push('/')
     }, 2000)
   } finally {
     loading.value = false
@@ -73,25 +72,33 @@ onMounted(() => {
 .email-verification {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: clamp(1rem, 3vw, 2rem);
-  background: linear-gradient(135deg, #1a2a3a 0%, #2c5282 50%, #2b6cb0 100%);
-  background-size: 300% 300%;
-  animation: gradientShift 20s ease infinite;
+  padding-top: 10vh;
+  animation: gradientShift 15s ease infinite;
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .verification-card {
+  margin-top: 2rem;
   background: rgba(255, 255, 255, 0.98);
   padding: clamp(2rem, 5vw, 2.5rem);
   border-radius: min(24px, 5vw);
-  box-shadow: 
+  box-shadow:
     0 10px 30px -5px rgba(0, 0, 0, 0.15),
     0 2px 8px -2px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(12px);
@@ -137,7 +144,9 @@ h1::after {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .message-container {
@@ -155,8 +164,15 @@ h1::after {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .status-message svg {
@@ -209,4 +225,5 @@ h1::after {
   h1 {
     margin-bottom: 1.5rem;
   }
-}</style>
+}
+</style>
