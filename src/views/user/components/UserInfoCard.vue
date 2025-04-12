@@ -5,7 +5,9 @@
                 <div class="avatar-container">
                     <img :src="avatarUrl" alt="用户头像" class="avatar" @error="$emit('avatar-error', $event)">
                     <div class="avatar-hover" v-if="isOwnProfile" @click="$emit('change-avatar')">
-                        <i class="fas fa-camera"></i>
+                        <el-icon>
+                            <Camera />
+                        </el-icon>
                     </div>
                 </div>
                 <div class="name-container">
@@ -14,7 +16,9 @@
                         <span class="username-tag">@{{ user.username }}</span>
                     </span>
                     <div class="user-badge" v-if="user.role === 'admin'">
-                        <i class="fas fa-shield-alt"></i> 管理员
+                        <el-icon>
+                            <UserFilled />
+                        </el-icon> 管理员
                     </div>
                 </div>
             </div>
@@ -56,28 +60,45 @@
         <div class="action-buttons">
             <el-dropdown v-if="isOwnProfile" trigger="click" placement="bottom-end">
                 <button class="settings-btn">
-                    <i class="fas fa-cog"></i>
+                    <el-icon>
+                        <Setting />
+                    </el-icon>
                     设置
                 </button>
                 <template #dropdown>
                     <el-dropdown-menu class="user-dropdown-menu">
                         <el-dropdown-item @click="$emit('edit-profile')" class="dropdown-item">
-                            <i class="fas fa-user-edit"></i> 编辑资料
+                            <el-icon>
+                                <Edit />
+                            </el-icon> 编辑资料
                         </el-dropdown-item>
                         <el-dropdown-item @click="$emit('change-avatar')" class="dropdown-item">
-                            <i class="fas fa-camera"></i> 更换头像
+                            <el-icon>
+                                <Camera />
+                            </el-icon> 更换头像
                         </el-dropdown-item>
                         <el-dropdown-item @click="$emit('change-background')" class="dropdown-item">
-                            <i class="fas fa-image"></i> 更换背景
+                            <el-icon>
+                                <Picture />
+                            </el-icon> 更换背景
                         </el-dropdown-item>
                         <el-dropdown-item divided @click="$emit('delete-account')" class="dropdown-item danger-item">
-                            <i class="fas fa-user-times"></i> 注销账户
+                            <el-icon>
+                                <UserFilled />
+                            </el-icon> 注销账户
                         </el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
             </el-dropdown>
             <button v-else class="follow-btn" :class="{ 'is-following': isFollowing }" @click="handleFollow">
-                <i :class="isFollowing ? 'fas fa-user-check' : 'fas fa-user-plus'"></i>
+                <el-icon>
+                    <template v-if="isFollowing">
+                        <Check />
+                    </template>
+                    <template v-else>
+                        <Plus />
+                    </template>
+                </el-icon>
                 {{ isFollowing ? '已关注' : '关注' }}
                 <span class="btn-hover-effect"></span>
             </button>
@@ -87,7 +108,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { Message, ChatDotRound } from '@element-plus/icons-vue'
+import { Message, ChatDotRound, Edit, Plus, Check, Camera, Setting, Picture, UserFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({
     user: {
@@ -457,5 +478,20 @@ const handleFollow = async () => {
     .stats-container {
         justify-content: center;
     }
+}
+
+.el-icon {
+    margin-right: 4px;
+    vertical-align: middle;
+    font-size: 1rem;
+}
+
+.dropdown-item .el-icon {
+    width: 18px;
+    text-align: center;
+}
+
+.el-button span {
+    vertical-align: middle;
 }
 </style>
