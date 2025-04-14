@@ -7,36 +7,25 @@
         <p>注销后，您的所有个人数据将被永久删除，无法恢复。</p>
       </div>
     </div>
-    
+
     <div class="form-group password-input">
       <label for="confirm-password">请输入密码确认操作</label>
-      <input
-        id="confirm-password"
-        v-model="password"
-        type="password"
-        placeholder="输入您的登录密码"
-        :disabled="isSubmitting"
-      >
+      <input id="confirm-password" v-model="password" type="password" placeholder="输入您的登录密码" :disabled="isSubmitting">
       <p v-if="error" class="error-message">{{ error }}</p>
     </div>
-    
+
     <div class="confirm-text notice-text">
       <label>
         <input type="checkbox" v-model="confirmed" :disabled="isSubmitting">
         我确认注销此账户
       </label>
     </div>
-    
+
     <div class="form-actions actions">
       <button type="button" class="cancel-btn" @click="$emit('cancel')" :disabled="isSubmitting">
         取消
       </button>
-      <button 
-        type="button" 
-        class="danger-btn confirm-btn" 
-        @click="handleDelete" 
-        :disabled="!canDelete || isSubmitting"
-      >
+      <button type="button" class="danger-btn confirm-btn" @click="handleDelete" :disabled="!canDelete || isSubmitting">
         <span v-if="isSubmitting" class="loader"></span>
         <span v-else>{{ '注销账户' }}</span>
       </button>
@@ -66,13 +55,13 @@ const canDelete = computed(() => {
 
 function handleDelete() {
   if (!canDelete.value || props.isSubmitting) return;
-  
+
   error.value = '';
   if (password.value.length < 6) {
     error.value = '密码格式不正确';
     return;
   }
-  
+
   emit('delete-account', password.value);
 }
 </script>
@@ -199,12 +188,10 @@ function handleDelete() {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
+  background: linear-gradient(120deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent);
   transition: 0.5s;
 }
 
@@ -244,10 +231,12 @@ function handleDelete() {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.1);
     opacity: 0.8;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;

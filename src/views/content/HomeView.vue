@@ -7,12 +7,7 @@
     <main class="center-container">
       <h1>今日推荐</h1>
       <div class="cards-container">
-        <ArticleCard
-          v-for="article in articles"
-          :key="article.id"
-          :article="article"
-          class="large-card"
-        />
+        <ArticleCard v-for="article in articles" :key="article.id" :article="article" class="large-card" />
       </div>
     </main>
   </div>
@@ -21,7 +16,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getDailyRecommendations_get } from '@/api/article';
-import ArticleCard from '@/components/common/ArticleCard.vue';
+import ArticleCard from './components/article-card.vue';
 
 const articles = ref([]);
 

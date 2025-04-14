@@ -14,6 +14,63 @@
 
       <!-- 用户信息内容 -->
       <template v-else-if="user">
+        <!-- 修改个人信息标题区域 -->
+        <div class="tab-header">
+          <div class="header-left">
+            <h2 class="section-title">
+              <span class="title-icon">👤</span>
+              个人信息
+            </h2>
+            <!-- 用户信息操作按钮 -->
+            <div class="header-actions">
+              <el-dropdown v-if="isOwnProfile" trigger="click" placement="bottom-end">
+                <button class="settings-btn">
+                  <el-icon>
+                    <Setting />
+                  </el-icon>
+                  设置
+                </button>
+                <template #dropdown>
+                  <el-dropdown-menu class="user-dropdown-menu">
+                    <el-dropdown-item @click="openModal('profile')" class="dropdown-item">
+                      <el-icon>
+                        <Edit />
+                      </el-icon> 编辑资料
+                    </el-dropdown-item>
+                    <el-dropdown-item @click="openModal('avatar')" class="dropdown-item">
+                      <el-icon>
+                        <Camera />
+                      </el-icon> 更换头像
+                    </el-dropdown-item>
+                    <el-dropdown-item @click="openModal('background')" class="dropdown-item">
+                      <el-icon>
+                        <Picture />
+                      </el-icon> 更换背景
+                    </el-dropdown-item>
+                    <el-dropdown-item divided @click="openModal('logout')" class="dropdown-item danger-item">
+                      <el-icon>
+                        <UserFilled />
+                      </el-icon> 注销账户
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+              <button v-else class="follow-btn" :class="{ 'is-following': isFollowing }" @click="handleFollow">
+                <el-icon>
+                  <template v-if="isFollowing">
+                    <Check />
+                  </template>
+                  <template v-else>
+                    <Plus />
+                  </template>
+                </el-icon>
+                {{ isFollowing ? '已关注' : '关注' }}
+              </button>
+            </div>
+          </div>
+          <div class="section-divider"></div>
+        </div>
+
         <user-info-card :user="user" :is-own-profile="isOwnProfile" :default-avatar="defaultAvatar"
           :is-updating="isUpdating" :is-deleting="isDeleting" @avatar-error="handleAvatarError"
           @edit-profile="openModal('profile')" @change-avatar="openModal('avatar')"
@@ -30,7 +87,22 @@
     <!-- 添加文章列表部分 -->
     <section v-if="user" class="articles-section">
       <div class="tab-header">
-        <h2 class="section-title">{{ isOwnProfile ? '我的文章' : '发布的文章' }}</h2>
+        <div class="header-left">
+          <h2 class="section-title">
+            <span class="title-icon">📝</span>
+            {{ isOwnProfile ? '我的文章' : '发布的文章' }}
+          </h2>
+          <router-link :to="{
+            name: 'articleList',
+            query: { userId: user.id }
+          }" class="view-all-btn">
+            查看全部
+            <el-icon>
+              <ArrowRight />
+            </el-icon>
+          </router-link>
+        </div>
+        <div class="section-divider"></div>
       </div>
       <profile-articles :user-id="user.id" :is-own-profile="isOwnProfile" />
     </section>
@@ -71,17 +143,18 @@ import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { getUserById_get } from '@/api/user'
+import { ArrowRight, Setting, Edit, Camera, Picture, UserFilled, Check, Plus } from '@element-plus/icons-vue'
 import defaultAvatar from '@/assets/image/default_avatar.png'
 import defaultBackground from '@/assets/image/default_cover.jpg'
 
-import ModalDialog from '@/views/user/components/ModalDialog.vue'
-import ProfileForm from '@/views/user/components/ProfileForm.vue'
-import AvatarUploader from '@/views/user/components/AvatarUploader.vue'
-import BackgroundUploader from '@/views/user/components/BackgroundUploader.vue'
-import AccountDeleteConfirm from '@/views/user/components/AccountDeleteConfirm.vue'
+import ModalDialog from '@/views/user/components/modal/modal-dialog.vue'
+import ProfileForm from '@/views/user/components/modal/profile-from.vue'
+import AvatarUploader from '@/views/user/components/modal/avatar-uploader.vue'
+import BackgroundUploader from '@/views/user/components/modal/background-uploader.vue'
+import AccountDeleteConfirm from '@/views/user/components/modal/delete-confirm-modal.vue'
 import NotificationSystem from '@/components/common/NotificationSystem.vue'
-import ProfileArticles from './components/ProfileArticles.vue'
-import UserInfoCard from './components/UserInfoCard.vue'
+import ProfileArticles from './components/article-list.vue'
+import UserInfoCard from './components/card/userinfo-card.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -275,6 +348,26 @@ function showNotification(message, type = 'info') {
     console.warn('通知系统未初始化:', message)
   }
 }
+
+// 添加关注状态
+const isFollowing = ref(false)
+
+// 添加关注处理函数
+const handleFollow = async () => {
+  if (!user.value?.id) {
+    showNotification('用户信息不完整', 'error')
+    return
+  }
+
+  try {
+    isFollowing.value = !isFollowing.value
+    // TODO: 调用关注/取消关注的 API
+    showNotification(isFollowing.value ? '关注成功' : '已取消关注', 'success')
+  } catch (error) {
+    isFollowing.value = !isFollowing.value // 恢复状态
+    showNotification(error.message || '操作失败', 'error')
+  }
+}
 </script>
 
 <style scoped>
@@ -282,69 +375,46 @@ function showNotification(message, type = 'info') {
   max-width: 1000px;
   width: 100%;
   margin: 0 auto;
-  /* 修改边距为居中 */
   min-height: 100vh;
   padding: 2rem;
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
   background-attachment: fixed;
   transition: background-image 0.5s ease;
   padding-top: calc(var(--header-height) + 1rem);
+  position: relative;
   z-index: 1;
-  /* 移除 overflow: hidden */
 }
 
 .user-profile::before {
   content: '';
   position: fixed;
-  /* 改回 fixed */
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   width: 100vw;
-  /* 添加此行 */
   height: 100vh;
-  /* 添加此行 */
   background-image: inherit;
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
   background-attachment: fixed;
-  /* 添加此行 */
   z-index: -1;
-  /* 移除 filter、transform 和其他模糊相关属性 */
 }
 
-/* 移除之前添加的 isolation 相关样式 */
 .profile-card,
 .articles-section {
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.479);
-  /* 降低不透明度 */
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(5px);
-  /* 增加背景模糊效果 */
   -webkit-backdrop-filter: blur(5px);
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
   padding: 1.5rem;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   margin-bottom: 1.5rem;
-}
-
-.profile-card:hover {
-  background: rgba(255, 255, 255, 0.95);
-  transform: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .profile-title {
@@ -352,24 +422,8 @@ function showNotification(message, type = 'info') {
   font-size: 2rem;
   padding-bottom: 0.8rem;
   margin-bottom: 2rem;
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
-  letter-spacing: 0.5px;
-  position: relative;
-  display: inline-block;
-  width: 100%;
-}
-
-.profile-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, #42b983, #3498db);
-  border-radius: 2px;
 }
 
 .loading-container,
@@ -378,24 +432,8 @@ function showNotification(message, type = 'info') {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 2rem 0;
-  padding: 1.5rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(66, 185, 131, 0.1);
-  border-radius: 50%;
-  border-top-color: #42b983;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 1.5rem;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  margin: 1.5rem 0;
+  padding: 1rem;
 }
 
 .error-container {
@@ -407,7 +445,7 @@ function showNotification(message, type = 'info') {
   text-decoration: underline;
 }
 
-/* 新的加载动画样式 */
+/* 加载动画样式 */
 .loading-ripple {
   display: inline-block;
   position: relative;
@@ -443,14 +481,6 @@ function showNotification(message, type = 'info') {
     opacity: 0;
   }
 
-  4.9% {
-    top: 36px;
-    left: 36px;
-    width: 0;
-    height: 0;
-    opacity: 0;
-  }
-
   5% {
     top: 36px;
     left: 36px;
@@ -471,39 +501,115 @@ function showNotification(message, type = 'info') {
 /* 文章列表部分样式 */
 .articles-section {
   margin-top: 2rem;
-  background: rgba(255, 255, 255, 0.75);
-  /* 降低不透明度 */
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  /* 更透明的边框 */
-  padding: 2rem;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1.5rem;
 }
 
-/* 在媒体查询中添加以下样式 */
+.tab-header {
+  margin-bottom: 1rem;
+  /* 减少下边距 */
+}
+
+.section-title {
+  font-size: 1.4rem;
+  /* 稍微减小字体大小 */
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  /* 减少下边距 */
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  /* 减少图标和文字的间距 */
+}
+
+.title-icon {
+  font-size: 1.3rem;
+  /* 调整图标大小 */
+}
+
+.section-divider {
+  height: 1.5px;
+  /* 减小分隔线高度 */
+  background: linear-gradient(90deg, var(--primary-color) 0%, rgba(var(--primary-color-rgb), 0.1) 100%);
+  margin-bottom: 1rem;
+  /* 减少下边距 */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  /* 减少下边距 */
+  width: 100%;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  width: 100%;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+  /* 移除底部间距 */
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.view-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.view-all-btn:hover {
+  color: var(--primary-color);
+  background: rgba(var(--primary-color-rgb), 0.1);
+}
+
+.view-all-btn i {
+  font-size: 0.8rem;
+}
+
+/* 响应式样式 */
 @media (max-width: 768px) {
   .user-profile {
     padding: 1rem;
     padding-top: calc(var(--header-height) + 0.5rem);
     background-attachment: scroll;
-    /* 移动端禁用固定背景 */
   }
 
   .user-profile::before {
     background-attachment: scroll;
   }
 
-  .profile-card {
-    padding: 1.5rem;
-    margin-top: 1rem;
-    z-index: 5;
-  }
-
+  .profile-card,
   .articles-section {
-    padding: 1.5rem;
-    margin-top: 1.5rem;
+    padding: 1.25rem;
   }
 
   .section-title {
@@ -517,8 +623,55 @@ function showNotification(message, type = 'info') {
   }
 
   .profile-card {
-    padding: 1.2rem;
-    border-radius: 15px;
+    padding: 1rem;
+    border-radius: 10px;
   }
+}
+
+.profile-actions {
+  display: none;
+}
+
+.follow-btn,
+.settings-btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.follow-btn {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+}
+
+.follow-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+}
+
+.follow-btn.is-following {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.follow-btn.is-following:hover {
+  background: #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-btn {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.settings-btn:hover {
+  background: #e5e7eb;
 }
 </style>

@@ -9,7 +9,7 @@
           <i class="fas fa-chevron-down"></i>
         </button>
         <template #dropdown>
-          <el-dropdown-menu>
+          <el-dropdown-menu class="user-dropdown-menu">
             <el-dropdown-item @click="$emit('edit-profile')">
               <i class="fas fa-edit"></i> 编辑资料
             </el-dropdown-item>
@@ -123,6 +123,7 @@ const showFollowing = () => {
   flex-direction: column;
   gap: 1.5rem;
   padding: 1rem;
+  background: rgb(255, 255, 255);
 }
 
 .main-actions {
@@ -272,6 +273,21 @@ const showFollowing = () => {
 
 .danger-item {
   color: #dc2626;
+}
+
+.user-dropdown-menu {
+  border-radius: 12px;
+  padding: 0.5rem;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.user-dropdown-menu :deep(.el-dropdown-menu__item) {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  margin: 0.125rem 0;
 }
 
 @media (max-width: 768px) {

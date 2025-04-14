@@ -21,7 +21,7 @@ export const getDailyRecommendations_get = async () => {
 
 // 获取我的文章列表
 export const getMyArticles_get = async () => {
-  const res = await privateRequest('GET', '/article/mine');
+  const res = await privateRequest('GET', '/article/profile');
   return { data: res.data.map(transformArticleData) };
 };
 
