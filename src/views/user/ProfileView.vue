@@ -84,7 +84,7 @@
       </div>
     </section>
 
-    <!-- 添加文章列表部分 -->
+    <!-- 文章列表部分 -->
     <section v-if="user" class="articles-section">
       <div class="tab-header">
         <div class="header-left">
@@ -500,9 +500,15 @@ const handleFollow = async () => {
 
 /* 文章列表部分样式 */
 .articles-section {
-  margin-top: 2rem;
+  margin-top: 0.5rem;
+  /* 减小上边距 */
   border-radius: 12px;
   padding: 1.5rem;
+}
+
+.articles-grid {
+  gap: 0.75rem;
+  /* 减小卡片之间的间距 */
 }
 
 .tab-header {
