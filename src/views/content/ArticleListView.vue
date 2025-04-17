@@ -24,8 +24,8 @@
 
       <!-- 空状态 -->
       <div v-else-if="articles.length === 0" class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.7;">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="12" y1="18" x2="12" y2="12"></line>
@@ -63,7 +63,8 @@
     <!-- 删除确认对话框 -->
     <div v-if="showDeleteConfirm" class="delete-confirm-dialog">
       <div class="dialog-content">
-        <p>确定要删除文章 "{{ articleToDelete?.title }}" 吗？</p>
+        <p class="dialog-title">确定要删除文章</p>
+        <p class="dialog-article-title">"{{ articleToDelete?.title }}"？</p>
         <div class="dialog-actions">
           <button @click="deleteArticle" :disabled="isDeleting" class="confirm-btn">
             确定
@@ -77,6 +78,7 @@
 
     <!-- 错误提示 -->
     <div v-if="error" class="error-message">
+      <span class="error-icon">!</span>
       {{ error }}
     </div>
   </div>
@@ -88,7 +90,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { getMyArticles_get, deleteArticle_delete } from '@/api/article'
 import { ArticleStatus } from '@/pojo/article'
-import ArticleCard from './components/ArticleCard.vue'
+import ArticleCard from './components/article-detail-card.vue'
+
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -130,7 +133,7 @@ const fetchArticles = async () => {
   loading.value = true
   error.value = ''
   try {
-    const response = await getMyArticles_get()
+    const response = await getMyArticlesList_get()
     // 确保文章数据格式正确
     articles.value = response.data?.map(article => ({
       ...article,
@@ -186,85 +189,122 @@ onMounted(() => {
 
 <style scoped>
 .article-list {
-  padding: 24px;
-  max-width: 1200px;
+  padding: 32px 16px;
+  width: 1000px;
+  /* 固定宽度 */
+  max-width: calc(100% - 32px);
   margin: 0 auto;
+  background: #f8fafc;
+  min-height: 100vh;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.06);
 }
 
 .list-header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  padding: 18px 28px;
 }
 
 .list-header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 28px;
   color: #2c3e50;
+  font-weight: 700;
+  letter-spacing: -1px;
 }
 
 .header-actions {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
 }
 
 .status-filter {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .filter-btn {
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 7px 20px;
+  border-radius: 8px;
   border: none;
-  background: #f5f5f5;
-  color: #666666;
+  background: #f5f7fa;
+  color: #666;
   cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
   transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
 }
 
 .filter-btn.active {
-  background: #1890ff;
-  color: white;
+  background: linear-gradient(90deg, #1890ff 60%, #40a9ff 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.10);
 }
 
 .new-article-btn {
-  padding: 8px 20px;
-  background: #1890ff;
+  padding: 9px 28px;
+  background: linear-gradient(90deg, #1890ff 60%, #40a9ff 100%);
   color: white;
-  border-radius: 6px;
+  border-radius: 8px;
   text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.10);
   transition: all 0.2s;
+  border: none;
 }
 
 .new-article-btn:hover {
-  background: #40a9ff;
+  background: linear-gradient(90deg, #40a9ff 60%, #1890ff 100%);
+  transform: translateY(-2px) scale(1.04);
 }
 
 .articles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  margin-top: 24px;
+  margin-top: 32px;
+  width: 100%;
+}
+
+.article-item {
+  width: 100%;
+  min-width: 0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.article-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.08);
 }
 
 .loading-state,
 .empty-state {
   text-align: center;
-  padding: 48px 0;
-  color: #666666;
+  padding: 80px 0 60px 0;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #1890ff;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1890ff;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
+  margin: 0 auto 18px;
 }
 
 @keyframes spin {
@@ -278,23 +318,28 @@ onMounted(() => {
 }
 
 .empty-state svg {
-  color: #999999;
-  margin-bottom: 16px;
+  color: #bdbdbd;
+  margin-bottom: 18px;
+  filter: drop-shadow(0 2px 8px #e6f7ff);
 }
 
 .create-btn {
   display: inline-block;
-  margin-top: 16px;
-  padding: 8px 20px;
-  background: #1890ff;
+  margin-top: 18px;
+  padding: 10px 28px;
+  background: linear-gradient(90deg, #1890ff 60%, #40a9ff 100%);
   color: white;
-  border-radius: 6px;
+  border-radius: 8px;
   text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.10);
   transition: all 0.2s;
 }
 
 .create-btn:hover {
-  background: #40a9ff;
+  background: linear-gradient(90deg, #40a9ff 60%, #1890ff 100%);
+  transform: translateY(-2px) scale(1.04);
 }
 
 .delete-confirm-dialog {
@@ -303,39 +348,59 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1002;
 }
 
 .dialog-content {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 400px;
+  background: #fff;
+  padding: 32px 28px 24px 28px;
+  border-radius: 14px;
+  width: 95%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.13);
+  text-align: center;
+  animation: fadeIn 0.2s;
+}
+
+.dialog-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.dialog-article-title {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 18px;
 }
 
 .dialog-actions {
   display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 24px;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 18px;
 }
 
 .confirm-btn,
 .cancel-btn {
-  padding: 8px 20px;
-  border-radius: 6px;
+  padding: 10px 28px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
   transition: all 0.2s;
 }
 
 .confirm-btn {
   background: #ff4d4f;
   color: white;
+  box-shadow: 0 2px 8px #ffccc7;
 }
 
 .confirm-btn:hover {
@@ -344,7 +409,7 @@ onMounted(() => {
 
 .cancel-btn {
   background: #f5f5f5;
-  color: #666666;
+  color: #666;
 }
 
 .cancel-btn:hover {
@@ -353,31 +418,65 @@ onMounted(() => {
 
 .error-message {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 32px;
+  right: 32px;
   background: #fff2f0;
-  border: 1px solid #ffccc7;
-  padding: 12px 20px;
-  border-radius: 4px;
+  border: 1.5px solid #ffccc7;
+  padding: 14px 28px;
+  border-radius: 8px;
   color: #ff4d4f;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 2px 12px #ffccc7;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1003;
+  animation: fadeIn 0.2s;
 }
 
-/* 添加新的样式 */
+.error-icon {
+  background: #ff4d4f;
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 卡片操作按钮美化 */
 .article-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .action-btn {
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 15px;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.2s;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  font-weight: 500;
 }
 
 .view-btn {
@@ -411,5 +510,37 @@ onMounted(() => {
 .delete-btn:hover {
   background-color: #ffccc7;
   border-color: #ff4d4f;
+}
+
+/* 响应式优化 */
+@media (max-width: 900px) {
+  .articles-grid {
+    gap: 16px;
+  }
+
+  .list-header {
+    flex-direction: column;
+    gap: 18px;
+    padding: 14px 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .article-list {
+    padding: 8px 2px 24px 2px;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .list-header {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 10px 4px;
+  }
+
+  .articles-grid {
+    gap: 12px;
+    margin-top: 16px;
+  }
 }
 </style>

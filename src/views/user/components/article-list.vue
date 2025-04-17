@@ -46,7 +46,6 @@ import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { getMyArticles_get, getUserArticles_get, deleteArticle_delete } from '@/api/article'
-import { ElMessageBox, ElMessage } from 'element-plus'
 import ArticleCard from './card/article-card-cover-only.vue'
 
 const router = useRouter()
@@ -81,7 +80,7 @@ const fetchArticles = async () => {
     error.value = null
     try {
         const response = props.isOwnProfile
-            ? await getMyArticles_get()
+            ? await getMyArticles_get(props.userId)
             : await getUserArticles_get(props.userId)
 
         // 规范化文章数据
@@ -104,47 +103,7 @@ const fetchArticles = async () => {
     }
 }
 
-const handleDeleteArticle = async (article) => {
-    try {
-        await ElMessageBox.confirm(
-            `确定要删除文章 "${article.title}" 吗？`,
-            '删除确认',
-            {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }
-        )
 
-        try {
-            await deleteArticle_delete(article.id)
-            articles.value = articles.value.filter(a => a.id !== article.id)
-            ElMessage({
-                message: '删除成功',
-                type: 'success'
-            })
-            // 如果当前已显示全部文章且删除后数量等于初始显示量，则自动收起
-            if (showAll.value && articles.value.length <= initialArticleCount) {
-                showAll.value = false
-            }
-        } catch (err) {
-            ElMessage({
-                message: `删除失败: ${err.message || '未知错误'}`,
-                type: 'error'
-            })
-        }
-    } catch (error) {
-        // 用户取消删除操作，不做处理
-        if (error !== 'cancel') {
-            console.error('删除文章出错:', error)
-        }
-    }
-}
-
-// 切换菜单状态
-const toggleMenu = (articleId) => {
-    activeMenu.value = activeMenu.value === articleId ? null : articleId
-}
 
 // 关闭点击外部区域时的菜单
 const handleClickOutside = (e) => {
@@ -164,11 +123,7 @@ const viewArticle = (articleId) => {
 
 onMounted(() => {
     fetchArticles()
-    document.addEventListener('click', handleClickOutside)
-})
 
-onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside)
 })
 </script>
 

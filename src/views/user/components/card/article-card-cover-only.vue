@@ -1,5 +1,5 @@
 <template>
-  <article class="article-card" :class="`status-${article.status.toLowerCase()}`" @click="$emit('click', article)">
+  <article class="article-card" :class="`status-${article.status.toLowerCase()}`" @click="handleCardClick">
     <!-- 封面图片 -->
     <div class="cover-container">
       <img :src="article.coverImg || default_cover" alt="文章封面" class="cover-image" @error="handleImageError" />
@@ -25,6 +25,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { ArticleStatus } from '@/pojo/article'
 import imageFail from '@/assets/image/image_fail_load.png'
 import default_cover from '@/assets/image/default_cover.png'
@@ -48,6 +49,8 @@ const props = defineProps({
 
 const emit = defineEmits(['click'])
 
+const router = useRouter()
+
 const statusText = computed(() => {
   switch (props.article.status) {
     case ArticleStatus.DRAFT:
@@ -64,6 +67,16 @@ const statusText = computed(() => {
 // 处理图片加载失败
 const handleImageError = (e) => {
   e.target.src = imageFail
+}
+
+// 处理卡片点击
+const handleCardClick = () => {
+  if (props.article?.id) {
+    router.push({
+      name: 'articleDetail',
+      params: { id: props.article.id }
+    })
+  }
 }
 
 // 格式化日期

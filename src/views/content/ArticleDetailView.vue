@@ -1,5 +1,5 @@
 <template>
-  <div class="article-detail">
+  <div class="article-detail-horizontal">
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
       <p>加载中...</p>
@@ -9,10 +9,9 @@
       <button @click="fetchArticle">重试</button>
     </div>
     <template v-else>
-      <!-- 文章头部 -->
-      <header class="article-header">
-        <h1 class="article-title">{{ article.title }}</h1>
-        <div class="article-meta">
+      <div class="article-horizontal-layout">
+        <!-- 左侧栏：作者信息和文章元数据 -->
+        <aside class="article-sidebar">
           <router-link :to="{ name: 'userProfile', params: { id: article.createUser?.id } }" class="author-info"
             v-if="article.createUser?.id">
             <img :src="authorAvatar" class="author-avatar" @error="handleAvatarError" />
@@ -27,25 +26,23 @@
               · {{ article.duration }} 字
             </span>
           </div>
-        </div>
-      </header>
-
-      <!-- 文章封面 -->
-      <div v-if="article.coverImg" class="cover-image">
-        <img :src="article.coverImg" :alt="article.title" @error="handleImageError">
+          <div class="article-actions">
+            <button v-if="isAuthor" class="edit-btn" @click="editArticle">
+              编辑文章
+            </button>
+          </div>
+        </aside>
+        <!-- 右侧主内容区 -->
+        <main class="article-main">
+          <header class="article-header">
+            <h1 class="article-title">{{ article.title }}</h1>
+          </header>
+          <div v-if="article.coverImg" class="cover-image">
+            <img :src="article.coverImg" :alt="article.title" @error="handleImageError">
+          </div>
+          <article class="article-content markdown-body" v-html="renderedContent"></article>
+        </main>
       </div>
-
-      <!-- 文章内容 -->
-      <article class="article-content markdown-body" v-html="renderedContent"></article>
-
-      <!-- 文章底部 -->
-      <footer class="article-footer">
-        <div class="article-actions">
-          <button v-if="isAuthor" class="edit-btn" @click="editArticle">
-            编辑文章
-          </button>
-        </div>
-      </footer>
     </template>
   </div>
 </template>
@@ -172,95 +169,91 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.article-detail {
-  max-width: 900px;
+.article-detail-horizontal {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2.5rem 1.5rem 2.5rem 1.5rem;
   animation: fadeIn 0.5s ease;
+  background: #f8fafc;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.06);
+  min-height: 100vh;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.article-horizontal-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 2.5rem;
 }
 
-.loading-state,
-.error-state {
+.article-sidebar {
+  flex: 0 0 290px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(24, 144, 255, 0.07), 0 1.5px 8px rgba(0, 0, 0, 0.04);
+  padding: 2.2rem 1.5rem 2.2rem 1.5rem;
+  min-width: 220px;
+  max-width: 340px;
+  margin-top: 1.5rem;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+  gap: 2.5rem;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border-color);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.article-main {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(24, 144, 255, 0.07), 0 1.5px 8px rgba(0, 0, 0, 0.04);
+  padding: 2.2rem 2.5rem 2.5rem 2.5rem;
 }
 
 .article-header {
-  margin-bottom: 3rem;
-  text-align: center;
-  position: relative;
+  margin-bottom: 2rem;
+  text-align: left;
 }
 
 .article-title {
-  font-size: 2.8rem;
-  margin-bottom: 2rem;
-  line-height: 1.3;
-  color: var(--text-primary);
-  font-weight: 700;
+  font-size: 2.4rem;
+  margin-bottom: 1.5rem;
+  color: #222;
+  font-weight: 800;
   letter-spacing: -0.5px;
-}
-
-.article-meta {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2.5rem;
-  color: var(--text-secondary);
+  line-height: 1.2;
 }
 
 .author-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.1rem;
   text-decoration: none;
-  padding: 0.75rem;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  background: var(--surface-color);
+  padding: 1rem 1.2rem;
+  border-radius: 14px;
+  transition: all 0.3s;
+  background: #f5f7fa;
+  width: 100%;
+  justify-content: flex-start;
+  box-shadow: 0 1.5px 8px rgba(24, 144, 255, 0.04);
 }
 
 .author-info:hover {
-  background: var(--hover-bg);
-  transform: translateY(-2px);
+  background: #e6f7ff;
+  transform: translateY(-2px) scale(1.01);
 }
 
 .author-avatar {
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--border-color);
+  border: 2.5px solid #e6f7ff;
 }
 
 .author-details {
@@ -270,27 +263,76 @@ onMounted(() => {
 }
 
 .author-name {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1890ff;
+  font-size: 1.18rem;
 }
 
 .author-signature {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  max-width: 240px;
+  color: #888;
+  font-size: 1rem;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.article-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #f5f7fa;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  color: #666;
+  width: 100%;
+  box-shadow: 0 1.5px 8px rgba(24, 144, 255, 0.04);
+}
+
+.publish-time {
+  font-weight: 600;
+}
+
+.reading-time {
+  color: #888;
+  font-weight: 500;
+}
+
+.article-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  width: 100%;
+}
+
+.edit-btn {
+  padding: 0.8rem 2.2rem;
+  background: linear-gradient(90deg, #1890ff 60%, #40a9ff 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.10);
+}
+
+.edit-btn:hover {
+  opacity: 0.93;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
 .cover-image {
-  margin: 3rem auto;
+  margin: 2rem 0;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  max-width: 1000px;
-  transition: transform 0.3s ease;
+  box-shadow: 0 8px 30px rgba(24, 144, 255, 0.10);
+  max-width: 100%;
+  transition: transform 0.3s;
 }
 
 .cover-image:hover {
@@ -299,15 +341,17 @@ onMounted(() => {
 
 .cover-image img {
   width: 100%;
-  max-height: 600px;
+  max-height: 480px;
   object-fit: cover;
+  border-radius: 16px;
 }
 
 .article-content {
-  margin: 3rem auto;
-  line-height: 1.8;
-  font-size: 1.15rem;
-  color: var(--text-primary);
+  margin: 2rem 0;
+  line-height: 1.85;
+  font-size: 1.18rem;
+  color: #222;
+  word-break: break-word;
 }
 
 .article-content :deep(h1),
@@ -317,7 +361,7 @@ onMounted(() => {
   margin-bottom: 1.5rem;
   font-weight: 700;
   line-height: 1.3;
-  color: var(--text-primary);
+  color: #1890ff;
 }
 
 .article-content :deep(h1) {
@@ -338,120 +382,119 @@ onMounted(() => {
 
 .article-content :deep(img) {
   max-width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
   margin: 2rem auto;
   display: block;
+  box-shadow: 0 2px 12px rgba(24, 144, 255, 0.10);
 }
 
 .article-content :deep(pre) {
   margin: 2rem 0;
   padding: 1.5rem;
   border-radius: 8px;
-  background: var(--code-bg);
+  background: #f6f8fa;
   overflow-x: auto;
 }
 
 .article-content :deep(code) {
   font-family: 'Fira Code', monospace;
-  font-size: 0.9em;
+  font-size: 0.98em;
 }
 
 .article-content :deep(blockquote) {
   margin: 2rem 0;
   padding: 1rem 1.5rem;
-  border-left: 4px solid var(--primary-color);
-  background: var(--quote-bg);
+  border-left: 4px solid #1890ff;
+  background: #f0f7ff;
   border-radius: 4px;
 }
 
-.article-footer {
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-color);
-}
-
-.article-actions {
+.loading-state,
+.error-state {
   display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.edit-btn {
-  padding: 0.9rem 2.5rem;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.edit-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.article-info {
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  background: var(--surface-color);
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
 }
 
-.reading-time {
-  color: var(--text-secondary);
-  font-weight: 500;
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #f3f3f3;
+  border-top-color: #1890ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 18px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 响应式布局 */
-@media (max-width: 768px) {
-  .article-detail {
-    padding: 1.5rem;
-  }
-
-  .article-title {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .article-meta {
+@media (max-width: 900px) {
+  .article-horizontal-layout {
     flex-direction: column;
     gap: 1.5rem;
   }
 
-  .author-info {
+  .article-sidebar {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 1.5rem;
+    min-width: 0;
+    max-width: 100%;
     width: 100%;
-    justify-content: center;
+    position: static;
+    margin-top: 0;
+    padding: 1rem 0.5rem;
+    border-radius: 10px;
+  }
+
+  .article-main {
+    margin-top: 0;
+    padding: 1.2rem 1rem 1.5rem 1rem;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .article-detail-horizontal {
+    padding: 0.5rem;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .article-title {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .cover-image img {
+    max-height: 220px;
+    border-radius: 8px;
   }
 
   .article-content {
-    font-size: 1.05rem;
-  }
-
-  .article-content :deep(h1) {
-    font-size: 1.8rem;
-  }
-
-  .article-content :deep(h2) {
-    font-size: 1.5rem;
-  }
-
-  .article-content :deep(h3) {
-    font-size: 1.3rem;
-  }
-
-  .cover-image {
-    margin: 2rem -1.5rem;
-    border-radius: 0;
-  }
-
-  .edit-btn {
-    width: 100%;
+    font-size: 1rem;
+    padding: 0;
   }
 }
 </style>

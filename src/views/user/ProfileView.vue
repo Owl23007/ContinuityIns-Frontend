@@ -94,7 +94,7 @@
           </h2>
           <router-link :to="{
             name: 'articleList',
-            query: { userId: user.id }
+            query: { userId: route.params.id || user.id }
           }" class="view-all-btn">
             查看全部
             <el-icon>
@@ -104,7 +104,7 @@
         </div>
         <div class="section-divider"></div>
       </div>
-      <profile-articles :user-id="user.id" :is-own-profile="isOwnProfile" />
+      <profile-articles :user-id="route.params.id || user.id" :is-own-profile="isOwnProfile" />
     </section>
 
     <!-- 模态框 -->
@@ -174,35 +174,48 @@ const formData = reactive({
 
 // 是否为当前用户的个人页面
 const isOwnProfile = computed(() => {
-  return !route.params.id || authStore.currentUser?.id === Number(route.params.id)
+  return !route.params.id || authStore.user?.userId === Number(route.params.id)
 })
 
 // 获取要显示的用户信息
 const user = computed(() => {
-  return isOwnProfile.value ? authStore.currentUser : profileUser.value
+  return isOwnProfile.value ? authStore.user : profileUser.value
 })
 
 // 获取指定用户信息
 const fetchUserProfile = async (userId) => {
+  if (!userId) {
+    showNotification('缺少用户ID参数', 'error')
+    router.push('/404')
+    return
+  }
+
   try {
     loading.value = true
-    // 确保userId是数字
     const numericUserId = parseInt(userId, 10)
     if (isNaN(numericUserId)) {
       throw new Error('无效的用户ID')
     }
 
     const response = await getUserById_get(numericUserId)
-    if (response.code === 0) {
-      profileUser.value = response.data
-      updateUserDataFromStore()
-    } else {
-      throw new Error(response.message || '获取用户信息失败')
+    if (!response || response.code !== 0) {
+      throw new Error(response?.message || '获取用户信息失败')
     }
+
+    if (!response.data) {
+      throw new Error('用户不存在')
+    }
+
+    profileUser.value = response.data
+    updateUserDataFromStore()
   } catch (error) {
-    showNotification('获取用户信息失败: ' + error.message, 'error')
     console.error('获取用户信息失败:', error)
-    router.push('/404') // 添加错误重定向
+    showNotification(error.message || '获取用户信息失败', 'error')
+    profileUser.value = null
+
+    if (error.response?.status === 404 || error.message === '用户不存在') {
+      router.push('/404')
+    }
   } finally {
     loading.value = false
   }
@@ -226,7 +239,9 @@ onMounted(async () => {
 })
 
 // 监听路由参数变化
-watch(() => route.params.id, async (newId) => {
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId === oldId) return
+
   if (newId) {
     // 验证ID是否为有效数字
     const numericId = parseInt(newId, 10)
@@ -240,6 +255,7 @@ watch(() => route.params.id, async (newId) => {
     }
   } else if (!newId && authStore.isAuthenticated) {
     await authStore.fetchUserInfo()
+    updateUserDataFromStore()
   }
 }, { immediate: true })
 

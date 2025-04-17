@@ -1,19 +1,21 @@
 <template>
-  <div class="article-card" :class="[`status-${(article.status || '').toLowerCase()}`]">
+  <div class="article-card-horizontal" :class="[`status-${(article.status || '').toLowerCase()}`]">
     <!-- 封面图片 -->
-    <div class="cover-container">
-      <img :src="article.coverImg || null" alt="文章封面" class="cover-image" @error="handleImageError" />
+    <div class="cover-container-horizontal">
+      <img :src="article.coverImg || null" alt="文章封面" class="cover-image-horizontal" @error="handleImageError" />
       <span class="article-status" v-if="statusText">{{ statusText }}</span>
     </div>
 
-    <div class="card-content">
+    <div class="card-content-horizontal">
       <!-- 作者信息 + 发布时间 -->
-      <div class="meta-row">
+      <div class="meta-row-horizontal">
         <router-link :to="{ name: 'userProfile', params: { id: article.createUser?.id } }" class="author-info"
           v-if="article.createUser">
           <img :src="article.createUser.avatar || defaultAvatar" :alt="article.createUser.username"
-            class="author-avatar" @error="handleAvatarError">
-          <span class="author-name">{{ article.createUser.nickname || article.createUser.username }}</span>
+            class="author-avatar" @error="handleAvatarError" />
+          <span class="author-name">{{
+            article.createUser.nickname || article.createUser.username
+          }}</span>
         </router-link>
         <div class="publish-info">
           <span class="publish-time">{{ formatDate(article.createTime) }}</span>
@@ -25,15 +27,15 @@
       </div>
 
       <!-- 标题 -->
-      <h2 class="article-title">{{ article.title }}</h2>
+      <h2 class="article-title-horizontal">{{ article.title }}</h2>
 
       <!-- 摘要 -->
-      <div class="article-excerpt" v-if="article.content">
+      <div class="article-excerpt-horizontal" v-if="article.content">
         {{ getExcerpt(article.content) }}
       </div>
 
       <!-- 底部操作区 -->
-      <div class="card-footer">
+      <div class="card-footer-horizontal">
         <slot name="actions"></slot>
       </div>
     </div>
@@ -41,10 +43,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { ArticleStatus } from '@/pojo/article'
-import defaultAvatar from '@/assets/image/default_avatar.png'
-import default_cover from '@/assets/image/default_cover.png'
+import { computed } from 'vue';
+import { ArticleStatus } from '@/pojo/article';
+import defaultAvatar from '@/assets/image/default_avatar.png';
+import default_cover from '@/assets/image/default_cover.png';
 
 const props = defineProps({
   article: {
@@ -58,12 +60,14 @@ const props = defineProps({
       status: '',
       createTime: null,
       createUser: null,
-      duration: null
-    })
-  }
-})
+      duration: null,
+    }),
+  },
+});
 
+// 动态状态文本
 const statusText = computed(() => {
+  if (!ArticleStatus) return ''; // Fallback if ArticleStatus is undefined
   switch (props.article.status) {
     case ArticleStatus.DRAFT:
       return '草稿';
@@ -74,26 +78,31 @@ const statusText = computed(() => {
     default:
       return '';
   }
-})
+});
 
 // 处理图片加载失败
 const handleImageError = (e) => {
-  e.target.src = default_cover;
-}
+  if (!e.target.dataset.errorHandled) {
+    e.target.src = default_cover;
+    e.target.dataset.errorHandled = true; // Prevent re-triggering
+  }
+};
 
 // 处理头像加载错误
 const handleAvatarError = (e) => {
-  e.target.src = defaultAvatar;
-}
+  if (!e.target.dataset.errorHandled) {
+    e.target.src = defaultAvatar;
+    e.target.dataset.errorHandled = true; // Prevent re-triggering
+  }
+};
 
 // 格式化日期
 const formatDate = (timestamp) => {
-  if (!timestamp) return '';
+  if (!timestamp || isNaN(new Date(timestamp).getTime())) return '';
   const date = new Date(timestamp);
   const now = new Date();
   const diff = now - date;
 
-  // 如果是今天发布的
   if (diff < 24 * 60 * 60 * 1000) {
     const hours = Math.floor(diff / (60 * 60 * 1000));
     if (hours < 1) {
@@ -103,19 +112,17 @@ const formatDate = (timestamp) => {
     return `${hours} 小时前`;
   }
 
-  // 如果是最近7天发布的
   if (diff < 7 * 24 * 60 * 60 * 1000) {
     const days = Math.floor(diff / (24 * 60 * 60 * 1000));
     return `${days} 天前`;
   }
 
-  // 否则显示完整日期
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
-}
+};
 
 // 获取文章摘要
 const getExcerpt = (content) => {
@@ -128,89 +135,100 @@ const getExcerpt = (content) => {
   const cleanText = noMarkdown.replace(/\n\s*\n/g, '\n').trim();
   // 截取前100个字符
   return cleanText.slice(0, 100) + (cleanText.length > 100 ? '...' : '');
-}
+};
 </script>
 
 <style scoped>
-.article-card {
-  position: relative;
+/* 横条型卡片样式 */
+.article-card-horizontal {
+  padding: 0;
   display: flex;
-  flex-direction: column;
-  border-radius: 16px;
+  flex-direction: row;
+  border-radius: 18px;
   overflow: hidden;
-  background: var(--surface-color);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
-  border: 1px solid var(--border-color);
-  height: 100%;
-}
-
-.article-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 24px rgba(0, 0, 0, 0.08);
-  border-color: var(--primary-color);
-}
-
-.cover-container {
-  position: relative;
+  background: #fff;
+  box-shadow: 0 6px 32px rgba(24, 144, 255, 0.07), 0 1.5px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.25s, box-shadow 0.25s;
+  border: 1.5px solid #e6f7ff;
+  height: 220px;
   width: 100%;
-  height: 200px;
-  overflow: hidden;
+  min-width: 0;
 }
 
-.cover-image {
+.article-card-horizontal:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 36px rgba(24, 144, 255, 0.13), 0 2px 12px rgba(0, 0, 0, 0.07);
+  border-color: #91d5ff;
+}
+
+.cover-container-horizontal {
+  flex: 0 0 280px;
+  /* 固定宽度 */
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6f6f6;
+}
+
+.cover-image-horizontal {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  aspect-ratio: 16/9;
+  border-radius: 0;
+  transition: transform 0.5s;
+  background: #f0f0f0;
 }
 
-.article-card:hover .cover-image {
-  transform: scale(1.05);
+.article-card-horizontal:hover .cover-image-horizontal {
+  transform: scale(1.06);
 }
 
 .article-status {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 6px 12px;
+  top: 14px;
+  right: 14px;
+  padding: 7px 16px;
   border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 700;
   letter-spacing: 0.5px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(90deg, #1890ff 60%, #40a9ff 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.13);
   z-index: 2;
+  border: none;
 }
 
 .status-draft .article-status {
-  background: rgba(3, 105, 161, 0.85);
-  color: white;
+  background: linear-gradient(90deg, #0369a1 60%, #38bdf8 100%);
 }
 
 .status-private .article-status {
-  background: rgba(162, 28, 175, 0.85);
-  color: white;
+  background: linear-gradient(90deg, #a21caf 60%, #f472b6 100%);
 }
 
 .status-banned .article-status {
-  background: rgba(220, 38, 38, 0.85);
-  color: white;
+  background: linear-gradient(90deg, #dc2626 60%, #f87171 100%);
 }
 
-.card-content {
+.card-content-horizontal {
+  flex: 1;
+  min-width: 0;
+  /* 防止内容溢出 */
   display: flex;
   flex-direction: column;
-  flex: 1;
-  padding: 1.25rem;
-  position: relative;
+  padding: 1.25rem 1.5rem;
 }
 
-.meta-row {
+.meta-row-horizontal {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.7rem;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -221,147 +239,134 @@ const getExcerpt = (content) => {
   gap: 0.625rem;
   text-decoration: none;
   border-radius: 20px;
-  padding: 4px 8px;
-  transition: background 0.2s ease;
+  padding: 4px 10px;
+  transition: background 0.2s;
+  background: #f5f7fa;
 }
 
 .author-info:hover {
-  background: var(--hover-bg);
+  background: #e6f7ff;
 }
 
 .author-avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid transparent;
-  transition: border-color 0.3s ease;
+  border: 2px solid #e6f7ff;
+  transition: border-color 0.3s;
 }
 
 .author-info:hover .author-avatar {
-  border-color: var(--primary-color);
+  border-color: #1890ff;
 }
 
 .author-name {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1890ff;
+  transition: color 0.2s;
 }
 
 .author-info:hover .author-name {
-  color: var(--primary-color);
+  color: #40a9ff;
 }
 
 .publish-info {
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.85rem;
-  color: var(--text-tertiary);
+  font-size: 0.95rem;
+  color: #888;
   white-space: nowrap;
 }
 
-.article-title {
-  font-size: 1.375rem;
+.article-title-horizontal {
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 0.875rem 0;
+  color: #222;
+  margin: 0 0 0.7rem 0;
   line-height: 1.4;
   letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.article-excerpt {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
+.article-excerpt-horizontal {
+  color: #666;
+  font-size: 1rem;
   line-height: 1.6;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.1rem;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
   flex-grow: 1;
 }
 
-.card-footer {
+.card-footer-horizontal {
   margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.7rem;
+  border-top: 1px solid #f0f0f0;
 }
 
 .dot {
   margin: 0 0.2rem;
 }
 
-/* 无封面图片时的样式 */
-.article-card:not(:has(.cover-container)) .article-title {
-  font-size: 1.5rem;
-}
-
-.article-card:not(:has(.cover-container)) .card-content {
-  padding: 1.5rem;
-}
-
 /* 响应式设计 */
-@media (max-width: 768px) {
-  .article-card {
-    border-radius: 12px;
+@media (max-width: 900px) {
+  .article-card-horizontal {
+    flex-direction: column;
+    height: auto;
   }
 
-  .cover-container {
+  .cover-container-horizontal {
+    width: 100%;
     height: 160px;
+    flex: none;
   }
 
-  .article-status {
-    top: 8px;
-    right: 8px;
-    padding: 4px 10px;
-    font-size: 0.7rem;
+  .card-content-horizontal {
+    padding: 1rem 1rem 1.2rem 1rem;
   }
 
-  .card-content {
-    padding: 1rem;
+  .article-title-horizontal {
+    font-size: 1.1rem;
   }
 
-  .meta-row {
-    margin-bottom: 0.75rem;
+  .article-excerpt-horizontal {
+    font-size: 0.89rem;
+    margin-bottom: 0.7rem;
+    -webkit-line-clamp: 3;
+  }
+}
+
+@media (max-width: 600px) {
+  .article-card-horizontal {
+    border-radius: 8px;
+    padding: 0;
   }
 
-  .author-avatar {
-    width: 24px;
-    height: 24px;
+  .cover-container-horizontal {
+    height: 110px;
   }
 
-  .author-name {
-    font-size: 0.85rem;
-  }
-
-  .publish-info {
-    font-size: 0.8rem;
-  }
-
-  .article-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .article-excerpt {
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
-  }
-
-  .card-footer {
-    padding-top: 0.75rem;
+  .card-content-horizontal {
+    padding: 0.7rem 0.7rem 1rem 0.7rem;
   }
 }
 
 /* 深色模式 */
 @media (prefers-color-scheme: dark) {
-  .article-card {
+  .article-card-horizontal {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     border-color: rgba(255, 255, 255, 0.1);
   }
 
-  .article-card:hover {
+  .article-card-horizontal:hover {
     box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
     border-color: var(--primary-color);
   }
@@ -378,7 +383,7 @@ const getExcerpt = (content) => {
     background: rgba(248, 113, 113, 0.75);
   }
 
-  .card-footer {
+  .card-footer-horizontal {
     border-color: rgba(255, 255, 255, 0.08);
   }
 
@@ -389,18 +394,18 @@ const getExcerpt = (content) => {
 
 /* 打印模式优化 */
 @media print {
-  .article-card {
+  .article-card-horizontal {
     box-shadow: none;
     border: 1px solid #ddd;
     break-inside: avoid;
   }
 
-  .cover-container {
-    height: 150px;
+  .cover-container-horizontal {
+    height: 90px;
   }
 
   .article-status,
-  .card-footer {
+  .card-footer-horizontal {
     display: none;
   }
 }

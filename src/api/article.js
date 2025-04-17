@@ -19,9 +19,15 @@ export const getDailyRecommendations_get = async () => {
   return { data: res.data.map(transformArticleData) };
 };
 
-// 获取我的文章列表
+// 获取我的主页文章列表
 export const getMyArticles_get = async () => {
   const res = await privateRequest('GET', '/article/profile');
+  return { data: res.data.map(transformArticleData) };
+};
+
+// 获取我的全部文章列表
+export const getMyArticlesList_get = async (page) => {
+  const res = await privateRequest('GET', `/article/all?page=${page}`);
   return { data: res.data.map(transformArticleData) };
 };
 

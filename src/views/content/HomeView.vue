@@ -16,7 +16,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getDailyRecommendations_get } from '@/api/article';
-import ArticleCard from './components/article-card.vue';
+import ArticleCard from './components/article-detail-card.vue';
 
 const articles = ref([]);
 
