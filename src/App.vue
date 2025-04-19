@@ -52,11 +52,11 @@ const layout = computed(() => {
   --background-color: #1a202c;
   --text-color: #ecf0f1;
   --hover-bg: #2d3748;
-  
+
   /* 暗色模式的RGB值 */
   --background-color-rgb: 26, 32, 44;
   --primary-color-rgb: 236, 240, 241;
-  
+
   --shadow-color: rgba(255, 255, 255, 0.1);
   --border-color: #2d3748;
 }
@@ -74,8 +74,8 @@ const layout = computed(() => {
   margin: 0;
   padding: 0;
   transition: background-color 0.3s ease,
-              color 0.3s ease,
-              box-shadow 0.3s ease;
+    color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 body {
@@ -100,5 +100,40 @@ body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 瀑布流相关样式 */
+.waterfall-container {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.waterfall-item {
+  break-inside: avoid;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .waterfall-item {
+    margin-bottom: 15px;
+  }
+}
+
+/* 文章卡片动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.article-card {
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: calc(var(--index) * 0.1s);
 }
 </style>

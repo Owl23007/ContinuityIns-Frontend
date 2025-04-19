@@ -48,6 +48,16 @@ export default [
     ]
   },
   {
+    path: '/',
+    name: 'home',
+    component: () => import('@/views/content/HomeView.vue'),
+    meta: {
+      title: '首页',
+      requiresAuth: false,
+      layout: 'DefaultLayout'
+    }
+  },
+  {
     path: '/home',
     name: 'homePage',
     component: () => import('@/views/content/HomeView.vue'),
