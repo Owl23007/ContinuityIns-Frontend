@@ -181,14 +181,13 @@ const triggerFileInput = () => {
 // 处理封面图片上传
 const handleCoverUpload = async (event) => {
   const file = event.target.files[0]
-  if (!file) {
-    error.value = '请选择要上传的图片'
-    return
-  }
+  if (!file) return
 
+  console.log('handleCoverUpload', file)
   // 验证文件类型
-  if (!['image/jpeg', 'image/png'].includes(file.type)) {
-    error.value = '只支持 JPG 和 PNG 格式的图片'
+  const supportedTypes = ['image/jpeg', 'image/png']
+  if (!supportedTypes.includes(file.type)) {
+    error.value = '不支持的文件类型，请上传 JPG 或 PNG 格式的图片'
     event.target.value = ''
     return
   }
@@ -200,11 +199,8 @@ const handleCoverUpload = async (event) => {
     event.target.value = ''
     return
   }
-
   try {
-    const formData = new FormData()
-    formData.append('file', file)
-    const { url } = await uploadFile(formData)
+    const { url } = await uploadFile(file, 'article')
 
     if (!url) {
       throw new Error('上传失败，请重试')
@@ -366,14 +362,12 @@ const triggerInsertImage = () => {
 // 处理插入图片上传
 const handleInsertImageUpload = async (event) => {
   const file = event.target.files[0]
-  if (!file) {
-    error.value = '请选择要上传的图片'
-    return
-  }
+  if (!file) return
 
   // 验证文件类型
-  if (!['image/jpeg', 'image/png'].includes(file.type)) {
-    error.value = '只支持 JPG 和 PNG 格式的图片'
+  const supportedTypes = ['image/jpeg', 'image/png']
+  if (!supportedTypes.includes(file.type)) {
+    error.value = '不支持的文件类型，请上传 JPG 或 PNG 格式的图片'
     event.target.value = ''
     return
   }
@@ -387,9 +381,7 @@ const handleInsertImageUpload = async (event) => {
   }
 
   try {
-    const formData = new FormData()
-    formData.append('file', file)
-    const { url } = await uploadFile(formData)
+    const { url } = await uploadFile(file, 'article')
 
     if (!url) {
       throw new Error('上传失败，请重试')

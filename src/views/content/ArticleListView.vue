@@ -40,7 +40,7 @@
       <!-- 文章列表 -->
       <div v-else class="articles-grid">
         <div v-for="article in filteredArticles" :key="article.id" class="article-item">
-          <article-card :article="article">
+          <article-card :article="article" @cover-error="handleCoverError(article)">
             <template #actions>
               <div class="article-actions">
                 <router-link v-if="article.status === ArticleStatus.PUBLISHED"
@@ -92,6 +92,7 @@ import { ArticleStatus } from '@/pojo/article'
 import ArticleCard from './components/article-detail-card.vue'
 import { getMyArticlesList_get } from '../../api/article'
 import { onBeforeRouteUpdate } from 'vue-router'
+import defaultCover from '@/assets/image/default_cover.jpg'
 
 const articles = ref([])
 const loading = ref(true)
@@ -146,7 +147,8 @@ const fetchArticles = async (resetPage = true) => {
       id: article.articleId || article.id,
       createTime: new Date(article.createTime || Date.now()).getTime(),
       status: article.status || ArticleStatus.DRAFT,
-      title: article.title || '无标题'
+      title: article.title || '无标题',
+      coverImage: article.coverImage || defaultCover
     })).sort((a, b) => b.createTime - a.createTime)
   } catch (err) {
     console.error('获取文章列表失败:', err)
@@ -190,6 +192,11 @@ const deleteArticle = async () => {
   } finally {
     isDeleting.value = false
   }
+}
+
+// 处理封面图片加载错误
+const handleCoverError = (article) => {
+  article.coverImage = defaultCover
 }
 
 // 初始化

@@ -41,9 +41,12 @@ export const uploadFile = async (file, type) => {
   formData.append('signature', ossUrl.signature);
   formData.append('policy', ossUrl.policy);
   formData.append('x-oss-security-token', ossUrl.securityToken);
+  // 获取文件名从后端返回的url中提取
+  
 
   const userId = useAuthStore().user?.userId;
-  let fileName;
+  let fileName = ossUrl.fileName;
+  let CDNPoint = ossUrl.CDNPoint;
   
   switch (type) {
     case 'avatar':
@@ -51,7 +54,6 @@ export const uploadFile = async (file, type) => {
       fileName = `${type}/${type}-${userId}`; 
       break;
     case 'article':
-      fileName = `${type}/${type}-${userId}-${Date.now()}`;
       break;
     default:
       throw new Error('不支持的上传类型');
@@ -66,7 +68,7 @@ export const uploadFile = async (file, type) => {
     };
     await service.post(ossUrl.host, formData, { headers });
     return {
-      url: fileName,
+      url: CDNPoint+'/' + fileName,
       key: fileName
     };
   } catch (error) {

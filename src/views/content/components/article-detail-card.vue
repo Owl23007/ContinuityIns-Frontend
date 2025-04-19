@@ -2,7 +2,8 @@
   <div class="article-card-horizontal" :class="[`status-${(article.status || '').toLowerCase()}`]">
     <!-- 封面图片 -->
     <div class="cover-container-horizontal">
-      <img :src="article.coverImg || null" alt="文章封面" class="cover-image-horizontal" @error="handleImageError" />
+      <img :src="article.coverImg || default_cover" alt="文章封面" class="cover-image-horizontal"
+        @error="handleImageError" />
       <span class="article-status" v-if="statusText">{{ statusText }}</span>
     </div>
 
@@ -38,6 +39,7 @@
 import { computed } from 'vue';
 import { ArticleStatus } from '@/pojo/article';
 import default_cover from '@/assets/image/default_cover.png';
+import image_fail from '@/assets/image/image_fail_load.png';
 
 const props = defineProps({
   article: {
@@ -52,6 +54,7 @@ const props = defineProps({
       createTime: null,
       createUser: null,
       duration: null,
+      coverImgFail: ''
     }),
   },
 });
@@ -74,7 +77,7 @@ const statusText = computed(() => {
 // 处理图片加载失败
 const handleImageError = (e) => {
   if (!e.target.dataset.errorHandled) {
-    e.target.src = default_cover;
+    e.target.src = image_fail; // 使用默认图片
     e.target.dataset.errorHandled = true; // Prevent re-triggering
   }
 };
@@ -100,6 +103,15 @@ const formatDate = (timestamp) => {
     return `${days} 天前`;
   }
 
+  // 如果超过30天，显示月份和日期
+  if (diff < 365 * 24 * 60 * 60 * 1000) {
+    return date.toLocaleDateString('zh-CN', {
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
+  // 超过一年，显示完整日期
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
@@ -188,7 +200,7 @@ const getExcerpt = (content) => {
 }
 
 .status-draft .article-status {
-  background: linear-gradient(90deg, #0369a1 60%, #38bdf8 100%);
+  background: linear-gradient(90deg, #1890ff 60%, #40a9ff 100%);
 }
 
 .status-private .article-status {
