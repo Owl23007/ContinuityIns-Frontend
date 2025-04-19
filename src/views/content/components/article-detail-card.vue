@@ -7,16 +7,8 @@
     </div>
 
     <div class="card-content-horizontal">
-      <!-- 作者信息 + 发布时间 -->
+      <!-- 发布时间 -->
       <div class="meta-row-horizontal">
-        <router-link :to="{ name: 'userProfile', params: { id: article.createUser?.id } }" class="author-info"
-          v-if="article.createUser">
-          <img :src="article.createUser.avatar || defaultAvatar" :alt="article.createUser.username"
-            class="author-avatar" @error="handleAvatarError" />
-          <span class="author-name">{{
-            article.createUser.nickname || article.createUser.username
-          }}</span>
-        </router-link>
         <div class="publish-info">
           <span class="publish-time">{{ formatDate(article.createTime) }}</span>
           <span class="dot" v-if="article.duration">·</span>
@@ -26,12 +18,12 @@
         </div>
       </div>
 
-      <!-- 标题 -->
-      <h2 class="article-title-horizontal">{{ article.title }}</h2>
-
-      <!-- 摘要 -->
-      <div class="article-excerpt-horizontal" v-if="article.content">
-        {{ getExcerpt(article.content) }}
+      <!-- 标题和摘要的容器 -->
+      <div class="content-wrapper">
+        <h2 class="article-title-horizontal">{{ article.title }}</h2>
+        <div class="article-excerpt-horizontal" v-if="article.content">
+          {{ getExcerpt(article.content) }}
+        </div>
       </div>
 
       <!-- 底部操作区 -->
@@ -45,7 +37,6 @@
 <script setup>
 import { computed } from 'vue';
 import { ArticleStatus } from '@/pojo/article';
-import defaultAvatar from '@/assets/image/default_avatar.png';
 import default_cover from '@/assets/image/default_cover.png';
 
 const props = defineProps({
@@ -84,14 +75,6 @@ const statusText = computed(() => {
 const handleImageError = (e) => {
   if (!e.target.dataset.errorHandled) {
     e.target.src = default_cover;
-    e.target.dataset.errorHandled = true; // Prevent re-triggering
-  }
-};
-
-// 处理头像加载错误
-const handleAvatarError = (e) => {
-  if (!e.target.dataset.errorHandled) {
-    e.target.src = defaultAvatar;
     e.target.dataset.errorHandled = true; // Prevent re-triggering
   }
 };
@@ -150,7 +133,8 @@ const getExcerpt = (content) => {
   box-shadow: 0 6px 32px rgba(24, 144, 255, 0.07), 0 1.5px 8px rgba(0, 0, 0, 0.04);
   transition: transform 0.25s, box-shadow 0.25s;
   border: 1.5px solid #e6f7ff;
-  height: 220px;
+  height: 260px;
+  /* 增加卡片高度以适应更多内容 */
   width: 100%;
   min-width: 0;
 }
@@ -226,50 +210,12 @@ const getExcerpt = (content) => {
 
 .meta-row-horizontal {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  /* 改为右对齐 */
   align-items: center;
   margin-bottom: 0.7rem;
   flex-wrap: wrap;
   gap: 0.5rem;
-}
-
-.author-info {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  text-decoration: none;
-  border-radius: 20px;
-  padding: 4px 10px;
-  transition: background 0.2s;
-  background: #f5f7fa;
-}
-
-.author-info:hover {
-  background: #e6f7ff;
-}
-
-.author-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #e6f7ff;
-  transition: border-color 0.3s;
-}
-
-.author-info:hover .author-avatar {
-  border-color: #1890ff;
-}
-
-.author-name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1890ff;
-  transition: color 0.2s;
-}
-
-.author-info:hover .author-name {
-  color: #40a9ff;
 }
 
 .publish-info {
@@ -281,27 +227,38 @@ const getExcerpt = (content) => {
   white-space: nowrap;
 }
 
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .article-title-horizontal {
   font-size: 1.25rem;
   font-weight: 700;
   color: #222;
-  margin: 0 0 0.7rem 0;
+  margin: 0 0 1rem 0;
   line-height: 1.4;
   letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .article-excerpt-horizontal {
   color: #666;
   font-size: 1rem;
   line-height: 1.6;
-  margin-bottom: 1.1rem;
+  margin-bottom: 0;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   overflow: hidden;
   flex-grow: 1;
 }
@@ -331,6 +288,10 @@ const getExcerpt = (content) => {
 
   .card-content-horizontal {
     padding: 1rem 1rem 1.2rem 1rem;
+  }
+
+  .content-wrapper {
+    min-height: unset;
   }
 
   .article-title-horizontal {
@@ -385,10 +346,6 @@ const getExcerpt = (content) => {
 
   .card-footer-horizontal {
     border-color: rgba(255, 255, 255, 0.08);
-  }
-
-  .author-info:hover {
-    background: rgba(255, 255, 255, 0.05);
   }
 }
 

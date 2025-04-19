@@ -44,6 +44,11 @@
                         <User />
                     </el-icon>个人信息
                 </el-dropdown-item>
+                <el-dropdown-item @click="goToContributions" class="menu-item">
+                    <el-icon>
+                        <Document />
+                    </el-icon>投稿管理
+                </el-dropdown-item>
                 <el-dropdown-item @click="goToSettings" class="menu-item">
                     <el-icon>
                         <Setting />
@@ -63,7 +68,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { CaretBottom, User, Setting, SwitchButton, Message } from '@element-plus/icons-vue'
+import { CaretBottom, User, Setting, SwitchButton, Message, Document } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import defaultCoverImg from '@/assets/image/default_cover.jpg'
 
@@ -91,6 +96,10 @@ const userBackground = computed(() => getFullImagePath(authStore.user.background
 
 const goToProfile = () => {
     router.push('/profile')
+}
+
+const goToContributions = () => {
+    router.push('/article')
 }
 
 const goToSettings = () => {
