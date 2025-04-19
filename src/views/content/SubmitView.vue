@@ -17,20 +17,15 @@
     <div class="editor-main">
       <!-- 标题输入 -->
       <div class="input-group">
-        <input 
-          type="text" 
-          v-model="articleData.title"
-          placeholder="请输入文章标题..."
-          class="title-input"
-          :maxlength="100"
-        >
+        <input type="text" v-model="articleData.title" placeholder="请输入文章标题..." class="title-input" :maxlength="100">
         <span class="char-count">{{ articleData.title.length }}/100</span>
       </div>
 
       <!-- 封面图片上传 -->
       <div class="cover-upload">
         <div class="upload-area" @click="triggerFileInput" v-if="!articleData.coverImg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <circle cx="8.5" cy="8.5" r="1.5"></circle>
             <polyline points="21 15 16 10 5 21"></polyline>
@@ -45,14 +40,8 @@
             <button class="remove-btn" @click="removeCover">移除图片</button>
           </div>
         </div>
-        <input 
-          type="file" 
-          ref="fileInput"
-          class="file-input"
-          accept="image/jpeg,image/png"
-          @change="handleCoverUpload"
-          style="display: none"
-        >
+        <input type="file" ref="fileInput" class="file-input" accept="image/jpeg,image/png" @change="handleCoverUpload"
+          style="display: none">
       </div>
 
       <!-- Markdown 编辑器集成 -->
@@ -60,24 +49,17 @@
         <div class="editor-container">
           <div class="toolbar">
             <div class="toolbar-group">
-              <button 
-                :class="['mode-btn', { active: !isMarkdownMode }]" 
-                @click="isMarkdownMode = false"
-                title="纯文本模式"
-              >
+              <button :class="['mode-btn', { active: !isMarkdownMode }]" @click="isMarkdownMode = false" title="纯文本模式">
                 Aa
               </button>
-              <button 
-                :class="['mode-btn', { active: isMarkdownMode }]" 
-                @click="isMarkdownMode = true"
-                title="Markdown模式"
-              >
+              <button :class="['mode-btn', { active: isMarkdownMode }]" @click="isMarkdownMode = true"
+                title="Markdown模式">
                 Md
               </button>
             </div>
-            
+
             <span class="divider" v-if="isMarkdownMode"></span>
-            
+
             <div class="toolbar-group" v-if="isMarkdownMode">
               <button @click="insertMd('**', '**')" title="粗体">B</button>
               <button @click="insertMd('*', '*')" title="斜体">I</button>
@@ -88,61 +70,40 @@
               <button @click="insertList('1. ')" title="有序列表">1.</button>
               <span class="divider"></span>
               <button @click="insertMd('[', ']()')" title="链接">🔗</button>
-              <button @click="insertMd('![', ']()')" title="图片">🖼</button>
+              <button @click="triggerInsertImage" title="插入图片">🖼</button>
               <button @click="insertMd('```\n', '\n```')" title="代码块">{}</button>
               <button @click="insertMd('|  |  |\n|--|--|\n|  |  |', '')" title="表格">⊞</button>
             </div>
 
             <div class="toolbar-group toolbar-right" v-if="isMarkdownMode">
-              <button 
-                :class="['preview-btn', { active: showPreview }]" 
-                @click="showPreview = !showPreview"
-                title="显示/隐藏预览"
-              >
+              <button :class="['preview-btn', { active: showPreview }]" @click="showPreview = !showPreview"
+                title="显示/隐藏预览">
                 👁
               </button>
-              <button 
-                :class="['sync-btn', { active: syncScroll }]" 
-                @click="syncScroll = !syncScroll"
-                title="同步滚动"
-              >
+              <button :class="['sync-btn', { active: syncScroll }]" @click="syncScroll = !syncScroll" title="同步滚动">
                 ⇅
               </button>
             </div>
           </div>
-          <div 
-            class="edit-preview-container" 
-            :class="{ 
-              'plain-text': !isMarkdownMode,
-              'hide-preview': !showPreview && isMarkdownMode
-            }"
-          >
-            <textarea
-              ref="editor"
-              v-model="articleData.content"
-              class="markdown-input"
+          <div class="edit-preview-container" :class="{
+            'plain-text': !isMarkdownMode,
+            'hide-preview': !showPreview && isMarkdownMode
+          }">
+            <textarea ref="editor" v-model="articleData.content" class="markdown-input"
               :class="{ 'plain-text': !isMarkdownMode }"
-              :placeholder="isMarkdownMode ? '开始创作(Markdown模式)...' : '开始创作(纯文本模式)...'"
-              @input="handleEditorChange"
-              @scroll="handleEditorScroll"
-            ></textarea>
-            <div 
-              v-if="isMarkdownMode && showPreview" 
-              ref="preview"
-              class="preview markdown-body" 
-              v-html="renderedContent"
-              @scroll="handlePreviewScroll"
-            ></div>
+              :placeholder="isMarkdownMode ? '开始创作(Markdown模式)...' : '开始创作(纯文本模式)...'" @input="handleEditorChange"
+              @scroll="handleEditorScroll"></textarea>
+            <div v-if="isMarkdownMode && showPreview" ref="preview" class="preview markdown-body"
+              v-html="renderedContent" @scroll="handlePreviewScroll"></div>
           </div>
         </div>
+        <!-- 用于插入图片的隐藏文件选择框 -->
+        <input type="file" ref="insertImageInput" accept="image/jpeg,image/png" style="display:none"
+          @change="handleInsertImageUpload" />
       </div>
     </div>
-
-    <!-- 错误提示 -->
-    <div v-if="error" class="error-message">
-      {{ error }}
-    </div>
   </div>
+  <notification-system ref="notificationSystem" />
 </template>
 
 <script setup>
@@ -150,9 +111,10 @@ import { ref, reactive, computed, watch, watchEffect } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { getArticleById_get, updateArticle_put, createArticle_post } from '@/api/article'
-import { uploadFile } from '@/api/file'
+import { uploadFile, validateFile } from '@/api/file'
 import { ArticleStatus } from '@/pojo/article'
 import { renderMarkdown } from '@/utils/markdown'
+import NotificationSystem from '@/components/common/NotificationSystem.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -168,12 +130,14 @@ const preview = ref(null)
 const isEditorScrolling = ref(false)
 const isPreviewScrolling = ref(false)
 const loading = ref(false)
+const insertImageInput = ref(null)
+const notificationSystem = ref(null)
 
 const isEditing = computed(() => Boolean(route.params.id))
 
 const articleData = reactive({
   title: '',
-  content: '', 
+  content: '',
   coverImg: '',
   status: ArticleStatus.DRAFT
 })
@@ -181,10 +145,10 @@ const articleData = reactive({
 // 初始化文章数据
 const initArticle = async () => {
   if (!isEditing.value) return
-  
+
   loading.value = true
   try {
-    const response = await getArticleById_get(authStore.token, route.params.id)
+    const response = await getArticleById_get(route.params.id)
     const article = response.data
     articleData.title = article.title
     articleData.content = article.content
@@ -217,10 +181,35 @@ const triggerFileInput = () => {
 // 处理封面图片上传
 const handleCoverUpload = async (event) => {
   const file = event.target.files[0]
-  if (!file) return
+  if (!file) {
+    error.value = '请选择要上传的图片'
+    return
+  }
+
+  // 验证文件类型
+  if (!['image/jpeg', 'image/png'].includes(file.type)) {
+    error.value = '只支持 JPG 和 PNG 格式的图片'
+    event.target.value = ''
+    return
+  }
+
+  // 验证文件大小（限制为 5MB）
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    error.value = '图片大小不能超过 5MB'
+    event.target.value = ''
+    return
+  }
 
   try {
-    const { url } = await uploadFile(file)
+    const formData = new FormData()
+    formData.append('file', file)
+    const { url } = await uploadFile(formData)
+
+    if (!url) {
+      throw new Error('上传失败，请重试')
+    }
+
     articleData.coverImg = url
     error.value = ''
   } catch (err) {
@@ -248,48 +237,37 @@ const publishArticle = () => {
 // 提交文章
 const submitArticle = async (status) => {
   if (!articleData.title.trim()) {
-    error.value = '请输入文章标题'
-    return
-  }
-
-  if (!articleData.content.trim()) {
-    error.value = '请输入文章内容'
+    notificationSystem.value?.show('请输入文章标题', 'error')
     return
   }
 
   isSubmitting.value = true
-  error.value = ''
 
   try {
-    const content = isMarkdownMode.value 
-      ? articleData.content 
+    const content = isMarkdownMode.value
+      ? articleData.content
       : articleData.content.split('\n').join('<br>')
-      
-    if (isEditing.value) {
-      await updateArticle_put(
-        authStore.token,
-        route.params.id,
-        {
-          title: articleData.title,
-          content,
-          coverImg: articleData.coverImg,
-          status
-        }
-      )
-    } else {
-      await createArticle_post(
-        authStore.token,
-        {
-          title: articleData.title,
-          content,
-          coverImg: articleData.coverImg,
-          status
-        }
-      )
+
+    const data = {
+      ...articleData,
+      content,
+      status
     }
-    router.push('/article')
+
+    if (isEditing.value) {
+      await updateArticle_put(route.params.id, data)
+      notificationSystem.value?.show('文章更新成功', 'success')
+    } else {
+      await createArticle_post(data)
+      notificationSystem.value?.show('文章创建成功', 'success')
+    }
+
+    // 延迟跳转，让用户看到成功提示
+    setTimeout(() => {
+      router.push('/article')
+    }, 1500)
   } catch (err) {
-    error.value = err.message || '保存失败，请重试'
+    notificationSystem.value?.show(err.message || '保存失败，请重试', 'error')
   } finally {
     isSubmitting.value = false
   }
@@ -301,7 +279,7 @@ watch(() => route.params.id, initArticle, { immediate: true })
 // 处理编辑器滚动
 const handleEditorScroll = (e) => {
   if (!syncScroll.value || !showPreview.value || isPreviewScrolling.value) return
-  
+
   isEditorScrolling.value = true
   const percentage = e.target.scrollTop / (e.target.scrollHeight - e.target.clientHeight)
   const previewEl = preview.value
@@ -316,7 +294,7 @@ const handleEditorScroll = (e) => {
 // 处理预览滚动
 const handlePreviewScroll = (e) => {
   if (!syncScroll.value || isEditorScrolling.value) return
-  
+
   isPreviewScrolling.value = true
   const percentage = e.target.scrollTop / (e.target.scrollHeight - e.target.clientHeight)
   const editorEl = editor.value
@@ -346,11 +324,11 @@ function insertMd(before, after) {
   const end = textarea.selectionEnd
   const text = String(articleData.content || '')
   const selectedText = text.substring(start, end)
-  
-  articleData.content = text.substring(0, start) + 
-                       before + selectedText + after + 
-                       text.substring(end)
-  
+
+  articleData.content = text.substring(0, start) +
+    before + selectedText + after +
+    text.substring(end)
+
   // 保持选中状态
   setTimeout(() => {
     textarea.focus()
@@ -367,11 +345,11 @@ function insertList(prefix) {
   const start = textarea.selectionStart
   const text = String(articleData.content || '')
   const lineStart = Math.max(text.lastIndexOf('\n', start - 1), -1) + 1
-  
-  articleData.content = text.substring(0, lineStart) + 
-                       prefix + 
-                       text.substring(lineStart)
-  
+
+  articleData.content = text.substring(0, lineStart) +
+    prefix +
+    text.substring(lineStart)
+
   // 将光标移到行末
   setTimeout(() => {
     textarea.focus()
@@ -379,6 +357,60 @@ function insertList(prefix) {
     textarea.setSelectionRange(newPos, newPos)
   })
 }
+
+// 触发插入图片文件选择
+const triggerInsertImage = () => {
+  insertImageInput.value.click()
+}
+
+// 处理插入图片上传
+const handleInsertImageUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) {
+    error.value = '请选择要上传的图片'
+    return
+  }
+
+  // 验证文件类型
+  if (!['image/jpeg', 'image/png'].includes(file.type)) {
+    error.value = '只支持 JPG 和 PNG 格式的图片'
+    event.target.value = ''
+    return
+  }
+
+  // 验证文件大小（限制为 5MB）
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    error.value = '图片大小不能超过 5MB'
+    event.target.value = ''
+    return
+  }
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    const { url } = await uploadFile(formData)
+
+    if (!url) {
+      throw new Error('上传失败，请重试')
+    }
+
+    insertMd(`![图片描述](${url})`, '')
+    error.value = ''
+  } catch (err) {
+    error.value = err.message || '图片上传失败'
+  } finally {
+    event.target.value = ''
+  }
+}
+
+// 替换原有 error 提示为全局通知
+watch(error, (val) => {
+  if (val) {
+    notificationSystem.value?.show(val, 'error')
+    error.value = ''
+  }
+})
 </script>
 
 <style scoped>
@@ -413,7 +445,8 @@ function insertList(prefix) {
   gap: 1rem;
 }
 
-.draft-btn, .publish-btn {
+.draft-btn,
+.publish-btn {
   padding: 0.625rem 1.5rem;
   border-radius: 6px;
   font-weight: 500;
@@ -449,7 +482,8 @@ function insertList(prefix) {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.draft-btn:disabled, .publish-btn:disabled {
+.draft-btn:disabled,
+.publish-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
@@ -530,7 +564,8 @@ function insertList(prefix) {
   gap: 0.5rem;
 }
 
-.change-btn, .remove-btn {
+.change-btn,
+.remove-btn {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.5);
@@ -540,7 +575,8 @@ function insertList(prefix) {
   transition: all 0.3s ease;
 }
 
-.change-btn:hover, .remove-btn:hover {
+.change-btn:hover,
+.remove-btn:hover {
   background: rgba(0, 0, 0, 0.7);
 }
 
@@ -605,7 +641,9 @@ function insertList(prefix) {
   margin: 0 4px;
 }
 
-.mode-btn.active, .preview-btn.active, .sync-btn.active {
+.mode-btn.active,
+.preview-btn.active,
+.sync-btn.active {
   background: var(--secondary-color);
   color: white;
   border-color: var(--secondary-color);
@@ -680,7 +718,8 @@ function insertList(prefix) {
     justify-content: stretch;
   }
 
-  .draft-btn, .publish-btn {
+  .draft-btn,
+  .publish-btn {
     flex: 1;
     justify-content: center;
   }
@@ -688,7 +727,7 @@ function insertList(prefix) {
   .markdown-editor {
     min-height: 400px;
   }
-  
+
   .toolbar {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -696,37 +735,37 @@ function insertList(prefix) {
     padding: 8px;
     gap: 4px;
   }
-  
+
   .toolbar::-webkit-scrollbar {
     height: 4px;
   }
-  
+
   .toolbar::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: 2px;
   }
-  
+
   .toolbar button {
     padding: 6px 8px;
     min-width: 32px;
     height: 32px;
     font-size: 0.9rem;
   }
-  
+
   .toolbar-group {
     flex-shrink: 0;
     gap: 4px;
   }
-  
+
   .edit-preview-container {
     grid-template-columns: 1fr;
     height: 500px;
   }
-  
+
   .preview {
     display: none;
   }
-  
+
   .markdown-input {
     border-right: none;
     padding: 1rem;

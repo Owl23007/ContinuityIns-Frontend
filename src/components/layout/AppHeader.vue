@@ -29,18 +29,32 @@
       </div>
 
       <div class="header_button">
-        <router-link to="/article" class="no-underline">
+        <router-link to="/explore" class="no-underline">
           <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
-              d="M39 4H11C9.89543 4 9 4.89543 9 6V42C9 43.1046 9.89543 44 11 44H39C40.1046 44 41 43.1046 41 42V6C41 4.89543 40.1046 4 39 4Z"
-              fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M17 30L31 30" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <path d="M17 36H24" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-            <rect x="17" y="12" width="14" height="10" fill="none" stroke="currentColor" stroke-width="4"
-              stroke-linecap="round" stroke-linejoin="round" />
+              d="M41.0002 41L32.6573 32.657M32.6573 32.657C35.0119 30.3024 36.4002 27.029 36.4002 23.5C36.4002 16.2827 30.6175 10.5 23.4002 10.5C16.183 10.5 10.4002 16.2827 10.4002 23.5C10.4002 30.7173 16.183 36.5 23.4002 36.5C26.9292 36.5 30.2027 35.1117 32.6573 32.657Z"
+              stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M26.5 23.5C26.5 25.2132 25.1132 26.6 23.4 26.6C21.6868 26.6 20.3 25.2132 20.3 23.5C20.3 21.7868 21.6868 20.4 23.4 20.4C25.1132 20.4 26.5 21.7868 26.5 23.5Z"
+              fill="currentColor" />
+            <path d="M23.4002 16.5V12.5M23.4002 34.5V30.5M34.4002 23.5H30.4002M16.4002 23.5H12.4002"
+              stroke="currentColor" stroke-width="4" stroke-linecap="round" />
           </svg>
-          文章
+          探索
+        </router-link>
+      </div>
+
+      <div class="header_button">
+        <router-link to="/community" class="no-underline">
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M42 8H6C4.89543 8 4 8.89543 4 10V38C4 39.1046 4.89543 40 6 40H42C43.1046 40 44 39.1046 44 38V10C44 8.89543 43.1046 8 42 8Z"
+              stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+            <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+            <path d="M24 14V24L31 28" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          社区
         </router-link>
       </div>
 
@@ -149,19 +163,37 @@
             stroke-linejoin="round" />
         </svg>
       </router-link>
-      <router-link to="/article" class="mobile-menu-item" @click="closeMobileMenu">
+      <router-link to="/explore" class="mobile-menu-item" @click="closeMobileMenu">
         <div class="menu-item-content">
           <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
-              d="M39 4H11C9.89543 4 9 4.89543 9 6V42C9 43.1046 9.89543 44 11 44H39C40.1046 44 41 43.1046 41 42V6C41 4.89543 40.1046 4 39 4Z"
-              fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M17 30L31 30" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <path d="M17 36H24" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-            <rect x="17" y="12" width="14" height="10" fill="none" stroke="currentColor" stroke-width="4"
-              stroke-linecap="round" stroke-linejoin="round" />
+              d="M41.0002 41L32.6573 32.657M32.6573 32.657C35.0119 30.3024 36.4002 27.029 36.4002 23.5C36.4002 16.2827 30.6175 10.5 23.4002 10.5C16.183 10.5 10.4002 16.2827 10.4002 23.5C10.4002 30.7173 16.183 36.5 23.4002 36.5C26.9292 36.5 30.2027 35.1117 32.6573 32.657Z"
+              stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M26.5 23.5C26.5 25.2132 25.1132 26.6 23.4 26.6C21.6868 26.6 20.3 25.2132 20.3 23.5C20.3 21.7868 21.6868 20.4 23.4 20.4C25.1132 20.4 26.5 21.7868 26.5 23.5Z"
+              fill="currentColor" />
+            <path d="M23.4002 16.5V12.5M23.4002 34.5V30.5M34.4002 23.5H30.4002M16.4002 23.5H12.4002"
+              stroke="currentColor" stroke-width="4" stroke-linecap="round" />
           </svg>
-          <span>文章</span>
+          <span>探索</span>
+        </div>
+        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </router-link>
+      <router-link to="/community" class="mobile-menu-item" @click="closeMobileMenu">
+        <div class="menu-item-content">
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M42 8H6C4.89543 8 4 8.89543 4 10V38C4 39.1046 4.89543 40 6 40H42C43.1046 40 44 39.1046 44 38V10C44 8.89543 43.1046 8 42 8Z"
+              stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+            <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+            <path d="M24 14V24L31 28" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          <span>社区</span>
         </div>
         <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
           xmlns="http://www.w3.org/2000/svg">

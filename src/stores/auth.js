@@ -74,7 +74,7 @@ export const useAuthStore = defineStore('auth', {
       
       //   更新用户信息
       try {
-        const res = await updateUserInfo_put(this.token, nickname, signature);
+        const res = await updateUserInfo_put( nickname, signature);
         if (res.code === 0) {
           //  更新用户数据，使用新的昵称和签名
           this.setUser({ ...this.user, nickname, signature });

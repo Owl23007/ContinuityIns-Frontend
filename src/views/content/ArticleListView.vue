@@ -77,24 +77,22 @@
     </div>
 
     <!-- 错误提示 -->
-    <div v-if="error" class="error-message">
+    <div v-if="error" class="error-message" @click="retryFetch">
       <span class="error-icon">!</span>
       {{ error }}
+      <span class="retry-text">点击刷新</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { getMyArticles_get, deleteArticle_delete } from '@/api/article'
 import { ArticleStatus } from '@/pojo/article'
 import ArticleCard from './components/article-detail-card.vue'
+import { getMyArticlesList_get } from '../../api/article'
+import { onBeforeRouteUpdate } from 'vue-router'
 
-
-const router = useRouter()
-const authStore = useAuthStore()
 const articles = ref([])
 const loading = ref(true)
 const error = ref('')
@@ -102,6 +100,7 @@ const currentStatus = ref('')
 const showDeleteConfirm = ref(false)
 const articleToDelete = ref(null)
 const isDeleting = ref(false)
+const page = ref(1)
 
 const filteredArticles = computed(() => {
   if (!currentStatus.value) {
@@ -124,32 +123,44 @@ const statusLabel = computed(() => {
 
 // 设置状态过滤器
 const setStatus = (status) => {
+  if (currentStatus.value === status) return
   currentStatus.value = status
-  fetchArticles()
+  fetchArticles(true)
 }
 
 // 获取文章列表
-const fetchArticles = async () => {
+const fetchArticles = async (resetPage = true) => {
+  if (resetPage) {
+    page.value = 1
+  }
   loading.value = true
   error.value = ''
   try {
-    const response = await getMyArticlesList_get()
-    // 确保文章数据格式正确
-    articles.value = response.data?.map(article => ({
+    const response = await getMyArticlesList_get(page.value)
+    if (!response || !response.data) {
+      throw new Error('获取文章数据失败')
+    }
+    const articlesArr = Array.isArray(response.data) ? response.data : []
+    articles.value = articlesArr.map(article => ({
       ...article,
       id: article.articleId || article.id,
-      createTime: article.createTime ? new Date(article.createTime).getTime() : Date.now(),
-      status: article.status || ArticleStatus.DRAFT
-    })) || []
-    // 按创建时间降序排序
-    articles.value.sort((a, b) => b.createTime - a.createTime)
+      createTime: new Date(article.createTime || Date.now()).getTime(),
+      status: article.status || ArticleStatus.DRAFT,
+      title: article.title || '无标题'
+    })).sort((a, b) => b.createTime - a.createTime)
   } catch (err) {
-    error.value = err.message || '获取文章列表失败'
     console.error('获取文章列表失败:', err)
+    error.value = '获取文章列表失败，请稍后再试'
     articles.value = []
   } finally {
     loading.value = false
   }
+}
+
+// 新增重试加载方法
+const retryFetch = () => {
+  error.value = ''
+  fetchArticles(true)
 }
 
 // 打开删除确认框
@@ -183,7 +194,13 @@ const deleteArticle = async () => {
 
 // 初始化
 onMounted(() => {
+  fetchArticles(true)
+})
+
+// 添加路由更新守卫
+onBeforeRouteUpdate((to, from, next) => {
   fetchArticles()
+  next()
 })
 </script>
 
@@ -433,6 +450,7 @@ onMounted(() => {
   gap: 10px;
   z-index: 1003;
   animation: fadeIn 0.2s;
+  cursor: pointer;
 }
 
 .error-icon {
@@ -446,6 +464,18 @@ onMounted(() => {
   justify-content: center;
   font-weight: bold;
   font-size: 1.1rem;
+}
+
+.retry-text {
+  font-size: 0.9rem;
+  margin-left: 8px;
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+.error-message:hover {
+  background: #fff0ed;
+  transform: translateY(-1px);
 }
 
 @keyframes fadeIn {
