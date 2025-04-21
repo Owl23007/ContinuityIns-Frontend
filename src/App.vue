@@ -11,16 +11,16 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import DefaultLayout from '@/components/layout/DefaultLayout.vue'
-import AuthLayout from '@/components/layout/AuthLayout.vue'
+import { computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import DefaultLayout from "@/components/layout/DefaultLayout.vue";
+import AuthLayout from "@/components/layout/AuthLayout.vue";
 
-const route = useRoute()
+const route = useRoute();
 const layout = computed(() => {
-  const layoutName = route.meta.layout || 'DefaultLayout'
-  return layoutName === 'AuthLayout' ? AuthLayout : DefaultLayout
-})
+  const layoutName = route.meta.layout || "DefaultLayout";
+  return layoutName === "AuthLayout" ? AuthLayout : DefaultLayout;
+});
 </script>
 
 <style>
@@ -73,13 +73,18 @@ const layout = computed(() => {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  transition: background-color 0.3s ease,
+  transition:
+    background-color 0.3s ease,
     color 0.3s ease,
     box-shadow 0.3s ease;
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
   line-height: 1.6;
   background: var(--background-color);
   color: var(--text-color);

@@ -8,14 +8,34 @@
       </div>
       <div v-else class="message-container">
         <div v-if="success" class="status-message success">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            />
           </svg>
           <p>验证成功！2秒后将跳转到首页...</p>
         </div>
         <div v-if="error" class="status-message error">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
           <p>{{ errorMessage }} 2秒后将跳转到登录页...</p>
         </div>
@@ -25,47 +45,48 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
 
-const route = useRoute()
-const router = useRouter()
-const email = ref(route.query.email)
-const token = ref(route.query.token)
-const loading = ref(true)
-const success = ref(false)
-const error = ref(false)
-const errorMessage = ref('')
+const route = useRoute();
+const router = useRouter();
+const email = ref(route.query.email);
+const token = ref(route.query.token);
+const loading = ref(true);
+const success = ref(false);
+const error = ref(false);
+const errorMessage = ref("");
 
 const verifyEmail = async () => {
-  const baseUrl = import.meta.env.VITE_APP_BASE_API
-  const url = `${baseUrl}/user/active?email=${email.value}&token=${token.value}`
+  const baseUrl = import.meta.env.VITE_APP_BASE_API;
+  const url = `${baseUrl}/user/active?email=${email.value}&token=${token.value}`;
 
   try {
-    const response = await axios.get(url)
+    const response = await axios.get(url);
     if (response.data.code === 0) {
-      success.value = true
+      success.value = true;
       setTimeout(() => {
-        router.push('/')
-      }, 2000)
+        router.push("/");
+      }, 2000);
     } else {
-      throw new Error(response.data.message || '验证失败，请重试。')
+      throw new Error(response.data.message || "验证失败，请重试。");
     }
   } catch (err) {
-    error.value = true
-    errorMessage.value = err.response?.data?.message || err.message || '验证失败，请重试。'
+    error.value = true;
+    errorMessage.value =
+      err.response?.data?.message || err.message || "验证失败，请重试。";
     setTimeout(() => {
-      router.push('/')
-    }, 2000)
+      router.push("/");
+    }, 2000);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 onMounted(() => {
-  verifyEmail()
-})
+  verifyEmail();
+});
 </script>
 
 <style scoped>

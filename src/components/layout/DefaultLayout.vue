@@ -6,18 +6,18 @@
         <slot></slot>
       </div>
     </main>
-    <app-footer v-if="!isChat"/>
+    <app-footer v-if="!isChat" />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import AppHeader from './AppHeader.vue'
-import AppFooter from './AppFooter.vue'
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import AppHeader from "./AppHeader.vue";
+import AppFooter from "./AppFooter.vue";
 
-const route = useRoute()
-const isChat = computed(() => route.path === '/chat')
+const route = useRoute();
+const isChat = computed(() => route.path === "/chat");
 </script>
 
 <style>
@@ -43,9 +43,9 @@ const isChat = computed(() => route.path === '/chat')
   margin-top: var(--header-height);
   min-height: calc(100vh - var(--header-height));
   position: relative;
-  display: flex; 
-  flex-direction: column; 
-  overflow-x: hidden; 
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 .container {
@@ -53,9 +53,9 @@ const isChat = computed(() => route.path === '/chat')
   max-width: 100%;
   margin: 0;
   padding: 0;
-  flex: 1; 
-  display: flex; 
-  flex-direction: column; 
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 1279px) {
@@ -70,12 +70,12 @@ const isChat = computed(() => route.path === '/chat')
     --padding-x: 0;
     --footer-height: 160px;
   }
-  
+
   .container {
     width: 100%;
     padding: 0;
   }
-  
+
   .main-content {
     padding: 0;
   }

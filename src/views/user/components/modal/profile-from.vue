@@ -3,60 +3,68 @@
     <div class="form-group">
       <label for="nickname">昵称</label>
       <div class="input-container">
-        <input 
+        <input
           id="nickname"
-          type="text" 
-          v-model="form.nickname" 
+          type="text"
+          v-model="form.nickname"
           maxlength="20"
-          placeholder="请输入昵称">
+          placeholder="请输入昵称"
+        />
         <span class="char-counter">{{ form.nickname.length }}/20</span>
       </div>
     </div>
-    
+
     <div class="form-group">
       <label for="signature">个性签名</label>
       <div class="input-container">
-        <textarea 
+        <textarea
           id="signature"
-          v-model="form.signature" 
+          v-model="form.signature"
           maxlength="100"
-          placeholder="写点什么吧..."></textarea>
+          placeholder="写点什么吧..."
+        ></textarea>
         <span class="char-counter">{{ form.signature.length }}/100</span>
       </div>
     </div>
-    
+
     <div class="form-actions">
-      <button type="button" @click="$emit('cancel')" class="cancel-btn">取消</button>
-      <button type="submit" class="submit-btn" :disabled="isSubmitting || !hasChanges">
-        {{ isSubmitting ? '保存中...' : '保存' }}
+      <button type="button" @click="$emit('cancel')" class="cancel-btn">
+        取消
+      </button>
+      <button
+        type="submit"
+        class="submit-btn"
+        :disabled="isSubmitting || !hasChanges"
+      >
+        {{ isSubmitting ? "保存中..." : "保存" }}
       </button>
     </div>
   </form>
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed } from "vue";
 
 const props = defineProps({
   nickname: {
     type: String,
-    default: ''
+    default: "",
   },
   signature: {
     type: String,
-    default: ''
+    default: "",
   },
   isSubmitting: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
-const emits = defineEmits(['update', 'cancel']);
+const emits = defineEmits(["update", "cancel"]);
 
 const form = reactive({
   nickname: props.nickname,
-  signature: props.signature
+  signature: props.signature,
 });
 
 const hasChanges = computed(() => {
@@ -65,10 +73,10 @@ const hasChanges = computed(() => {
 
 function handleSubmit() {
   if (!hasChanges.value || props.isSubmitting) return;
-  
-  emits('update', {
+
+  emits("update", {
     nickname: form.nickname.trim(),
-    signature: form.signature.trim()
+    signature: form.signature.trim(),
   });
 }
 </script>

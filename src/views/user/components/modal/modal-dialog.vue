@@ -1,11 +1,26 @@
 <template>
-  <div class="modal-overlay" @mousedown="handleBackdropClick" ref="modalBackdrop">
+  <div
+    class="modal-overlay"
+    @mousedown="handleBackdropClick"
+    ref="modalBackdrop"
+  >
     <div class="modal-container" :class="theme">
       <div class="modal-header">
-        <h2 class="modal-title" :class="{ danger: theme === 'danger' }">{{ title }}</h2>
+        <h2 class="modal-title" :class="{ danger: theme === 'danger' }">
+          {{ title }}
+        </h2>
         <button class="close-button" @click="$emit('close')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -19,41 +34,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 
 defineProps({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   theme: {
     type: String,
-    default: 'default'
-  }
+    default: "default",
+  },
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 const modalBackdrop = ref(null);
 const isCropping = ref(false);
 let cropperElement = null;
 
 // 添加监听器，检测是否在裁剪器上按下鼠标
 onMounted(() => {
-  document.addEventListener('mousedown', startCropTracking);
-  document.addEventListener('mouseup', endCropTracking);
+  document.addEventListener("mousedown", startCropTracking);
+  document.addEventListener("mouseup", endCropTracking);
 
   // 延迟一下，确保模态框内容已渲染
   nextTick(() => {
     // 查找裁剪器元素（带有cropper类的元素）
     if (modalBackdrop.value) {
-      cropperElement = modalBackdrop.value.querySelector('.cropper-container');
+      cropperElement = modalBackdrop.value.querySelector(".cropper-container");
     }
   });
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', startCropTracking);
-  document.removeEventListener('mouseup', endCropTracking);
+  document.removeEventListener("mousedown", startCropTracking);
+  document.removeEventListener("mouseup", endCropTracking);
 });
 
 // 当开始在裁剪器上操作时设置标志
@@ -73,7 +88,7 @@ function handleBackdropClick(event) {
   // 如果点击的是背景遮罩本身，并且不是在裁剪过程中，则关闭模态框
   if (event.target === modalBackdrop.value && !isCropping.value) {
     event.preventDefault();
-    emit('close');
+    emit("close");
   }
 }
 </script>

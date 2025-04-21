@@ -1,10 +1,27 @@
 <template>
-  <div class="avatar-uploader" v-if="!selectedFile && !isUploading" @click="triggerFileInput"
-    @dragenter.prevent="handleDragEnter" @dragleave.prevent="handleDragLeave" @dragover.prevent
-    @drop.prevent="handleDrop" :class="{ 'dragging': isDragging }">
+  <div
+    class="avatar-uploader"
+    v-if="!selectedFile && !isUploading"
+    @click="triggerFileInput"
+    @dragenter.prevent="handleDragEnter"
+    @dragleave.prevent="handleDragLeave"
+    @dragover.prevent
+    @drop.prevent="handleDrop"
+    :class="{ dragging: isDragging }"
+  >
     <div class="upload-instructions">
-      <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        class="upload-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="17 8 12 3 7 8"></polyline>
         <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -12,13 +29,27 @@
       <p class="upload-text">点击或拖拽图片到这里上传</p>
       <p class="upload-hint">支持 JPG, PNG 格式图片</p>
     </div>
-    <input type="file" ref="fileInput" accept="image/jpeg,image/png" @change="handleFileSelect" class="file-input" />
+    <input
+      type="file"
+      ref="fileInput"
+      accept="image/jpeg,image/png"
+      @change="handleFileSelect"
+      class="file-input"
+    />
   </div>
 
   <!-- 图片剪切区域 -->
   <div v-if="selectedFile && !isUploading" class="cropper-area">
-    <image-cropper :image-file="selectedFile" :aspect-ratio="1" :circular-crop="true" :min-width="100" :min-height="100"
-      :lock-aspect-ratio="true" @crop-complete="handleCropComplete" @cancel="resetUpload" />
+    <image-cropper
+      :image-file="selectedFile"
+      :aspect-ratio="1"
+      :circular-crop="true"
+      :min-width="100"
+      :min-height="100"
+      :lock-aspect-ratio="true"
+      @crop-complete="handleCropComplete"
+      @cancel="resetUpload"
+    />
   </div>
 
   <div v-if="isUploading" class="uploading-feedback">
@@ -27,8 +58,17 @@
   </div>
 
   <div class="upload-error" v-if="uploadError">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#e74c3c"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="8" x2="12" y2="12"></line>
       <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -39,30 +79,30 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useAuthStore } from '@/stores/auth';
-import ImageCropper from '@/components/common/ImageCropper.vue';
-import { uploadFile, validateFile } from '@/api/file';
+import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import ImageCropper from "@/components/common/ImageCropper.vue";
+import { uploadFile, validateFile } from "@/api/file";
 
 const authStore = useAuthStore();
 
-const emit = defineEmits(['avatar-updated', 'cancel']);
+const emit = defineEmits(["avatar-updated", "cancel"]);
 
 const props = defineProps({
   isSubmitting: {
     type: Boolean,
-    default: false
+    default: false,
   },
   token: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const isUploading = ref(false);
-const uploadError = ref('');
+const uploadError = ref("");
 const isDragging = ref(false);
 
 // 触发文件选择框
@@ -75,9 +115,9 @@ function handleFileSelect(event) {
   const file = event.target.files[0];
   if (file) {
     try {
-      validateFile(file, 'avatar');
+      validateFile(file, "avatar");
       selectedFile.value = file;
-      uploadError.value = '';
+      uploadError.value = "";
     } catch (error) {
       uploadError.value = error.message;
     }
@@ -100,9 +140,9 @@ function handleDrop(e) {
   const file = e.dataTransfer.files[0];
   if (file) {
     try {
-      validateFile(file, 'avatar');
+      validateFile(file, "avatar");
       selectedFile.value = file;
-      uploadError.value = '';
+      uploadError.value = "";
     } catch (error) {
       uploadError.value = error.message;
     }
@@ -112,26 +152,26 @@ function handleDrop(e) {
 // 处理裁剪完成
 async function handleCropComplete(cropResult) {
   if (!cropResult || !cropResult.file) {
-    uploadError.value = '图片处理失败';
+    uploadError.value = "图片处理失败";
     return;
   }
 
   if (!props.token) {
-    uploadError.value = '未登录，请重新登录后再试';
+    uploadError.value = "未登录，请重新登录后再试";
     return;
   }
 
   isUploading.value = true;
-  uploadError.value = '';
+  uploadError.value = "";
 
   try {
     const { url: accessUrl } = await uploadFile(cropResult.file, "avatar");
     await authStore.updateAvatar(accessUrl);
-    emit('avatar-updated');
+    emit("avatar-updated");
     return;
   } catch (error) {
-    console.error('上传头像失败:', error);
-    uploadError.value = error.message || '上传失败，请重试';
+    console.error("上传头像失败:", error);
+    uploadError.value = error.message || "上传失败，请重试";
   } finally {
     isUploading.value = false;
   }
@@ -140,9 +180,9 @@ async function handleCropComplete(cropResult) {
 // 重置上传状态
 function resetUpload() {
   selectedFile.value = null;
-  uploadError.value = '';
+  uploadError.value = "";
   if (fileInput.value) {
-    fileInput.value.value = '';
+    fileInput.value.value = "";
   }
 }
 </script>
@@ -268,7 +308,6 @@ function resetUpload() {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(231, 76, 60, 0.2);
 }
-
 
 .file-input {
   display: none;

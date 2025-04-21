@@ -19,139 +19,145 @@
       :class="['smart-button', { 'abort-mode': disabled }]"
       @click="handleClick"
     >
-      {{ disabled ? '停止生成' : '发送消息' }}
+      {{ disabled ? "停止生成" : "发送消息" }}
     </button>
   </form>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick } from "vue";
 
 const props = defineProps({
   disabled: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const emit = defineEmits(['submit', 'abort'])
+const emit = defineEmits(["submit", "abort"]);
 
-const inputValue = ref('')
-const textareaRef = ref(null)
-const messageHistory = ref([])
-const currentHistoryIndex = ref(-1)
-const tempInput = ref('') // 存储未发送的输入
+const inputValue = ref("");
+const textareaRef = ref(null);
+const messageHistory = ref([]);
+const currentHistoryIndex = ref(-1);
+const tempInput = ref(""); // 存储未发送的输入
 
 const handleSubmit = () => {
-  if (props.disabled || !inputValue.value.trim()) return
-  
+  if (props.disabled || !inputValue.value.trim()) return;
+
   // 添加到历史记录
-  messageHistory.value.unshift(inputValue.value.trim())
+  messageHistory.value.unshift(inputValue.value.trim());
   // 限制历史记录数量，防止占用过多内存
   if (messageHistory.value.length > 50) {
-    messageHistory.value.pop()
+    messageHistory.value.pop();
   }
-  
-  emit('submit', inputValue.value.trim())
-  inputValue.value = ''
-  currentHistoryIndex.value = -1 // 重置历史记录索引
-  tempInput.value = '' // 清空临时输入
-  adjustHeight()
-}
+
+  emit("submit", inputValue.value.trim());
+  inputValue.value = "";
+  currentHistoryIndex.value = -1; // 重置历史记录索引
+  tempInput.value = ""; // 清空临时输入
+  adjustHeight();
+};
 
 const handleClick = () => {
   if (props.disabled) {
-    emit('abort')
+    emit("abort");
   } else {
-    handleSubmit()
+    handleSubmit();
   }
-}
+};
 
 const handleEnter = () => {
   if (!props.disabled && inputValue.value.trim()) {
-    handleSubmit()
+    handleSubmit();
   }
-}
+};
 
 const scrollToMessage = (index) => {
-  const messages = document.querySelectorAll('.message')
+  const messages = document.querySelectorAll(".message");
   if (messages && messages.length > 0) {
     // 计算需要滚动到的消息的位置
     // 用户消息在数组中是交替出现的，所以索引需要乘2
-    const targetIndex = messages.length - 1 - (index * 2)
+    const targetIndex = messages.length - 1 - index * 2;
     if (targetIndex >= 0 && messages[targetIndex]) {
-      messages[targetIndex].scrollIntoView({ behavior: 'smooth', block: 'center' })
+      messages[targetIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   }
-}
+};
 
 const showPreviousMessage = () => {
-  if (messageHistory.value.length === 0) return
-  
+  if (messageHistory.value.length === 0) return;
+
   if (currentHistoryIndex.value === -1) {
     // 保存当前未发送的输入
-    tempInput.value = inputValue.value
+    tempInput.value = inputValue.value;
   }
-  
+
   currentHistoryIndex.value = Math.min(
     currentHistoryIndex.value + 1,
-    messageHistory.value.length - 1
-  )
-  
-  inputValue.value = messageHistory.value[currentHistoryIndex.value]
+    messageHistory.value.length - 1,
+  );
+
+  inputValue.value = messageHistory.value[currentHistoryIndex.value];
   nextTick(() => {
-    adjustHeight()
+    adjustHeight();
     // 将光标移动到末尾
-    const textarea = textareaRef.value
-    textarea.selectionStart = textarea.selectionEnd = textarea.value.length
+    const textarea = textareaRef.value;
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
     // 滚动到对应的消息
-    scrollToMessage(currentHistoryIndex.value)
-  })
-}
+    scrollToMessage(currentHistoryIndex.value);
+  });
+};
 
 const showNextMessage = () => {
-  if (currentHistoryIndex.value === -1) return
-  
-  currentHistoryIndex.value--
-  
+  if (currentHistoryIndex.value === -1) return;
+
+  currentHistoryIndex.value--;
+
   if (currentHistoryIndex.value === -1) {
     // 恢复未发送的输入
-    inputValue.value = tempInput.value
+    inputValue.value = tempInput.value;
   } else {
-    inputValue.value = messageHistory.value[currentHistoryIndex.value]
+    inputValue.value = messageHistory.value[currentHistoryIndex.value];
   }
-  
+
   nextTick(() => {
-    adjustHeight()
+    adjustHeight();
     // 将光标移动到末尾
-    const textarea = textareaRef.value
-    textarea.selectionStart = textarea.selectionEnd = textarea.value.length
+    const textarea = textareaRef.value;
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
     // 如果不是恢复到编辑状态，滚动到对应消息
     if (currentHistoryIndex.value !== -1) {
-      scrollToMessage(currentHistoryIndex.value)
+      scrollToMessage(currentHistoryIndex.value);
     }
-  })
-}
+  });
+};
 
 const insertNewline = () => {
-  const textarea = textareaRef.value
-  const start = textarea.selectionStart
-  const end = textarea.selectionEnd
+  const textarea = textareaRef.value;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
 
-  inputValue.value = inputValue.value.substring(0, start) + '\n' + inputValue.value.substring(end)
+  inputValue.value =
+    inputValue.value.substring(0, start) +
+    "\n" +
+    inputValue.value.substring(end);
   nextTick(() => {
-    textarea.selectionStart = textarea.selectionEnd = start + 1
-    adjustHeight()
-  })
-}
+    textarea.selectionStart = textarea.selectionEnd = start + 1;
+    adjustHeight();
+  });
+};
 
 const adjustHeight = () => {
   nextTick(() => {
-    const textarea = textareaRef.value
-    textarea.style.height = 'auto'
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
-  })
-}
+    const textarea = textareaRef.value;
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+  });
+};
 </script>
 
 <style scoped>

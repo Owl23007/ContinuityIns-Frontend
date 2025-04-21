@@ -1,8 +1,13 @@
 <template>
   <div class="message" :class="[role, { loading }]">
     <div class="avatar">
-      <img v-if="role === 'user'" :src="userAvatar" alt="用户头像" @error="handleAvatarError">
-      <img v-else :src="botAvatar" alt="AI头像">
+      <img
+        v-if="role === 'user'"
+        :src="userAvatar"
+        alt="用户头像"
+        @error="handleAvatarError"
+      />
+      <img v-else :src="botAvatar" alt="AI头像" />
     </div>
     <div class="message-content">
       <div v-if="loading" class="loading-animation">
@@ -26,14 +31,28 @@
                 <div class="thinking-dot"></div>
                 <div class="thinking-dot"></div>
               </div>
-              <svg v-else class="arrow-icon" :class="{ expanded: isReasoningExpanded }"
-                xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                v-else
+                class="arrow-icon"
+                :class="{ expanded: isReasoningExpanded }"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M6 9l6 6 6-6" />
               </svg>
             </div>
           </div>
-          <div class="reasoning-content" :class="{ expanded: isReasoningExpanded || isThinking }">
+          <div
+            class="reasoning-content"
+            :class="{ expanded: isReasoningExpanded || isThinking }"
+          >
             <div class="markdown-body" v-html="renderedReasoning"></div>
           </div>
         </div>
@@ -46,86 +65,94 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUpdated } from 'vue'
-import { renderMarkdownWithCopy } from '@/utils/markdown'
-import { initCodeCopy } from '@/utils/copy'
-import defaultAvatar from '@/assets/image/default_avatar.png'
-import botAvatar from '@/assets/image/ai-girl.png'
-import { useAuthStore } from '@/stores/auth'
+import { ref, computed, watch, onMounted, onUpdated } from "vue";
+import { renderMarkdownWithCopy } from "@/utils/markdown";
+import { initCodeCopy } from "@/utils/copy";
+import defaultAvatar from "@/assets/image/default_avatar.png";
+import botAvatar from "@/assets/image/ai-girl.png";
+import { useAuthStore } from "@/stores/auth";
 
 const props = defineProps({
   role: {
     type: String,
-    required: true
+    required: true,
   },
   content: {
     type: String,
-    default: ''
+    default: "",
   },
   reasoning: {
     type: String,
-    default: ''
+    default: "",
   },
   loading: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const authStore = useAuthStore()
-const userAvatar = computed(() => authStore.currentUser.avatarImage || defaultAvatar)
+const authStore = useAuthStore();
+const userAvatar = computed(
+  () => authStore.currentUser.avatarImage || defaultAvatar,
+);
 
 const handleAvatarError = (e) => {
-  e.target.src = defaultAvatar
-}
+  e.target.src = defaultAvatar;
+};
 
-const isReasoningExpanded = ref(false)
-const isThinking = ref(false)
-const reasoningTime = ref('')
-const reasoningStartTime = ref(null)
+const isReasoningExpanded = ref(false);
+const isThinking = ref(false);
+const reasoningTime = ref("");
+const reasoningStartTime = ref(null);
 
 const toggleReasoning = () => {
   if (!isThinking.value) {
-    isReasoningExpanded.value = !isReasoningExpanded.value
+    isReasoningExpanded.value = !isReasoningExpanded.value;
   }
-}
+};
 
 const calculateThinkingTime = () => {
-  if (!reasoningStartTime.value) return
-  const duration = Date.now() - reasoningStartTime.value
+  if (!reasoningStartTime.value) return;
+  const duration = Date.now() - reasoningStartTime.value;
   if (duration < 1000) {
-    reasoningTime.value = '思考时间: <1秒'
+    reasoningTime.value = "思考时间: <1秒";
   } else {
-    reasoningTime.value = `思考时间: ${Math.round(duration / 1000)}秒`
+    reasoningTime.value = `思考时间: ${Math.round(duration / 1000)}秒`;
   }
-}
+};
 
 // 监听reasoning的变化
-watch(() => props.reasoning, (newVal, oldVal) => {
-  // 开始有新的思考内容
-  if (newVal && !oldVal) {
-    reasoningStartTime.value = Date.now()
-    isThinking.value = true
-    reasoningTime.value = ''  // 清除之前的思考时间
-  }
-  // 思考完成
-  if (newVal && oldVal && newVal !== oldVal && !newVal.endsWith('...')) {
-    isThinking.value = false
-    calculateThinkingTime()
-  }
-}, { immediate: true })
+watch(
+  () => props.reasoning,
+  (newVal, oldVal) => {
+    // 开始有新的思考内容
+    if (newVal && !oldVal) {
+      reasoningStartTime.value = Date.now();
+      isThinking.value = true;
+      reasoningTime.value = ""; // 清除之前的思考时间
+    }
+    // 思考完成
+    if (newVal && oldVal && newVal !== oldVal && !newVal.endsWith("...")) {
+      isThinking.value = false;
+      calculateThinkingTime();
+    }
+  },
+  { immediate: true },
+);
 
-const renderedContent = computed(() => renderMarkdownWithCopy(props.content))
-const renderedReasoning = computed(() => renderMarkdownWithCopy(props.reasoning))
+const renderedContent = computed(() => renderMarkdownWithCopy(props.content));
+const renderedReasoning = computed(() =>
+  renderMarkdownWithCopy(props.reasoning),
+);
 
 // 在内容更新后初始化复制按钮功能
 onMounted(() => {
-  initCodeCopy()
-})
+  initCodeCopy();
+});
 
 onUpdated(() => {
-  initCodeCopy()
-})
+  initCodeCopy();
+});
 </script>
 
 <style scoped>
@@ -215,7 +242,6 @@ onUpdated(() => {
 }
 
 @keyframes bounce {
-
   0%,
   80%,
   100% {
@@ -307,7 +333,6 @@ onUpdated(() => {
 }
 
 @keyframes thinking {
-
   0%,
   80%,
   100% {

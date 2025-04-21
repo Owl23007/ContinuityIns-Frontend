@@ -5,7 +5,7 @@
       <div class="nav_logo_title" @click="tohome">
         <nav>
           <router-link to="/" class="logo no-underline">
-            <img :src="logoPic" alt="logo">
+            <img :src="logoPic" alt="logo" />
             <div class="title-container">
               <span class="nav_title">存续院</span>
             </div>
@@ -18,11 +18,34 @@
     <div class="nav_links">
       <div class="header_button">
         <router-link to="/" class="no-underline">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18V42H39V18L24 6L9 18Z" fill="none" stroke="currentColor" stroke-width="4"
-              stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M19 29V42H29V29H19Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-            <path d="M9 42H39" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 18V42H39V18L24 6L9 18Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M19 29V42H29V29H19Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M9 42H39"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+            />
           </svg>
           主页
         </router-link>
@@ -30,15 +53,30 @@
 
       <div class="header_button">
         <router-link to="/explore" class="no-underline">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M41.0002 41L32.6573 32.657M32.6573 32.657C35.0119 30.3024 36.4002 27.029 36.4002 23.5C36.4002 16.2827 30.6175 10.5 23.4002 10.5C16.183 10.5 10.4002 16.2827 10.4002 23.5C10.4002 30.7173 16.183 36.5 23.4002 36.5C26.9292 36.5 30.2027 35.1117 32.6573 32.657Z"
-              stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
             <path
               d="M26.5 23.5C26.5 25.2132 25.1132 26.6 23.4 26.6C21.6868 26.6 20.3 25.2132 20.3 23.5C20.3 21.7868 21.6868 20.4 23.4 20.4C25.1132 20.4 26.5 21.7868 26.5 23.5Z"
-              fill="currentColor" />
-            <path d="M23.4002 16.5V12.5M23.4002 34.5V30.5M34.4002 23.5H30.4002M16.4002 23.5H12.4002"
-              stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              fill="currentColor"
+            />
+            <path
+              d="M23.4002 16.5V12.5M23.4002 34.5V30.5M34.4002 23.5H30.4002M16.4002 23.5H12.4002"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+            />
           </svg>
           探索
         </router-link>
@@ -46,13 +84,34 @@
 
       <div class="header_button">
         <router-link to="/community" class="no-underline">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M42 8H6C4.89543 8 4 8.89543 4 10V38C4 39.1046 4.89543 40 6 40H42C43.1046 40 44 39.1046 44 38V10C44 8.89543 43.1046 8 42 8Z"
-              stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-            <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-            <path d="M24 14V24L31 28" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-              stroke-linejoin="round" />
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linejoin="round"
+            />
+            <circle
+              cx="24"
+              cy="24"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M24 14V24L31 28"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           社区
         </router-link>
@@ -60,8 +119,16 @@
 
       <div class="header_button">
         <router-link to="/chat" class="no-underline">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M4 8h40v24H13l-9 8V8z" />
           </svg>
           对话
@@ -69,7 +136,7 @@
       </div>
 
       <div class="nav_search">
-        <input type="text" placeholder="世界在你脚下..." class="search_input">
+        <input type="text" placeholder="世界在你脚下..." class="search_input" />
         <button class="search_button">搜索</button>
       </div>
     </div>
@@ -78,8 +145,17 @@
     <div class="nav_right">
       <div class="button-with-icon" v-if="isLoggedIn">
         <router-link to="/submit" class="no-underline">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="17 8 12 3 7 8"></polyline>
             <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -100,7 +176,7 @@
 
     <!--汉堡菜单按钮-->
     <div class="hamburger-menu" @click="toggleMobileMenu">
-      <div class="hamburger-icon" :class="{ 'active': isMobileMenuOpen }">
+      <div class="hamburger-icon" :class="{ active: isMobileMenuOpen }">
         <span></span>
         <span></span>
         <span></span>
@@ -108,26 +184,42 @@
     </div>
 
     <!--移动端菜单-->
-    <div class="mobile-menu" :class="{ 'active': isMobileMenuOpen }">
+    <div class="mobile-menu" :class="{ active: isMobileMenuOpen }">
       <div class="mobile-search">
-        <input type="text" placeholder="世界在你脚下..." class="mobile-search-input">
+        <input
+          type="text"
+          placeholder="世界在你脚下..."
+          class="mobile-search-input"
+        />
         <button class="search_button">搜索</button>
       </div>
 
       <!-- 登录后显示用户信息和直接操作按钮 -->
       <div v-if="isLoggedIn" class="mobile-user-card">
         <div class="mobile-user-info">
-          <el-avatar :size="50" :src="authStore.user.avatarImage">{{ authStore.user.nickname }}</el-avatar>
-          <span class="mobile-username">{{ authStore.user.nickname + " #" + authStore.user.username || '用户' }}</span>
+          <el-avatar :size="50" :src="authStore.user.avatarImage">{{
+            authStore.user.nickname
+          }}</el-avatar>
+          <span class="mobile-username">{{
+            authStore.user.nickname + " #" + authStore.user.username || "用户"
+          }}</span>
         </div>
         <div class="mobile-user-actions">
-          <router-link to="/profile" class="mobile-action-button" @click="closeMobileMenu">
+          <router-link
+            to="/profile"
+            class="mobile-action-button"
+            @click="closeMobileMenu"
+          >
             <el-icon>
               <User />
             </el-icon>
             <span>个人信息</span>
           </router-link>
-          <router-link to="/settings" class="mobile-action-button" @click="closeMobileMenu">
+          <router-link
+            to="/settings"
+            class="mobile-action-button"
+            @click="closeMobileMenu"
+          >
             <el-icon>
               <Setting />
             </el-icon>
@@ -143,94 +235,243 @@
       </div>
 
       <!-- 未登录时显示登录按钮 -->
-      <router-link v-else to="/auth" class="login-button no-underline" @click="closeMobileMenu">
+      <router-link
+        v-else
+        to="/auth"
+        class="login-button no-underline"
+        @click="closeMobileMenu"
+      >
         <span>登录/注册</span>
       </router-link>
 
       <router-link to="/" class="mobile-menu-item" @click="closeMobileMenu">
         <div class="menu-item-content">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18V42H39V18L24 6L9 18Z" fill="none" stroke="currentColor" stroke-width="4"
-              stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M19 29V42H29V29H19Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-            <path d="M9 42H39" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 18V42H39V18L24 6L9 18Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M19 29V42H29V29H19Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M9 42H39"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+            />
           </svg>
           <span>主页</span>
         </div>
-        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
+        <svg
+          class="arrow-icon"
+          width="24"
+          height="24"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M19 12L31 24L19 36"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </router-link>
-      <router-link to="/explore" class="mobile-menu-item" @click="closeMobileMenu">
+      <router-link
+        to="/explore"
+        class="mobile-menu-item"
+        @click="closeMobileMenu"
+      >
         <div class="menu-item-content">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M41.0002 41L32.6573 32.657M32.6573 32.657C35.0119 30.3024 36.4002 27.029 36.4002 23.5C36.4002 16.2827 30.6175 10.5 23.4002 10.5C16.183 10.5 10.4002 16.2827 10.4002 23.5C10.4002 30.7173 16.183 36.5 23.4002 36.5C26.9292 36.5 30.2027 35.1117 32.6573 32.657Z"
-              stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
             <path
               d="M26.5 23.5C26.5 25.2132 25.1132 26.6 23.4 26.6C21.6868 26.6 20.3 25.2132 20.3 23.5C20.3 21.7868 21.6868 20.4 23.4 20.4C25.1132 20.4 26.5 21.7868 26.5 23.5Z"
-              fill="currentColor" />
-            <path d="M23.4002 16.5V12.5M23.4002 34.5V30.5M34.4002 23.5H30.4002M16.4002 23.5H12.4002"
-              stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              fill="currentColor"
+            />
+            <path
+              d="M23.4002 16.5V12.5M23.4002 34.5V30.5M34.4002 23.5H30.4002M16.4002 23.5H12.4002"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+            />
           </svg>
           <span>探索</span>
         </div>
-        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
+        <svg
+          class="arrow-icon"
+          width="24"
+          height="24"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M19 12L31 24L19 36"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </router-link>
-      <router-link to="/community" class="mobile-menu-item" @click="closeMobileMenu">
+      <router-link
+        to="/community"
+        class="mobile-menu-item"
+        @click="closeMobileMenu"
+      >
         <div class="menu-item-content">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M42 8H6C4.89543 8 4 8.89543 4 10V38C4 39.1046 4.89543 40 6 40H42C43.1046 40 44 39.1046 44 38V10C44 8.89543 43.1046 8 42 8Z"
-              stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-            <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
-            <path d="M24 14V24L31 28" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-              stroke-linejoin="round" />
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linejoin="round"
+            />
+            <circle
+              cx="24"
+              cy="24"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M24 14V24L31 28"
+              stroke="currentColor"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           <span>社区</span>
         </div>
-        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
+        <svg
+          class="arrow-icon"
+          width="24"
+          height="24"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M19 12L31 24L19 36"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </router-link>
       <router-link to="/chat" class="mobile-menu-item" @click="closeMobileMenu">
         <div class="menu-item-content">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M4 8h40v24H13l-9 8V8z" />
           </svg>
           <span>对话</span>
         </div>
-        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
+        <svg
+          class="arrow-icon"
+          width="24"
+          height="24"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M19 12L31 24L19 36"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </router-link>
 
       <!-- 投稿按钮 - 仅在登录状态显示 -->
-      <router-link v-if="isLoggedIn" to="/submit" class="mobile-menu-item" @click="closeMobileMenu">
+      <router-link
+        v-if="isLoggedIn"
+        to="/submit"
+        class="mobile-menu-item"
+        @click="closeMobileMenu"
+      >
         <div class="menu-item-content">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="17 8 12 3 7 8"></polyline>
             <line x1="12" y1="3" x2="12" y2="15"></line>
           </svg>
           <span>投稿</span>
         </div>
-        <svg class="arrow-icon" width="24" height="24" viewBox="0 0 48 48" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 12L31 24L19 36" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
+        <svg
+          class="arrow-icon"
+          width="24"
+          height="24"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M19 12L31 24L19 36"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </router-link>
     </div>
@@ -238,37 +479,37 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import UserDropdown from '@/components/layout/UserDropdown.vue'
-import logoPic from '@/assets/svg/logo.svg'
-import { User, Setting, SwitchButton } from '@element-plus/icons-vue'
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+import UserDropdown from "@/components/layout/UserDropdown.vue";
+import logoPic from "@/assets/svg/logo.svg";
+import { User, Setting, SwitchButton } from "@element-plus/icons-vue";
 
-const authStore = useAuthStore()
-const router = useRouter()
-const isLoggedIn = computed(() => authStore.isAuthenticated)
+const authStore = useAuthStore();
+const router = useRouter();
+const isLoggedIn = computed(() => authStore.isAuthenticated);
 
 const tohome = () => {
-  router.push('/')
-}
+  router.push("/");
+};
 
-const isMobileMenuOpen = ref(false)
+const isMobileMenuOpen = ref(false);
 
 const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value
-  document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : ''
-}
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  document.body.style.overflow = isMobileMenuOpen.value ? "hidden" : "";
+};
 
 const closeMobileMenu = () => {
-  isMobileMenuOpen.value = false
-  document.body.style.overflow = ''
-}
+  isMobileMenuOpen.value = false;
+  document.body.style.overflow = "";
+};
 
 const handleLogout = () => {
-  authStore.logout()
-  closeMobileMenu()
-}
+  authStore.logout();
+  closeMobileMenu();
+};
 </script>
 
 <style scoped>
@@ -326,7 +567,7 @@ const handleLogout = () => {
 
 .nav_title {
   font-size: 1.5rem;
-  font-family: 'Montserrat', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: "Montserrat", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-weight: 550;
   letter-spacing: 0.5px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -342,10 +583,10 @@ const handleLogout = () => {
 }
 
 .nav_title::after {
-  content: 'Contins';
+  content: "Contins";
   font-size: 1.6rem;
   font-weight: 700;
-  font-family: 'Poppins', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: "Poppins", "PingFang SC", "Microsoft YaHei", sans-serif;
   opacity: 0.9;
   letter-spacing: 1px;
   background: linear-gradient(90deg, #007cf0, #00dfd8);
@@ -504,7 +745,7 @@ const handleLogout = () => {
 }
 
 .login-button:before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -548,7 +789,11 @@ const handleLogout = () => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(18, 194, 233, 0.1), rgba(196, 113, 237, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(18, 194, 233, 0.1),
+    rgba(196, 113, 237, 0.1)
+  );
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
@@ -557,7 +802,11 @@ const handleLogout = () => {
 
 .hamburger-menu:hover {
   transform: scale(1.05);
-  background: linear-gradient(135deg, rgba(18, 194, 233, 0.2), rgba(196, 113, 237, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(18, 194, 233, 0.2),
+    rgba(196, 113, 237, 0.2)
+  );
   box-shadow: 0 0 15px rgba(18, 194, 233, 0.15);
 }
 
@@ -755,7 +1004,7 @@ const handleLogout = () => {
 }
 
 .mobile-menu .search_button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -794,7 +1043,11 @@ const handleLogout = () => {
   margin-bottom: 1.8rem;
   padding: 1.5rem;
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(18, 194, 233, 0.05), rgba(196, 113, 237, 0.08));
+  background: linear-gradient(
+    135deg,
+    rgba(18, 194, 233, 0.05),
+    rgba(196, 113, 237, 0.08)
+  );
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
@@ -865,7 +1118,11 @@ const handleLogout = () => {
 }
 
 .mobile-action-button:hover {
-  background: linear-gradient(135deg, rgba(18, 194, 233, 0.1), rgba(196, 113, 237, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(18, 194, 233, 0.1),
+    rgba(196, 113, 237, 0.1)
+  );
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(18, 194, 233, 0.1);
 }

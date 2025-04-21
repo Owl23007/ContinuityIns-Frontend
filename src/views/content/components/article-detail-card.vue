@@ -1,9 +1,16 @@
 <template>
-  <div class="article-card-horizontal" :class="[`status-${(article.status || '').toLowerCase()}`]">
+  <div
+    class="article-card-horizontal"
+    :class="[`status-${(article.status || '').toLowerCase()}`]"
+  >
     <!-- 封面图片 -->
     <div class="cover-container-horizontal">
-      <img :src="article.coverImg || default_cover" alt="文章封面" class="cover-image-horizontal"
-        @error="handleImageError" />
+      <img
+        :src="article.coverImg || default_cover"
+        alt="文章封面"
+        class="cover-image-horizontal"
+        @error="handleImageError"
+      />
       <span class="article-status" v-if="statusText">{{ statusText }}</span>
     </div>
 
@@ -36,41 +43,41 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { ArticleStatus } from '@/pojo/article';
-import default_cover from '@/assets/image/default_cover.png';
-import image_fail from '@/assets/image/image_fail_load.png';
+import { computed } from "vue";
+import { ArticleStatus } from "@/pojo/article";
+import default_cover from "@/assets/image/default_cover.png";
+import image_fail from "@/assets/image/image_fail_load.png";
 
 const props = defineProps({
   article: {
     type: Object,
     required: true,
     default: () => ({
-      id: '',
-      title: '',
-      content: '',
-      coverImg: '',
-      status: '',
+      id: "",
+      title: "",
+      content: "",
+      coverImg: "",
+      status: "",
       createTime: null,
       createUser: null,
       duration: null,
-      coverImgFail: ''
+      coverImgFail: "",
     }),
   },
 });
 
 // 动态状态文本
 const statusText = computed(() => {
-  if (!ArticleStatus) return ''; // Fallback if ArticleStatus is undefined
+  if (!ArticleStatus) return ""; // Fallback if ArticleStatus is undefined
   switch (props.article.status) {
     case ArticleStatus.DRAFT:
-      return '草稿';
+      return "草稿";
     case ArticleStatus.PRIVATE:
-      return '私密';
+      return "私密";
     case ArticleStatus.BANNED:
-      return '已禁用';
+      return "已禁用";
     default:
-      return '';
+      return "";
   }
 });
 
@@ -84,7 +91,7 @@ const handleImageError = (e) => {
 
 // 格式化日期
 const formatDate = (timestamp) => {
-  if (!timestamp || isNaN(new Date(timestamp).getTime())) return '';
+  if (!timestamp || isNaN(new Date(timestamp).getTime())) return "";
   const date = new Date(timestamp);
   const now = new Date();
   const diff = now - date;
@@ -105,31 +112,33 @@ const formatDate = (timestamp) => {
 
   // 如果超过30天，显示月份和日期
   if (diff < 365 * 24 * 60 * 60 * 1000) {
-    return date.toLocaleDateString('zh-CN', {
-      month: 'long',
-      day: 'numeric',
+    return date.toLocaleDateString("zh-CN", {
+      month: "long",
+      day: "numeric",
     });
   }
 
   // 超过一年，显示完整日期
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return date.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 
 // 获取文章摘要
 const getExcerpt = (content) => {
-  if (!content) return '';
+  if (!content) return "";
   // 移除HTML标签，包括<br>
-  const plainText = content.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
+  const plainText = content
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "");
   // 移除Markdown语法
-  const noMarkdown = plainText.replace(/[#*`_~\[\]]/g, '');
+  const noMarkdown = plainText.replace(/[#*`_~\[\]]/g, "");
   // 移除多余空行
-  const cleanText = noMarkdown.replace(/\n\s*\n/g, '\n').trim();
+  const cleanText = noMarkdown.replace(/\n\s*\n/g, "\n").trim();
   // 截取前100个字符
-  return cleanText.slice(0, 100) + (cleanText.length > 100 ? '...' : '');
+  return cleanText.slice(0, 100) + (cleanText.length > 100 ? "..." : "");
 };
 </script>
 
@@ -142,8 +151,12 @@ const getExcerpt = (content) => {
   border-radius: 18px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 6px 32px rgba(24, 144, 255, 0.07), 0 1.5px 8px rgba(0, 0, 0, 0.04);
-  transition: transform 0.25s, box-shadow 0.25s;
+  box-shadow:
+    0 6px 32px rgba(24, 144, 255, 0.07),
+    0 1.5px 8px rgba(0, 0, 0, 0.04);
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
   border: 1.5px solid #e6f7ff;
   height: 260px;
   /* 增加卡片高度以适应更多内容 */
@@ -153,7 +166,9 @@ const getExcerpt = (content) => {
 
 .article-card-horizontal:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 36px rgba(24, 144, 255, 0.13), 0 2px 12px rgba(0, 0, 0, 0.07);
+  box-shadow:
+    0 12px 36px rgba(24, 144, 255, 0.13),
+    0 2px 12px rgba(0, 0, 0, 0.07);
   border-color: #91d5ff;
 }
 

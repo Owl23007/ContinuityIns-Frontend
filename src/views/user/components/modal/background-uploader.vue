@@ -1,9 +1,23 @@
 <template>
   <div class="background-uploader">
-    <div v-if="!selectedFile && !isUploading" class="file-upload-area" @click="triggerFileInput">
+    <div
+      v-if="!selectedFile && !isUploading"
+      class="file-upload-area"
+      @click="triggerFileInput"
+    >
       <div class="upload-instructions">
-        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
-          fill="none" stroke="#42b983" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="upload-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#42b983"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
           <circle cx="8.5" cy="8.5" r="1.5"></circle>
           <polyline points="21 15 16 10 5 21"></polyline>
@@ -11,13 +25,26 @@
         <p>点击或拖拽图片到这里上传</p>
         <p class="upload-hint">推荐尺寸 1920×1080，支持 JPG, PNG 格式</p>
       </div>
-      <input type="file" ref="fileInput" accept="image/jpeg,image/png" @change="handleFileSelect" class="file-input" />
+      <input
+        type="file"
+        ref="fileInput"
+        accept="image/jpeg,image/png"
+        @change="handleFileSelect"
+        class="file-input"
+      />
     </div>
 
     <!-- 图片剪切区域 -->
     <div v-if="selectedFile && !isUploading" class="cropper-area">
-      <image-cropper :image-file="selectedFile" :aspect-ratio="16 / 9" :min-width="100" :min-height="100"
-        :lock-aspect-ratio="true" @crop-complete="handleCropComplete" @cancel="resetUpload" />
+      <image-cropper
+        :image-file="selectedFile"
+        :aspect-ratio="16 / 9"
+        :min-width="100"
+        :min-height="100"
+        :lock-aspect-ratio="true"
+        @crop-complete="handleCropComplete"
+        @cancel="resetUpload"
+      />
     </div>
 
     <div v-if="isUploading" class="uploading-feedback">
@@ -26,8 +53,17 @@
     </div>
 
     <div class="upload-error" v-if="uploadError">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#e74c3c"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="12" y1="8" x2="12" y2="12"></line>
         <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -39,29 +75,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useAuthStore } from '@/stores/auth';
-import ImageCropper from '@/components/common/ImageCropper.vue';
-import { uploadFile, validateFile } from '@/api/file';
+import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import ImageCropper from "@/components/common/ImageCropper.vue";
+import { uploadFile, validateFile } from "@/api/file";
 
 const authStore = useAuthStore();
-const emit = defineEmits(['background-updated', 'cancel']);
+const emit = defineEmits(["background-updated", "cancel"]);
 
 const props = defineProps({
   isSubmitting: {
     type: Boolean,
-    default: false
+    default: false,
   },
   token: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const isUploading = ref(false);
-const uploadError = ref('');
+const uploadError = ref("");
 
 // 触发文件选择框
 function triggerFileInput() {
@@ -73,9 +109,9 @@ function handleFileSelect(event) {
   const file = event.target.files[0];
   if (file) {
     try {
-      validateFile(file, 'background');
+      validateFile(file, "background");
       selectedFile.value = file;
-      uploadError.value = '';
+      uploadError.value = "";
     } catch (error) {
       uploadError.value = error.message;
     }
@@ -85,26 +121,26 @@ function handleFileSelect(event) {
 // 处理裁剪完成
 async function handleCropComplete(cropResult) {
   if (!cropResult || !cropResult.file) {
-    uploadError.value = '图片处理失败';
+    uploadError.value = "图片处理失败";
     return;
   }
 
   if (!props.token) {
-    uploadError.value = '未登录，请重新登录后再试';
+    uploadError.value = "未登录，请重新登录后再试";
     return;
   }
 
   isUploading.value = true;
-  uploadError.value = '';
+  uploadError.value = "";
 
   try {
     const { url: accessUrl } = await uploadFile(cropResult.file, "background");
     await authStore.updateUserProfile({ backgroundImage: accessUrl });
-    emit('background-updated');
+    emit("background-updated");
     return;
   } catch (error) {
-    console.error('上传背景图片失败:', error);
-    uploadError.value = error.message || '上传失败，请重试';
+    console.error("上传背景图片失败:", error);
+    uploadError.value = error.message || "上传失败，请重试";
   } finally {
     isUploading.value = false;
   }
@@ -113,9 +149,9 @@ async function handleCropComplete(cropResult) {
 // 重置上传状态
 function resetUpload() {
   selectedFile.value = null;
-  uploadError.value = '';
+  uploadError.value = "";
   if (fileInput.value) {
-    fileInput.value.value = '';
+    fileInput.value.value = "";
   }
 }
 </script>

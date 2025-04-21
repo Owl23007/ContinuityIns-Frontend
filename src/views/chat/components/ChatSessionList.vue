@@ -1,14 +1,27 @@
 <template>
   <div class="session-list" :class="{ 'session-list-open': isOpen }">
     <!-- 添加遮罩层，只在isOpen时才显示和捕获事件 -->
-    <div class="session-list-overlay" @click="handleOverlayClick" v-if="isOpen"></div>
+    <div
+      class="session-list-overlay"
+      @click="handleOverlayClick"
+      v-if="isOpen"
+    ></div>
 
     <div class="session-list-content">
       <div class="session-header">
         <h3>聊天记录</h3>
         <button class="new-chat-btn" @click="createNewChat" title="新建对话">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
@@ -17,15 +30,35 @@
       </div>
 
       <div class="sessions-container">
-        <div v-for="session in sessions" :key="session.id" class="session-item"
-          :class="{ active: currentSessionId === session.id }" @click="switchSession(session.id)">
+        <div
+          v-for="session in sessions"
+          :key="session.id"
+          class="session-item"
+          :class="{ active: currentSessionId === session.id }"
+          @click="switchSession(session.id)"
+        >
           <div class="session-info">
             <span class="session-title">{{ session.title }}</span>
-            <span class="session-time">{{ formatTime(session.updatedAt) }}</span>
+            <span class="session-time">{{
+              formatTime(session.updatedAt)
+            }}</span>
           </div>
-          <button class="delete-btn" @click.stop="deleteSession(session.id)" title="删除对话">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button
+            class="delete-btn"
+            @click.stop="deleteSession(session.id)"
+            title="删除对话"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M3 6h18"></path>
               <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
               <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -38,71 +71,77 @@
 </template>
 
 <script setup>
-import { useChatStore } from '@/stores/chat'
-import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { useChatStore } from "@/stores/chat";
+import { storeToRefs } from "pinia";
+import { computed } from "vue";
 
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const emit = defineEmits(['session-switched'])
+const emit = defineEmits(["session-switched"]);
 
-const chatStore = useChatStore()
-const { chatSessions, currentSessionId } = storeToRefs(chatStore)
+const chatStore = useChatStore();
+const { chatSessions, currentSessionId } = storeToRefs(chatStore);
 
 const sessions = computed(() => {
-  return chatSessions.value.sort((a, b) =>
-    new Date(b.updatedAt) - new Date(a.updatedAt)
-  )
-})
+  return chatSessions.value.sort(
+    (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+  );
+});
 
 function createNewChat() {
-  chatStore.createNewSession()
-  emit('session-switched')
+  chatStore.createNewSession();
+  emit("session-switched");
 }
 
 function switchSession(sessionId) {
   // 通知父组件进行会话切换，父组件会处理确认逻辑
-  emit('session-switched', sessionId)
+  emit("session-switched", sessionId);
 }
 
 function deleteSession(sessionId) {
-  if (confirm('确定要删除这个对话吗？')) {
-    chatStore.deleteSession(sessionId)
+  if (confirm("确定要删除这个对话吗？")) {
+    chatStore.deleteSession(sessionId);
   }
 }
 
 function formatTime(timestamp) {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now - date
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now - date;
 
   // 如果是今天
   if (diff < 24 * 60 * 60 * 1000 && date.getDate() === now.getDate()) {
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleTimeString("zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
   // 如果是昨天
   else if (diff < 48 * 60 * 60 * 1000 && date.getDate() === now.getDate() - 1) {
-    return '昨天'
+    return "昨天";
   }
   // 如果是本周
   else if (diff < 7 * 24 * 60 * 60 * 1000) {
-    const days = ['日', '一', '二', '三', '四', '五', '六']
-    return '星期' + days[date.getDay()]
+    const days = ["日", "一", "二", "三", "四", "五", "六"];
+    return "星期" + days[date.getDay()];
   }
   // 其他情况显示完整日期
   else {
-    return date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })
+    return date.toLocaleDateString("zh-CN", {
+      month: "numeric",
+      day: "numeric",
+    });
   }
 }
 
 // 添加遮罩层点击处理
 function handleOverlayClick() {
-  emit('session-switched')
+  emit("session-switched");
 }
 </script>
 

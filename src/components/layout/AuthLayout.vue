@@ -2,7 +2,7 @@
   <div class="auth-layout">
     <div class="logo-container">
       <router-link to="/">
-        <img :src="logoPic" alt="logo">
+        <img :src="logoPic" alt="logo" />
         <span class="site-name">存续院</span>
       </router-link>
     </div>
@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import logoPic from '@/assets/svg/logo.svg'
+import logoPic from "@/assets/svg/logo.svg";
 </script>
 
 <style scoped>
@@ -53,7 +53,11 @@ import logoPic from '@/assets/svg/logo.svg'
   height: 200%;
   top: -50%;
   left: -50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 8%, transparent 8%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.07) 8%,
+    transparent 8%
+  );
   background-size: 25px 25px;
   transform: rotate(30deg);
   animation: moveBackground 60s linear infinite;
@@ -127,7 +131,6 @@ import logoPic from '@/assets/svg/logo.svg'
 }
 
 .logo-container a:hover img {
-
   transform: rotate(-5deg);
 }
 
@@ -180,8 +183,6 @@ import logoPic from '@/assets/svg/logo.svg'
 
 /* 平板电脑布局 */
 @media (max-width: 768px) {
-
-
   .auth-content {
     width: min(92%, 500px);
     margin: 0 auto;
@@ -218,7 +219,6 @@ import logoPic from '@/assets/svg/logo.svg'
 
 /* 确保在小屏幕设备上的触摸友好性 */
 @media (hover: none) and (pointer: coarse) {
-
   .logo-container a,
   .auth-content button {
     padding: 0.5rem;
@@ -231,7 +231,6 @@ import logoPic from '@/assets/svg/logo.svg'
 
 /* 处理横屏模式 */
 @media (max-height: 600px) and (orientation: landscape) {
-
   .logo-container {
     margin-bottom: 1rem;
   }

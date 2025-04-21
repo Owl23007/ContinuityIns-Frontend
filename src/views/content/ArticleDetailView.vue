@@ -4,7 +4,12 @@
     <ArticleError v-else-if="error" :error="error" @retry="fetchArticle" />
     <template v-else>
       <div class="article-horizontal-layout">
-        <ArticleSidebar :article="article" :authorInfo="authorInfo" :isAuthor="isAuthor" @edit="editArticle" />
+        <ArticleSidebar
+          :article="article"
+          :authorInfo="authorInfo"
+          :isAuthor="isAuthor"
+          @edit="editArticle"
+        />
         <ArticleContent :article="article" :renderedContent="renderedContent" />
       </div>
     </template>
@@ -12,16 +17,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getArticleById_get } from '@/api/article';
-import { getUserById_get } from '@/api/user';
-import { renderMarkdown } from '@/utils/markdown';
-import { useAuthStore } from '@/stores/auth';
-import ArticleSidebar from './components/article-sidebar.vue';
-import ArticleContent from './components/article-content.vue';
-import ArticleLoading from './components/article-loading.vue';
-import ArticleError from './components/article-error.vue';
+import { ref, onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { getArticleById_get } from "@/api/article";
+import { getUserById_get } from "@/api/user";
+import { renderMarkdown } from "@/utils/markdown";
+import { useAuthStore } from "@/stores/auth";
+import ArticleSidebar from "./components/article-sidebar.vue";
+import ArticleContent from "./components/article-content.vue";
+import ArticleLoading from "./components/article-loading.vue";
+import ArticleError from "./components/article-error.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -29,17 +34,17 @@ const authStore = useAuthStore();
 
 const article = ref(null);
 const loading = ref(true);
-const error = ref('');
+const error = ref("");
 const authorInfo = ref(null);
 
 // 获取文章详情
 const fetchArticle = async () => {
   loading.value = true;
-  error.value = '';
+  error.value = "";
   try {
     const response = await getArticleById_get(route.params.id);
     if (!response.data) {
-      error.value = '文章不存在或已被删除';
+      error.value = "文章不存在或已被删除";
       return;
     }
     article.value = response.data;
@@ -48,8 +53,8 @@ const fetchArticle = async () => {
       await fetchAuthorInfo(article.value.createUser.id);
     }
   } catch (err) {
-    error.value = err.message || '获取文章失败';
-    console.error('获取文章失败:', err);
+    error.value = err.message || "获取文章失败";
+    console.error("获取文章失败:", err);
   } finally {
     loading.value = false;
   }
@@ -63,14 +68,17 @@ const fetchAuthorInfo = async (userId) => {
       authorInfo.value = response.data;
     }
   } catch (err) {
-    console.error('获取作者信息失败:', err);
+    console.error("获取作者信息失败:", err);
   }
 };
 
 // 渲染Markdown内容
 const renderedContent = computed(() => {
-  if (!article.value?.content) return '';
-  if (article.value.content.includes('<br>') && !article.value.content.includes('```')) {
+  if (!article.value?.content) return "";
+  if (
+    article.value.content.includes("<br>") &&
+    !article.value.content.includes("```")
+  ) {
     return article.value.content;
   }
   return renderMarkdown(article.value.content);
@@ -84,8 +92,8 @@ const isAuthor = computed(() => {
 // 编辑文章
 const editArticle = () => {
   router.push({
-    name: 'articleEdit',
-    params: { id: article.value.id }
+    name: "articleEdit",
+    params: { id: article.value.id },
   });
 };
 

@@ -10,44 +10,60 @@
 
     <div class="form-group password-input">
       <label for="confirm-password">请输入密码确认操作</label>
-      <input id="confirm-password" v-model="password" type="password" placeholder="输入您的登录密码" :disabled="isSubmitting">
+      <input
+        id="confirm-password"
+        v-model="password"
+        type="password"
+        placeholder="输入您的登录密码"
+        :disabled="isSubmitting"
+      />
       <p v-if="error" class="error-message">{{ error }}</p>
     </div>
 
     <div class="confirm-text notice-text">
       <label>
-        <input type="checkbox" v-model="confirmed" :disabled="isSubmitting">
+        <input type="checkbox" v-model="confirmed" :disabled="isSubmitting" />
         我确认注销此账户
       </label>
     </div>
 
     <div class="form-actions actions">
-      <button type="button" class="cancel-btn" @click="$emit('cancel')" :disabled="isSubmitting">
+      <button
+        type="button"
+        class="cancel-btn"
+        @click="$emit('cancel')"
+        :disabled="isSubmitting"
+      >
         取消
       </button>
-      <button type="button" class="danger-btn confirm-btn" @click="handleDelete" :disabled="!canDelete || isSubmitting">
+      <button
+        type="button"
+        class="danger-btn confirm-btn"
+        @click="handleDelete"
+        :disabled="!canDelete || isSubmitting"
+      >
         <span v-if="isSubmitting" class="loader"></span>
-        <span v-else>{{ '注销账户' }}</span>
+        <span v-else>{{ "注销账户" }}</span>
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed } from "vue";
 
 const props = defineProps({
   isSubmitting: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
-const emit = defineEmits(['delete-account', 'cancel']);
+const emit = defineEmits(["delete-account", "cancel"]);
 
-const password = ref('');
+const password = ref("");
 const confirmed = ref(false);
-const error = ref('');
+const error = ref("");
 
 const canDelete = computed(() => {
   return password.value.length > 0 && confirmed.value;
@@ -56,13 +72,13 @@ const canDelete = computed(() => {
 function handleDelete() {
   if (!canDelete.value || props.isSubmitting) return;
 
-  error.value = '';
+  error.value = "";
   if (password.value.length < 6) {
-    error.value = '密码格式不正确';
+    error.value = "密码格式不正确";
     return;
   }
 
-  emit('delete-account', password.value);
+  emit("delete-account", password.value);
 }
 </script>
 
@@ -182,16 +198,18 @@ function handleDelete() {
 }
 
 .confirm-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(120deg,
-      transparent,
-      rgba(255, 255, 255, 0.3),
-      transparent);
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
   transition: 0.5s;
 }
 

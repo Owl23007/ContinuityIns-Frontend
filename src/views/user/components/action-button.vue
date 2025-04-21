@@ -2,7 +2,11 @@
   <div class="profile-actions">
     <!-- 主要操作按钮 -->
     <div class="main-actions">
-      <el-dropdown v-if="isOwnProfile" trigger="click" class="settings-dropdown">
+      <el-dropdown
+        v-if="isOwnProfile"
+        trigger="click"
+        class="settings-dropdown"
+      >
         <button class="primary-btn">
           <i class="fas fa-cog"></i>
           账户设置
@@ -19,16 +23,25 @@
             <el-dropdown-item @click="$emit('change-background')">
               <i class="fas fa-image"></i> 更换背景
             </el-dropdown-item>
-            <el-dropdown-item divided @click="$emit('delete-account')" class="danger-item">
+            <el-dropdown-item
+              divided
+              @click="$emit('delete-account')"
+              class="danger-item"
+            >
               <i class="fas fa-trash-alt"></i> 注销账户
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
 
-      <button v-else class="follow-btn" :class="{ 'is-following': isFollowing }" @click="handleFollow">
+      <button
+        v-else
+        class="follow-btn"
+        :class="{ 'is-following': isFollowing }"
+        @click="handleFollow"
+      >
         <i :class="isFollowing ? 'fas fa-user-check' : 'fas fa-user-plus'"></i>
-        {{ isFollowing ? '已关注' : '关注' }}
+        {{ isFollowing ? "已关注" : "关注" }}
       </button>
     </div>
 
@@ -57,7 +70,12 @@
         <div v-if="favorites.length === 0" class="empty-favorites">
           暂无收藏内容
         </div>
-        <div v-else v-for="item in favorites.slice(0, 4)" :key="item.id" class="favorite-item">
+        <div
+          v-else
+          v-for="item in favorites.slice(0, 4)"
+          :key="item.id"
+          class="favorite-item"
+        >
           <i class="fas fa-bookmark"></i>
           <span>{{ item.title }}</span>
         </div>
@@ -67,36 +85,36 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ref, defineProps, defineEmits } from "vue";
+import { ElMessage } from "element-plus";
 
 const props = defineProps({
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isOwnProfile: {
     type: Boolean,
-    default: false
+    default: false,
   },
   userId: {
     type: [String, Number],
-    required: true
-  }
+    required: true,
+  },
 });
 
 const emits = defineEmits([
-  'edit-profile',
-  'change-background',
-  'delete-account',
-  'change-avatar'
+  "edit-profile",
+  "change-background",
+  "delete-account",
+  "change-avatar",
 ]);
 
 const isFollowing = ref(false);
 const stats = ref({
   articles: 0,
   followers: 0,
-  following: 0
+  following: 0,
 });
 
 const favorites = ref([]);
@@ -104,7 +122,7 @@ const favorites = ref([]);
 const handleFollow = () => {
   // 关注/取消关注的逻辑
   isFollowing.value = !isFollowing.value;
-  ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注');
+  ElMessage.success(isFollowing.value ? "关注成功" : "已取消关注");
 };
 
 const showFollowers = () => {

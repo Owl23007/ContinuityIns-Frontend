@@ -1,7 +1,16 @@
 <template>
   <Teleport to="body">
-    <transition-group name="notification" tag="div" class="notification-container">
-      <div v-for="notification in notifications" :key="notification.id" class="notification" :class="notification.type">
+    <transition-group
+      name="notification"
+      tag="div"
+      class="notification-container"
+    >
+      <div
+        v-for="notification in notifications"
+        :key="notification.id"
+        class="notification"
+        :class="notification.type"
+      >
         <span class="notification-icon">{{ getIcon(notification.type) }}</span>
         <span class="notification-message">{{ notification.message }}</span>
         <button class="notification-close" @click="close(notification.id)">
@@ -13,19 +22,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 
 const notifications = ref([]);
 let nextId = 1;
 
 // 显示通知
-function show(message, type = 'info', duration = 3000) {
+function show(message, type = "info", duration = 3000) {
   const id = nextId++;
 
   const notification = {
     id,
     message,
-    type
+    type,
   };
 
   notifications.value.push(notification);
@@ -42,7 +51,7 @@ function show(message, type = 'info', duration = 3000) {
 
 // 关闭通知
 function close(id) {
-  const index = notifications.value.findIndex(n => n.id === id);
+  const index = notifications.value.findIndex((n) => n.id === id);
   if (index !== -1) {
     notifications.value.splice(index, 1);
   }
@@ -51,18 +60,22 @@ function close(id) {
 // 根据类型获取图标
 function getIcon(type) {
   switch (type) {
-    case 'success': return '✓';
-    case 'error': return '✗';
-    case 'warning': return '⚠';
-    case 'info':
-    default: return 'ℹ';
+    case "success":
+      return "✓";
+    case "error":
+      return "✗";
+    case "warning":
+      return "⚠";
+    case "info":
+    default:
+      return "ℹ";
   }
 }
 
 // 暴露方法给父组件
 defineExpose({
   show,
-  close
+  close,
 });
 </script>
 

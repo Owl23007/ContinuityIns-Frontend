@@ -1,10 +1,21 @@
 <template>
-  <article class="article-card" :class="`status-${article.status.toLowerCase()}`" @click="handleCardClick">
+  <article
+    class="article-card"
+    :class="`status-${article.status.toLowerCase()}`"
+    @click="handleCardClick"
+  >
     <!-- 封面图片 -->
     <div class="cover-container">
-      <img :src="article.coverImg || default_cover" alt="文章封面" class="cover-image" @error="handleImageError" />
+      <img
+        :src="article.coverImg || default_cover"
+        alt="文章封面"
+        class="cover-image"
+        @error="handleImageError"
+      />
       <span class="article-status" v-if="statusText">{{ statusText }}</span>
-      <span class="video-duration" v-if="article.videoDuration">{{ article.videoDuration }}</span>
+      <span class="video-duration" v-if="article.videoDuration">{{
+        article.videoDuration
+      }}</span>
     </div>
 
     <!-- 文章内容 -->
@@ -16,106 +27,105 @@
       <div class="meta-info">
         <span class="publish-time">{{ formatDate(article.createTime) }}</span>
         <span class="divider">·</span>
-        <span class="word-count">{{ article.duration || '1' }}字</span>
-
+        <span class="word-count">{{ article.duration || "1" }}字</span>
       </div>
     </div>
   </article>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { ArticleStatus } from '@/pojo/article'
-import imageFail from '@/assets/image/image_fail_load.png'
-import default_cover from '@/assets/image/default_cover.png'
+import { computed } from "vue";
+import { useRouter } from "vue-router";
+import { ArticleStatus } from "@/pojo/article";
+import imageFail from "@/assets/image/image_fail_load.png";
+import default_cover from "@/assets/image/default_cover.png";
 
 const props = defineProps({
   article: {
     type: Object,
     required: true,
     default: () => ({
-      id: '',
-      title: '',
-      coverImg: '',
-      status: '',
+      id: "",
+      title: "",
+      coverImg: "",
+      status: "",
       createTime: null,
       duration: null,
       views: 0,
-      videoDuration: ''
-    })
-  }
-})
+      videoDuration: "",
+    }),
+  },
+});
 
-const emit = defineEmits(['click'])
+const emit = defineEmits(["click"]);
 
-const router = useRouter()
+const router = useRouter();
 
 const statusText = computed(() => {
   switch (props.article.status) {
     case ArticleStatus.DRAFT:
-      return '草稿'
+      return "草稿";
     case ArticleStatus.PRIVATE:
-      return '私密'
+      return "私密";
     case ArticleStatus.BANNED:
-      return '已禁用'
+      return "已禁用";
     default:
-      return ''
+      return "";
   }
-})
+});
 
 // 处理图片加载失败
 const handleImageError = (e) => {
-  e.target.src = imageFail
-}
+  e.target.src = imageFail;
+};
 
 // 处理卡片点击
 const handleCardClick = () => {
   if (props.article?.id) {
     router.push({
-      name: 'articleDetail',
-      params: { id: props.article.id }
-    })
+      name: "articleDetail",
+      params: { id: props.article.id },
+    });
   }
-}
+};
 
 // 格式化日期
 const formatDate = (timestamp) => {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now - date
+  if (!timestamp) return "";
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now - date;
 
   // 如果是今天发布的
   if (diff < 24 * 60 * 60 * 1000) {
-    const hours = Math.floor(diff / (60 * 60 * 1000))
+    const hours = Math.floor(diff / (60 * 60 * 1000));
     if (hours < 1) {
-      const minutes = Math.floor(diff / (60 * 1000))
-      return `${minutes}分钟前`
+      const minutes = Math.floor(diff / (60 * 1000));
+      return `${minutes}分钟前`;
     }
-    return `${hours}小时前`
+    return `${hours}小时前`;
   }
 
   // 如果是最近7天发布的
   if (diff < 7 * 24 * 60 * 60 * 1000) {
-    const days = Math.floor(diff / (24 * 60 * 60 * 1000))
-    return `${days}天前`
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+    return `${days}天前`;
   }
   // 如果是今年内发布的
   if (date.getFullYear() === now.getFullYear()) {
-    return date.toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric'
-    })
+    return date.toLocaleDateString("zh-CN", {
+      month: "short",
+      day: "numeric",
+    });
   }
 
   // 否则显示完整日期
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
-}
+  return date.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 </script>
 
 <style scoped>
@@ -127,7 +137,9 @@ const formatDate = (timestamp) => {
   overflow: hidden;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
   border: 1px solid #f0f0f0;
   cursor: pointer;
 }
