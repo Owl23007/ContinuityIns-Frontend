@@ -71,24 +71,24 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { View, Picture, ChatDotRound, ThumbUp } from "@element-plus/icons-vue";
-import default_cover from "@/assets/image/default_cover.png";
-import image_fail from "@/assets/image/image_fail_load.png";
+import { computed } from 'vue'
+import { View, Picture, ChatDotRound, ThumbUp } from '@element-plus/icons-vue'
+import default_cover from '@/assets/image/default_cover.png'
+import image_fail from '@/assets/image/image_fail_load.png'
 
 const props = defineProps({
   article: {
     type: Object,
     required: true,
     default: () => ({
-      article_id: "",
-      title: "",
-      content: "",
-      coverImg: "",
-      status: "PUBLISHED",
+      article_id: '',
+      title: '',
+      content: '',
+      coverImg: '',
+      status: 'PUBLISHED',
       create_time: null,
       update_time: null,
-      user_id: "",
+      user_id: '',
       view_count: 0,
       comment_count: 0,
       like_count: 0,
@@ -98,97 +98,95 @@ const props = defineProps({
       word_count: 0,
     }),
   },
-});
+})
 
 // 处理图片加载失败
 const handleImageError = (e) => {
   if (!e.target.dataset.errorHandled) {
-    e.target.src = image_fail;
-    e.target.dataset.errorHandled = true;
+    e.target.src = image_fail
+    e.target.dataset.errorHandled = true
   }
-};
+}
 
 // 获取状态类型
 const getStatusType = (status) => {
   switch (status) {
-    case "DRAFT":
-      return "info";
-    case "PUBLISHED":
-      return "success";
-    case "PRIVATE":
-      return "warning";
-    case "BANNED":
-      return "danger";
+    case 'DRAFT':
+      return 'info'
+    case 'PUBLISHED':
+      return 'success'
+    case 'PRIVATE':
+      return 'warning'
+    case 'BANNED':
+      return 'danger'
     default:
-      return "info";
+      return 'info'
   }
-};
+}
 
 // 获取状态文本
 const getStatusText = (status) => {
   switch (status) {
-    case "DRAFT":
-      return "草稿";
-    case "PUBLISHED":
-      return "已发布";
-    case "PRIVATE":
-      return "私密";
-    case "BANNED":
-      return "已禁用";
+    case 'DRAFT':
+      return '草稿'
+    case 'PUBLISHED':
+      return '已发布'
+    case 'PRIVATE':
+      return '私密'
+    case 'BANNED':
+      return '已禁用'
     default:
-      return "未知";
+      return '未知'
   }
-};
+}
 
 // 格式化日期
 const formatDate = (timestamp) => {
-  if (!timestamp || isNaN(new Date(timestamp).getTime())) return "";
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diff = now - date;
+  if (!timestamp || isNaN(new Date(timestamp).getTime())) return ''
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diff = now - date
 
   if (diff < 24 * 60 * 60 * 1000) {
-    const hours = Math.floor(diff / (60 * 60 * 1000));
+    const hours = Math.floor(diff / (60 * 60 * 1000))
     if (hours < 1) {
-      const minutes = Math.floor(diff / (60 * 1000));
-      return `${minutes} 分钟前`;
+      const minutes = Math.floor(diff / (60 * 1000))
+      return `${minutes} 分钟前`
     }
-    return `${hours} 小时前`;
+    return `${hours} 小时前`
   }
 
   if (diff < 7 * 24 * 60 * 60 * 1000) {
-    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-    return `${days} 天前`;
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000))
+    return `${days} 天前`
   }
 
   if (diff < 365 * 24 * 60 * 60 * 1000) {
-    return date.toLocaleDateString("zh-CN", {
-      month: "long",
-      day: "numeric",
-    });
+    return date.toLocaleDateString('zh-CN', {
+      month: 'long',
+      day: 'numeric',
+    })
   }
 
-  return date.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
 
 // 获取文章摘要
 const getExcerpt = (content) => {
-  if (!content) return "";
+  if (!content) return ''
   // 移除HTML标签，包括<br>
-  const plainText = content
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]+>/g, "");
+  const plainText = content.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')
   // 移除Markdown语法
-  const noMarkdown = plainText.replace(/[#*`_~\[\]]/g, "");
+  const noMarkdown = plainText.replace(/[#*`_~\[\]]/g, '')
   // 移除多余空行
-  const cleanText = noMarkdown.replace(/\n\s*\n/g, "\n").trim();
+  const cleanText = noMarkdown.replace(/\n\s*\n/g, '\n').trim()
   // 截取前80个字符
-  return cleanText.slice(0, 80) + (cleanText.length > 80 ? "..." : "");
-};
+  return cleanText.slice(0, 80) + (cleanText.length > 80 ? '...' : '')
+}
 </script>
 
 <style scoped>

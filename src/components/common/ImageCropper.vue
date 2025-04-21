@@ -116,21 +116,17 @@
 
     <div class="cropper-actions">
       <button class="btn btn-cancel" @click.stop="$emit('cancel')">取消</button>
-      <button
-        class="btn btn-confirm"
-        @click.stop="crop"
-        :disabled="isCropping || !cropperReady"
-      >
-        {{ isCropping ? "处理中..." : "确认剪切" }}
+      <button class="btn btn-confirm" @click.stop="crop" :disabled="isCropping || !cropperReady">
+        {{ isCropping ? '处理中...' : '确认剪切' }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, computed } from "vue";
-import Cropper from "cropperjs";
-import "cropperjs/dist/cropper.css";
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
+import Cropper from 'cropperjs'
+import 'cropperjs/dist/cropper.css'
 
 const props = defineProps({
   imageFile: {
@@ -157,78 +153,78 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-});
+})
 
-const emit = defineEmits(["crop-complete", "cancel"]);
-const cropperImage = ref(null);
-const cropperWrapper = ref(null);
-const cropper = ref(null);
-const isCropping = ref(false);
-const imageUrl = ref("");
-const cropperReady = ref(false);
-const imageNaturalWidth = ref(0);
-const imageNaturalHeight = ref(0);
+const emit = defineEmits(['crop-complete', 'cancel'])
+const cropperImage = ref(null)
+const cropperWrapper = ref(null)
+const cropper = ref(null)
+const isCropping = ref(false)
+const imageUrl = ref('')
+const cropperReady = ref(false)
+const imageNaturalWidth = ref(0)
+const imageNaturalHeight = ref(0)
 
 // 根据图片尺寸动态计算容器样式
 const containerStyle = computed(() => {
   if (!imageNaturalWidth.value || !imageNaturalHeight.value) {
     return {
-      width: "100%",
-      height: "400px",
-    };
+      width: '100%',
+      height: '400px',
+    }
   }
 
-  const ratio = imageNaturalWidth.value / imageNaturalHeight.value;
-  const maxWidth = 600; // 最大宽度
-  let containerWidth = Math.min(maxWidth, window.innerWidth * 0.9);
-  let containerHeight;
+  const ratio = imageNaturalWidth.value / imageNaturalHeight.value
+  const maxWidth = 600 // 最大宽度
+  let containerWidth = Math.min(maxWidth, window.innerWidth * 0.9)
+  let containerHeight
 
   // 超宽图片（比例大于2:1）
   if (ratio > 2) {
-    containerHeight = Math.min(400, containerWidth / ratio);
+    containerHeight = Math.min(400, containerWidth / ratio)
   }
   // 超高图片（比例小于1:2）
   else if (ratio < 0.5) {
-    containerHeight = Math.min(500, containerWidth / ratio);
+    containerHeight = Math.min(500, containerWidth / ratio)
   }
   // 标准比例图片
   else {
-    containerHeight = Math.min(400, containerWidth / ratio);
+    containerHeight = Math.min(400, containerWidth / ratio)
   }
 
   return {
     width: `${containerWidth}px`,
     height: `${containerHeight}px`,
-  };
-});
+  }
+})
 
 // 创建图片URL
 const createImageUrl = (file) => {
-  if (typeof file === "string") {
-    return file;
+  if (typeof file === 'string') {
+    return file
   } else if (file instanceof File) {
-    return URL.createObjectURL(file);
+    return URL.createObjectURL(file)
   }
-  return "";
-};
+  return ''
+}
 
 // 阻止事件冒泡的函数
 const stopEventPropagation = (e) => {
-  e.stopPropagation();
-};
+  e.stopPropagation()
+}
 
 // 图片加载完成后初始化裁剪器
 const onImageLoaded = () => {
-  if (!cropperImage.value) return;
+  if (!cropperImage.value) return
 
   // 获取图片原始尺寸
-  imageNaturalWidth.value = cropperImage.value.naturalWidth;
-  imageNaturalHeight.value = cropperImage.value.naturalHeight;
+  imageNaturalWidth.value = cropperImage.value.naturalWidth
+  imageNaturalHeight.value = cropperImage.value.naturalHeight
 
   // 确保销毁之前的裁剪实例
   if (cropper.value) {
-    cropper.value.destroy();
-    cropper.value = null;
+    cropper.value.destroy()
+    cropper.value = null
   }
 
   // 初始化Cropper实例
@@ -240,7 +236,7 @@ const onImageLoaded = () => {
       minCropBoxHeight: Math.min(props.minHeight, 50),
       cropBoxResizable: true,
       cropBoxMovable: true,
-      dragMode: "move",
+      dragMode: 'move',
       guides: true,
       highlight: true,
       background: false,
@@ -248,45 +244,45 @@ const onImageLoaded = () => {
       responsive: true,
       toggleDragModeOnDblclick: true,
       ready: () => {
-        cropperReady.value = true;
+        cropperReady.value = true
         // 为cropper元素添加事件监听器阻止事件冒泡
         const cropperElements = document.querySelectorAll(
-          ".cropper-container, .cropper-drag-box, .cropper-face, .cropper-view-box, .cropper-point, .cropper-line",
-        );
+          '.cropper-container, .cropper-drag-box, .cropper-face, .cropper-view-box, .cropper-point, .cropper-line'
+        )
         cropperElements.forEach((el) => {
-          el.addEventListener("mousedown", stopEventPropagation);
-        });
+          el.addEventListener('mousedown', stopEventPropagation)
+        })
       },
-    });
-  }, 100); // 延迟初始化，确保容器尺寸已更新
-};
+    })
+  }, 100) // 延迟初始化，确保容器尺寸已更新
+}
 
 // 监听imageFile变化
 watch(
   () => props.imageFile,
   (newFile) => {
     if (newFile) {
-      cropperReady.value = false;
-      imageNaturalWidth.value = 0;
-      imageNaturalHeight.value = 0;
+      cropperReady.value = false
+      imageNaturalWidth.value = 0
+      imageNaturalHeight.value = 0
 
       // 清除旧的URL对象
-      if (imageUrl.value && imageUrl.value.startsWith("blob:")) {
-        URL.revokeObjectURL(imageUrl.value);
+      if (imageUrl.value && imageUrl.value.startsWith('blob:')) {
+        URL.revokeObjectURL(imageUrl.value)
       }
 
       // 创建新的URL
-      imageUrl.value = createImageUrl(newFile);
+      imageUrl.value = createImageUrl(newFile)
     }
   },
-  { immediate: true },
-);
+  { immediate: true }
+)
 
 // 剪切图片
 const crop = async () => {
-  if (!cropper.value || isCropping.value) return;
+  if (!cropper.value || isCropping.value) return
 
-  isCropping.value = true;
+  isCropping.value = true
 
   try {
     // 获取裁剪的Canvas
@@ -296,122 +292,116 @@ const crop = async () => {
       maxWidth: 4096,
       maxHeight: 4096,
       imageSmoothingEnabled: true,
-      imageSmoothingQuality: "high",
-    });
+      imageSmoothingQuality: 'high',
+    })
 
     if (!canvas) {
-      throw new Error("剪切图片失败");
+      throw new Error('剪切图片失败')
     }
 
     // 如果需要圆形剪切，使用Canvas API绘制圆形
     if (props.circularCrop) {
-      const circularCanvas = document.createElement("canvas");
-      const ctx = circularCanvas.getContext("2d");
-      const width = canvas.width;
-      const height = canvas.height;
+      const circularCanvas = document.createElement('canvas')
+      const ctx = circularCanvas.getContext('2d')
+      const width = canvas.width
+      const height = canvas.height
 
-      circularCanvas.width = width;
-      circularCanvas.height = height;
+      circularCanvas.width = width
+      circularCanvas.height = height
 
-      ctx.beginPath();
-      ctx.arc(
-        width / 2,
-        height / 2,
-        Math.min(width, height) / 2,
-        0,
-        Math.PI * 2,
-      );
-      ctx.closePath();
-      ctx.clip();
+      ctx.beginPath()
+      ctx.arc(width / 2, height / 2, Math.min(width, height) / 2, 0, Math.PI * 2)
+      ctx.closePath()
+      ctx.clip()
 
-      ctx.drawImage(canvas, 0, 0, width, height);
+      ctx.drawImage(canvas, 0, 0, width, height)
 
       canvas.toBlob((blob) => {
         if (blob) {
-          const croppedFile = new File([blob], "cropped-image.png", {
-            type: "image/png",
-          });
-          emit("crop-complete", {
+          const croppedFile = new File([blob], 'cropped-image.png', {
+            type: 'image/png',
+          })
+          emit('crop-complete', {
             file: croppedFile,
-            dataUrl: circularCanvas.toDataURL("image/png"),
-          });
-          isCropping.value = false;
+            dataUrl: circularCanvas.toDataURL('image/png'),
+          })
+          isCropping.value = false
         }
-      }, "image/png");
+      }, 'image/png')
     } else {
       // 直接使用矩形剪切结果
       canvas.toBlob((blob) => {
         if (blob) {
-          const croppedFile = new File([blob], "cropped-image.png", {
-            type: "image/png",
-          });
-          emit("crop-complete", {
+          const croppedFile = new File([blob], 'cropped-image.png', {
+            type: 'image/png',
+          })
+          emit('crop-complete', {
             file: croppedFile,
-            dataUrl: canvas.toDataURL("image/png"),
-          });
-          isCropping.value = false;
+            dataUrl: canvas.toDataURL('image/png'),
+          })
+          isCropping.value = false
         }
-      }, "image/png");
+      }, 'image/png')
     }
   } catch (error) {
-    console.error("剪切图片时出错:", error);
-    isCropping.value = false;
+    console.error('剪切图片时出错:', error)
+    isCropping.value = false
   }
-};
+}
 
 // 控制方法
-const rotateLeft = () => cropper.value?.rotate(-90);
-const rotateRight = () => cropper.value?.rotate(90);
-const zoomIn = () => cropper.value?.zoom(0.1);
-const zoomOut = () => cropper.value?.zoom(-0.1);
-const reset = () => cropper.value?.reset();
+const rotateLeft = () => cropper.value?.rotate(-90)
+const rotateRight = () => cropper.value?.rotate(90)
+const zoomIn = () => cropper.value?.zoom(0.1)
+const zoomOut = () => cropper.value?.zoom(-0.1)
+const reset = () => cropper.value?.reset()
 
 // 添加事件监听器阻止冒泡
 onMounted(() => {
   if (props.imageFile) {
-    imageUrl.value = createImageUrl(props.imageFile);
+    imageUrl.value = createImageUrl(props.imageFile)
   }
 
   // 为整个裁剪器容器添加事件监听器阻止冒泡
   if (cropperWrapper.value) {
-    cropperWrapper.value.addEventListener("mousedown", stopEventPropagation);
+    cropperWrapper.value.addEventListener('mousedown', stopEventPropagation)
   }
-});
+})
 
 onBeforeUnmount(() => {
   // 销毁Cropper实例
   if (cropper.value) {
-    cropper.value.destroy();
-    cropper.value = null;
+    cropper.value.destroy()
+    cropper.value = null
   }
 
   // 释放blob URL
-  if (imageUrl.value && imageUrl.value.startsWith("blob:")) {
-    URL.revokeObjectURL(imageUrl.value);
+  if (imageUrl.value && imageUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(imageUrl.value)
   }
 
   // 移除事件监听器
   if (cropperWrapper.value) {
-    cropperWrapper.value.removeEventListener("mousedown", stopEventPropagation);
+    cropperWrapper.value.removeEventListener('mousedown', stopEventPropagation)
   }
 
   // 移除cropper元素的事件监听器
   const cropperElements = document.querySelectorAll(
-    ".cropper-container, .cropper-drag-box, .cropper-face, .cropper-view-box, .cropper-point, .cropper-line",
-  );
+    '.cropper-container, .cropper-drag-box, .cropper-face, .cropper-view-box, .cropper-point, .cropper-line'
+  )
   cropperElements.forEach((el) => {
-    el.removeEventListener("mousedown", stopEventPropagation);
-  });
-});
+    el.removeEventListener('mousedown', stopEventPropagation)
+  })
+})
 
 // 监听窗口大小变化，重新计算容器尺寸
-window.addEventListener("resize", () => {
+window.addEventListener('resize', () => {
   if (cropper.value) {
     setTimeout(() => {
-      cropper.value.resize();
-    }, 200);
+      cropper.value.resize()
+    }, 200)
   }
-});
+})
 </script>
 
 <style scoped>

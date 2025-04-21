@@ -25,21 +25,15 @@
             <h3>修改密码</h3>
             <p>定期更换密码可以提高账号安全性</p>
           </div>
-          <button @click="showPasswordModal = true" class="action-button">
-            修改密码
-          </button>
+          <button @click="showPasswordModal = true" class="action-button">修改密码</button>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
             <h3>邮箱验证</h3>
-            <p>{{ user.emailVerified ? "已验证" : "未验证" }}</p>
+            <p>{{ user.emailVerified ? '已验证' : '未验证' }}</p>
           </div>
-          <button
-            v-if="!user.emailVerified"
-            @click="sendVerificationEmail"
-            class="action-button"
-          >
+          <button v-if="!user.emailVerified" @click="sendVerificationEmail" class="action-button">
             验证邮箱
           </button>
         </div>
@@ -89,11 +83,7 @@
       width="30%"
       :close-on-click-modal="false"
     >
-      <el-form
-        :model="passwordForm"
-        :rules="passwordRules"
-        ref="passwordFormRef"
-      >
+      <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef">
         <el-form-item label="当前密码" prop="currentPassword">
           <el-input
             v-model="passwordForm.currentPassword"
@@ -122,9 +112,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="showPasswordModal = false">取消</el-button>
-          <el-button type="primary" @click="handleChangePassword">
-            确认修改
-          </el-button>
+          <el-button type="primary" @click="handleChangePassword"> 确认修改 </el-button>
         </span>
       </template>
     </el-dialog>
@@ -132,87 +120,85 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
-import { useAuthStore } from "@/stores/auth";
-import { ElMessage } from "element-plus";
+import { ref, reactive } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { ElMessage } from 'element-plus'
 
-const authStore = useAuthStore();
-const user = ref(authStore.user);
+const authStore = useAuthStore()
+const user = ref(authStore.user)
 
 // 标签页配置
 const tabs = [
-  { id: "security", name: "账号安全" },
-  { id: "notifications", name: "通知设置" },
-  { id: "privacy", name: "隐私设置" },
-];
-const activeTab = ref("security");
+  { id: 'security', name: '账号安全' },
+  { id: 'notifications', name: '通知设置' },
+  { id: 'privacy', name: '隐私设置' },
+]
+const activeTab = ref('security')
 
 // 通知设置
 const notificationSettings = reactive({
   messages: true,
   email: true,
-});
+})
 
 // 隐私设置
 const privacySettings = reactive({
-  profileVisibility: "public",
-});
+  profileVisibility: 'public',
+})
 
 // 密码修改相关
-const showPasswordModal = ref(false);
-const passwordFormRef = ref(null);
+const showPasswordModal = ref(false)
+const passwordFormRef = ref(null)
 const passwordForm = reactive({
-  currentPassword: "",
-  newPassword: "",
-  confirmPassword: "",
-});
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+})
 
 const passwordRules = {
-  currentPassword: [
-    { required: true, message: "请输入当前密码", trigger: "blur" },
-  ],
+  currentPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
   newPassword: [
-    { required: true, message: "请输入新密码", trigger: "blur" },
-    { min: 8, message: "密码长度不能少于8个字符", trigger: "blur" },
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 8, message: '密码长度不能少于8个字符', trigger: 'blur' },
   ],
   confirmPassword: [
-    { required: true, message: "请确认新密码", trigger: "blur" },
+    { required: true, message: '请确认新密码', trigger: 'blur' },
     {
       validator: (rule, value, callback) => {
         if (value !== passwordForm.newPassword) {
-          callback(new Error("两次输入的密码不一致"));
+          callback(new Error('两次输入的密码不一致'))
         } else {
-          callback();
+          callback()
         }
       },
-      trigger: "blur",
+      trigger: 'blur',
     },
   ],
-};
+}
 
 // 修改密码
 const handleChangePassword = async () => {
-  if (!passwordFormRef.value) return;
+  if (!passwordFormRef.value) return
 
   try {
-    await passwordFormRef.value.validate();
+    await passwordFormRef.value.validate()
     // TODO: 调用修改密码API
-    ElMessage.success("密码修改成功");
-    showPasswordModal.value = false;
+    ElMessage.success('密码修改成功')
+    showPasswordModal.value = false
   } catch (error) {
-    console.error("密码修改失败:", error);
+    console.error('密码修改失败:', error)
   }
-};
+}
 
 // 发送验证邮件
 const sendVerificationEmail = async () => {
   try {
     // TODO: 调用发送验证邮件API
-    ElMessage.success("验证邮件已发送，请查收");
+    ElMessage.success('验证邮件已发送，请查收')
   } catch (error) {
-    ElMessage.error("验证邮件发送失败，请稍后重试");
+    ElMessage.error('验证邮件发送失败，请稍后重试')
   }
-};
+}
 </script>
 
 <style scoped>

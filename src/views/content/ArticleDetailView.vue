@@ -17,89 +17,86 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { getArticleById_get } from "@/api/article";
-import { getUserById_get } from "@/api/user";
-import { renderMarkdown } from "@/utils/markdown";
-import { useAuthStore } from "@/stores/auth";
-import ArticleSidebar from "./components/article-sidebar.vue";
-import ArticleContent from "./components/article-content.vue";
-import ArticleLoading from "./components/article-loading.vue";
-import ArticleError from "./components/article-error.vue";
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getArticleById_get } from '@/api/article'
+import { getUserById_get } from '@/api/user'
+import { renderMarkdown } from '@/utils/markdown'
+import { useAuthStore } from '@/stores/auth'
+import ArticleSidebar from './components/article-sidebar.vue'
+import ArticleContent from './components/article-content.vue'
+import ArticleLoading from './components/article-loading.vue'
+import ArticleError from './components/article-error.vue'
 
-const route = useRoute();
-const router = useRouter();
-const authStore = useAuthStore();
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
-const article = ref(null);
-const loading = ref(true);
-const error = ref("");
-const authorInfo = ref(null);
+const article = ref(null)
+const loading = ref(true)
+const error = ref('')
+const authorInfo = ref(null)
 
 // 获取文章详情
 const fetchArticle = async () => {
-  loading.value = true;
-  error.value = "";
+  loading.value = true
+  error.value = ''
   try {
-    const response = await getArticleById_get(route.params.id);
+    const response = await getArticleById_get(route.params.id)
     if (!response.data) {
-      error.value = "文章不存在或已被删除";
-      return;
+      error.value = '文章不存在或已被删除'
+      return
     }
-    article.value = response.data;
+    article.value = response.data
     // 加载作者信息
     if (article.value.createUser?.id) {
-      await fetchAuthorInfo(article.value.createUser.id);
+      await fetchAuthorInfo(article.value.createUser.id)
     }
   } catch (err) {
-    error.value = err.message || "获取文章失败";
-    console.error("获取文章失败:", err);
+    error.value = err.message || '获取文章失败'
+    console.error('获取文章失败:', err)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 // 获取作者信息
 const fetchAuthorInfo = async (userId) => {
   try {
-    const response = await getUserById_get(userId);
+    const response = await getUserById_get(userId)
     if (response.code === 0) {
-      authorInfo.value = response.data;
+      authorInfo.value = response.data
     }
   } catch (err) {
-    console.error("获取作者信息失败:", err);
+    console.error('获取作者信息失败:', err)
   }
-};
+}
 
 // 渲染Markdown内容
 const renderedContent = computed(() => {
-  if (!article.value?.content) return "";
-  if (
-    article.value.content.includes("<br>") &&
-    !article.value.content.includes("```")
-  ) {
-    return article.value.content;
+  if (!article.value?.content) return ''
+  if (article.value.content.includes('<br>') && !article.value.content.includes('```')) {
+    return article.value.content
   }
-  return renderMarkdown(article.value.content);
-});
+  return renderMarkdown(article.value.content)
+})
 
 // 判断是否为作者
 const isAuthor = computed(() => {
-  return authStore.currentUser?.id === article.value?.createUser?.id;
-});
+  return authStore.currentUser?.id === article.value?.createUser?.id
+})
 
 // 编辑文章
 const editArticle = () => {
   router.push({
-    name: "articleEdit",
+    name: 'articleEdit',
     params: { id: article.value.id },
-  });
-};
+  })
+}
 
 onMounted(() => {
-  fetchArticle();
-});
+  fetchArticle()
+})
 </script>
 
 <style scoped>

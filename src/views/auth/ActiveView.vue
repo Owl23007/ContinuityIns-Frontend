@@ -45,48 +45,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import axios from "axios";
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
 
-const route = useRoute();
-const router = useRouter();
-const email = ref(route.query.email);
-const token = ref(route.query.token);
-const loading = ref(true);
-const success = ref(false);
-const error = ref(false);
-const errorMessage = ref("");
+const route = useRoute()
+const router = useRouter()
+const email = ref(route.query.email)
+const token = ref(route.query.token)
+const loading = ref(true)
+const success = ref(false)
+const error = ref(false)
+const errorMessage = ref('')
 
 const verifyEmail = async () => {
-  const baseUrl = import.meta.env.VITE_APP_BASE_API;
-  const url = `${baseUrl}/user/active?email=${email.value}&token=${token.value}`;
+  const baseUrl = import.meta.env.VITE_APP_BASE_API
+  const url = `${baseUrl}/user/active?email=${email.value}&token=${token.value}`
 
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url)
     if (response.data.code === 0) {
-      success.value = true;
+      success.value = true
       setTimeout(() => {
-        router.push("/");
-      }, 2000);
+        router.push('/')
+      }, 2000)
     } else {
-      throw new Error(response.data.message || "验证失败，请重试。");
+      throw new Error(response.data.message || '验证失败，请重试。')
     }
   } catch (err) {
-    error.value = true;
-    errorMessage.value =
-      err.response?.data?.message || err.message || "验证失败，请重试。";
+    error.value = true
+    errorMessage.value = err.response?.data?.message || err.message || '验证失败，请重试。'
     setTimeout(() => {
-      router.push("/");
-    }, 2000);
+      router.push('/')
+    }, 2000)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 onMounted(() => {
-  verifyEmail();
-});
+  verifyEmail()
+})
 </script>
 
 <style scoped>
@@ -137,7 +136,7 @@ h1 {
 }
 
 h1::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -0.5rem;
   left: 50%;

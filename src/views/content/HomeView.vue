@@ -51,12 +51,7 @@
               <template #header>
                 <span>热门标签</span>
               </template>
-              <el-tag
-                v-for="tag in tags"
-                :key="tag.id"
-                class="tag"
-                @click="filterByTag(tag.id)"
-              >
+              <el-tag v-for="tag in tags" :key="tag.id" class="tag" @click="filterByTag(tag.id)">
                 {{ tag.name }}
               </el-tag>
             </el-card>
@@ -68,81 +63,77 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import ArticleCard from "./components/ArticleCard.vue";
-import {
-  fetchArticles,
-  getHotTags_get,
-  getCategories_get,
-} from "@/api/recommend";
+import { ref, onMounted } from 'vue'
+import ArticleCard from './components/ArticleCard.vue'
+import { fetchArticles, getHotTags_get, getCategories_get } from '@/api/recommend'
 
-const loading = ref(true);
-const articles = ref([]);
-const tags = ref([]);
-const categories = ref([]);
+const loading = ref(true)
+const articles = ref([])
+const tags = ref([])
+const categories = ref([])
 
 // 加载数据
 const loadData = async () => {
-  loading.value = true;
+  loading.value = true
 
   try {
     try {
-      const res = await fetchArticles();
-      console.log("完整API响应:", res);
+      const res = await fetchArticles()
+      console.log('完整API响应:', res)
 
       // 直接从res.list获取数据
-      const articlesData = res?.list || [];
-      console.log("文章数据:", articlesData);
+      const articlesData = res?.list || []
+      console.log('文章数据:', articlesData)
 
       if (articlesData.length > 0) {
-        articles.value = articlesData;
-        console.log("成功加载文章:", articles.value.length, "条");
+        articles.value = articlesData
+        console.log('成功加载文章:', articles.value.length, '条')
       } else {
-        console.warn("文章列表为空");
-        articles.value = [];
+        console.warn('文章列表为空')
+        articles.value = []
       }
     } catch (error) {
-      console.error("加载文章失败:", error);
-      articles.value = [];
+      console.error('加载文章失败:', error)
+      articles.value = []
     }
 
     // 加载标签和分类数据，使用try-catch分别处理，避免一个失败影响另一个
     try {
-      tags.value = await getHotTags_get();
-      console.log("标签数据:", tags.value);
+      tags.value = await getHotTags_get()
+      console.log('标签数据:', tags.value)
     } catch (error) {
-      console.error("加载标签失败:", error);
-      tags.value = [];
+      console.error('加载标签失败:', error)
+      tags.value = []
     }
 
     try {
-      categories.value = await getCategories_get();
-      console.log("分类数据:", categories.value);
+      categories.value = await getCategories_get()
+      console.log('分类数据:', categories.value)
     } catch (error) {
-      console.error("加载分类失败:", error);
-      categories.value = [];
+      console.error('加载分类失败:', error)
+      categories.value = []
     }
   } catch (error) {
-    console.log(" 加载数据失败:", error);
-    articles.value = []; // 确保数据为空数组
+    console.log(' 加载数据失败:', error)
+    articles.value = [] // 确保数据为空数组
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 // 分类筛选
 const filterByCategory = (categoryId) => {
   // 实现分类筛选逻辑
-};
+}
 
 // 标签筛选
 const filterByTag = (tagId) => {
   // 实现标签筛选逻辑
-};
+}
 
 onMounted(() => {
-  loadData();
-});
+  loadData()
+})
 </script>
 
 <style scoped>

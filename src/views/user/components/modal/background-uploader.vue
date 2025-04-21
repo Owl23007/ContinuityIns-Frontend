@@ -1,10 +1,6 @@
 <template>
   <div class="background-uploader">
-    <div
-      v-if="!selectedFile && !isUploading"
-      class="file-upload-area"
-      @click="triggerFileInput"
-    >
+    <div v-if="!selectedFile && !isUploading" class="file-upload-area" @click="triggerFileInput">
       <div class="upload-instructions">
         <svg
           class="upload-icon"
@@ -75,13 +71,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useAuthStore } from "@/stores/auth";
-import ImageCropper from "@/components/common/ImageCropper.vue";
-import { uploadFile, validateFile } from "@/api/file";
+import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import ImageCropper from '@/components/common/ImageCropper.vue'
+import { uploadFile, validateFile } from '@/api/file'
 
-const authStore = useAuthStore();
-const emit = defineEmits(["background-updated", "cancel"]);
+const authStore = useAuthStore()
+const emit = defineEmits(['background-updated', 'cancel'])
 
 const props = defineProps({
   isSubmitting: {
@@ -92,28 +88,28 @@ const props = defineProps({
     type: String,
     required: true,
   },
-});
+})
 
-const fileInput = ref(null);
-const selectedFile = ref(null);
-const isUploading = ref(false);
-const uploadError = ref("");
+const fileInput = ref(null)
+const selectedFile = ref(null)
+const isUploading = ref(false)
+const uploadError = ref('')
 
 // 触发文件选择框
 function triggerFileInput() {
-  fileInput.value.click();
+  fileInput.value.click()
 }
 
 // 处理文件选择
 function handleFileSelect(event) {
-  const file = event.target.files[0];
+  const file = event.target.files[0]
   if (file) {
     try {
-      validateFile(file, "background");
-      selectedFile.value = file;
-      uploadError.value = "";
+      validateFile(file, 'background')
+      selectedFile.value = file
+      uploadError.value = ''
     } catch (error) {
-      uploadError.value = error.message;
+      uploadError.value = error.message
     }
   }
 }
@@ -121,37 +117,37 @@ function handleFileSelect(event) {
 // 处理裁剪完成
 async function handleCropComplete(cropResult) {
   if (!cropResult || !cropResult.file) {
-    uploadError.value = "图片处理失败";
-    return;
+    uploadError.value = '图片处理失败'
+    return
   }
 
   if (!props.token) {
-    uploadError.value = "未登录，请重新登录后再试";
-    return;
+    uploadError.value = '未登录，请重新登录后再试'
+    return
   }
 
-  isUploading.value = true;
-  uploadError.value = "";
+  isUploading.value = true
+  uploadError.value = ''
 
   try {
-    const { url: accessUrl } = await uploadFile(cropResult.file, "background");
-    await authStore.updateUserProfile({ backgroundImage: accessUrl });
-    emit("background-updated");
-    return;
+    const { url: accessUrl } = await uploadFile(cropResult.file, 'background')
+    await authStore.updateUserProfile({ backgroundImage: accessUrl })
+    emit('background-updated')
+    return
   } catch (error) {
-    console.error("上传背景图片失败:", error);
-    uploadError.value = error.message || "上传失败，请重试";
+    console.error('上传背景图片失败:', error)
+    uploadError.value = error.message || '上传失败，请重试'
   } finally {
-    isUploading.value = false;
+    isUploading.value = false
   }
 }
 
 // 重置上传状态
 function resetUpload() {
-  selectedFile.value = null;
-  uploadError.value = "";
+  selectedFile.value = null
+  uploadError.value = ''
   if (fileInput.value) {
-    fileInput.value.value = "";
+    fileInput.value.value = ''
   }
 }
 </script>

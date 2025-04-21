@@ -41,15 +41,15 @@ export default {
   methods: {
     starStyle(index) {
       return {
-        "--size": Math.random() * 3 + 1 + "px",
-        "--x": Math.random() * 100 + "%",
-        "--y": Math.random() * 100 + "%",
-        "--delay": Math.random() * 2 + "s",
-        "--duration": Math.random() * 3 + 2 + "s",
-      };
+        '--size': Math.random() * 3 + 1 + 'px',
+        '--x': Math.random() * 100 + '%',
+        '--y': Math.random() * 100 + '%',
+        '--delay': Math.random() * 2 + 's',
+        '--duration': Math.random() * 3 + 2 + 's',
+      }
     },
   },
-};
+}
 </script>
 
 <style scoped>
@@ -61,7 +61,7 @@ export default {
   align-items: center;
   justify-content: center;
   color: white;
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: 'Helvetica Neue', sans-serif;
   position: relative;
   overflow: hidden;
 }

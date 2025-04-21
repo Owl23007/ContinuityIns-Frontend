@@ -5,24 +5,16 @@
     </header>
 
     <div v-if="article.coverImg" class="cover-image">
-      <img
-        :src="article.coverImg"
-        :alt="article.title"
-        @error="handleImageError"
-        loading="lazy"
-      />
+      <img :src="article.coverImg" :alt="article.title" @error="handleImageError" loading="lazy" />
     </div>
 
-    <article
-      class="article-content markdown-body"
-      v-html="renderedContent"
-    ></article>
+    <article class="article-content markdown-body" v-html="renderedContent"></article>
   </main>
 </template>
 
 <script setup>
-import { defineProps } from "vue";
-import defaultCover from "@/assets/image/default_cover.jpg";
+import { defineProps } from 'vue'
+import defaultCover from '@/assets/image/default_cover.jpg'
 
 const props = defineProps({
   article: {
@@ -31,13 +23,13 @@ const props = defineProps({
   },
   renderedContent: {
     type: String,
-    default: "",
+    default: '',
   },
-});
+})
 
 const handleImageError = (e) => {
-  e.target.src = defaultCover;
-};
+  e.target.src = defaultCover
+}
 </script>
 
 <style scoped>
@@ -69,7 +61,7 @@ const handleImageError = (e) => {
 }
 
 .article-title::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
@@ -162,7 +154,7 @@ const handleImageError = (e) => {
 }
 
 .article-content :deep(pre::before) {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -173,7 +165,7 @@ const handleImageError = (e) => {
 }
 
 .article-content :deep(code) {
-  font-family: "Fira Code", monospace;
+  font-family: 'Fira Code', monospace;
   font-size: 0.98em;
 }
 

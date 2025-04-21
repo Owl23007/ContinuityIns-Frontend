@@ -50,9 +50,7 @@
             ></path>
             <polyline points="22,6 12,13 2,6"></polyline>
           </svg>
-          <a href="mailto:mailofowlwork@gmail.com" class="contact-link"
-            >mailofowlwork@gmail.com</a
-          >
+          <a href="mailto:mailofowlwork@gmail.com" class="contact-link">mailofowlwork@gmail.com</a>
         </p>
       </div>
       <div class="footer-section">
@@ -68,10 +66,7 @@
     <div class="footer-bottom">
       <p>&copy; {{ new Date().getFullYear() }} 存续院. 保留所有权利.</p>
       <p class="icp-info">
-        <a
-          href="https://beian.miit.gov.cn/"
-          target="_blank"
-          rel="noopener noreferrer"
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
           >鄂ICP备2024073383号-1</a
         >
       </p>
@@ -119,7 +114,7 @@
 }
 
 .footer-section h4::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   bottom: 0;

@@ -1,6 +1,6 @@
-import MarkdownIt from "markdown-it";
-import hljs from "highlight.js";
-import "highlight.js/styles/github.css";
+import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css'
 
 // 创建 MarkdownIt 实例，并设置标准配置
 const md = new MarkdownIt({
@@ -11,27 +11,27 @@ const md = new MarkdownIt({
   highlight: (str, lang) => {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return hljs.highlight(str, { language: lang }).value;
+        return hljs.highlight(str, { language: lang }).value
       } catch (error) {
-        console.error("语法高亮出错:", error);
+        console.error('语法高亮出错:', error)
       }
     }
-    return ""; // 使用默认转义
+    return '' // 使用默认转义
   },
-});
+})
 
 // 导出渲染函数
 export const renderMarkdown = (content) => {
-  if (typeof content !== "string") {
-    content = String(content || "");
+  if (typeof content !== 'string') {
+    content = String(content || '')
   }
-  if (!content) return "";
-  return md.render(content);
-};
+  if (!content) return ''
+  return md.render(content)
+}
 
 // 复制按钮功能
 export const renderMarkdownWithCopy = (content) => {
-  const rendered = renderMarkdown(content);
+  const rendered = renderMarkdown(content)
   return rendered.replace(
     /<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g,
     (match, attr, codeContent) =>
@@ -42,8 +42,8 @@ export const renderMarkdownWithCopy = (content) => {
     </svg>
   </button>
   <pre><code${attr}>${codeContent}</code></pre>
-</div>`,
-  );
-};
+</div>`
+  )
+}
 
-export default md;
+export default md

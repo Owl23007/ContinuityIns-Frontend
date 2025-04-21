@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="modal-overlay"
-    @mousedown="handleBackdropClick"
-    ref="modalBackdrop"
-  >
+  <div class="modal-overlay" @mousedown="handleBackdropClick" ref="modalBackdrop">
     <div class="modal-container" :class="theme">
       <div class="modal-header">
         <h2 class="modal-title" :class="{ danger: theme === 'danger' }">
@@ -34,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
 defineProps({
   title: {
@@ -43,52 +39,52 @@ defineProps({
   },
   theme: {
     type: String,
-    default: "default",
+    default: 'default',
   },
-});
+})
 
-const emit = defineEmits(["close"]);
-const modalBackdrop = ref(null);
-const isCropping = ref(false);
-let cropperElement = null;
+const emit = defineEmits(['close'])
+const modalBackdrop = ref(null)
+const isCropping = ref(false)
+let cropperElement = null
 
 // 添加监听器，检测是否在裁剪器上按下鼠标
 onMounted(() => {
-  document.addEventListener("mousedown", startCropTracking);
-  document.addEventListener("mouseup", endCropTracking);
+  document.addEventListener('mousedown', startCropTracking)
+  document.addEventListener('mouseup', endCropTracking)
 
   // 延迟一下，确保模态框内容已渲染
   nextTick(() => {
     // 查找裁剪器元素（带有cropper类的元素）
     if (modalBackdrop.value) {
-      cropperElement = modalBackdrop.value.querySelector(".cropper-container");
+      cropperElement = modalBackdrop.value.querySelector('.cropper-container')
     }
-  });
-});
+  })
+})
 
 onBeforeUnmount(() => {
-  document.removeEventListener("mousedown", startCropTracking);
-  document.removeEventListener("mouseup", endCropTracking);
-});
+  document.removeEventListener('mousedown', startCropTracking)
+  document.removeEventListener('mouseup', endCropTracking)
+})
 
 // 当开始在裁剪器上操作时设置标志
 function startCropTracking(event) {
   if (cropperElement && cropperElement.contains(event.target)) {
-    isCropping.value = true;
+    isCropping.value = true
   }
 }
 
 // 操作完成时清除标志
 function endCropTracking() {
-  isCropping.value = false;
+  isCropping.value = false
 }
 
 // 处理点击背景的事件
 function handleBackdropClick(event) {
   // 如果点击的是背景遮罩本身，并且不是在裁剪过程中，则关闭模态框
   if (event.target === modalBackdrop.value && !isCropping.value) {
-    event.preventDefault();
-    emit("close");
+    event.preventDefault()
+    emit('close')
   }
 }
 </script>

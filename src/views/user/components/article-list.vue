@@ -34,20 +34,12 @@
         <line x1="9" y1="15" x2="15" y2="15" />
       </svg>
       <h3 class="empty-title">
-        {{ isOwnProfile ? "暂无文章" : "该用户暂无文章" }}
+        {{ isOwnProfile ? '暂无文章' : '该用户暂无文章' }}
       </h3>
       <p class="empty-desc">
-        {{
-          isOwnProfile
-            ? "分享你的想法和知识，创建第一篇文章吧"
-            : "该用户还没有发布任何文章内容"
-        }}
+        {{ isOwnProfile ? '分享你的想法和知识，创建第一篇文章吧' : '该用户还没有发布任何文章内容' }}
       </p>
-      <router-link
-        v-if="isOwnProfile"
-        :to="{ name: 'articleCreate' }"
-        class="create-btn"
-      >
+      <router-link v-if="isOwnProfile" :to="{ name: 'articleCreate' }" class="create-btn">
         <span class="btn-icon">+</span>
         <span>创建第一篇文章</span>
       </router-link>
@@ -56,28 +48,20 @@
     <!-- 文章列表 -->
     <div v-else class="articles-container">
       <div class="articles-grid">
-        <article-card
-          v-for="article in displayedArticles"
-          :key="article.id"
-          :article="article"
-        />
+        <article-card v-for="article in displayedArticles" :key="article.id" :article="article" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onBeforeUnmount } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import {
-  getMyArticles_get,
-  getUserArticles_get,
-  deleteArticle_delete,
-} from "@/api/article";
-import ArticleCard from "./card/article-card-cover-only.vue";
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { getMyArticles_get, getUserArticles_get, deleteArticle_delete } from '@/api/article'
+import ArticleCard from './card/article-card-cover-only.vue'
 
-const router = useRouter();
+const router = useRouter()
 
 const props = defineProps({
   userId: {
@@ -88,75 +72,69 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-});
+})
 
-const authStore = useAuthStore();
-const articles = ref([]);
-const loading = ref(true);
-const showAll = ref(false);
-const initialArticleCount = 4;
-const activeMenu = ref(null);
-const error = ref(null);
+const authStore = useAuthStore()
+const articles = ref([])
+const loading = ref(true)
+const showAll = ref(false)
+const initialArticleCount = 4
+const activeMenu = ref(null)
+const error = ref(null)
 
 // 计算当前需要显示的文章
 const displayedArticles = computed(() => {
-  const sortedArticles = [...articles.value].sort(
-    (a, b) => b.createTime - a.createTime,
-  );
-  return showAll.value
-    ? sortedArticles
-    : sortedArticles.slice(0, initialArticleCount);
-});
+  const sortedArticles = [...articles.value].sort((a, b) => b.createTime - a.createTime)
+  return showAll.value ? sortedArticles : sortedArticles.slice(0, initialArticleCount)
+})
 
 const fetchArticles = async () => {
-  loading.value = true;
-  error.value = null;
+  loading.value = true
+  error.value = null
   try {
     const response = props.isOwnProfile
       ? await getMyArticles_get(props.userId)
-      : await getUserArticles_get(props.userId);
+      : await getUserArticles_get(props.userId)
 
     // 规范化文章数据
     articles.value = (response.data || []).map((article) => ({
       ...article,
       id: article.id || article.articleId,
-      title: article.title || "无标题文章",
-      content: article.content || "",
+      title: article.title || '无标题文章',
+      content: article.content || '',
       coverImg: article.coverImg || article.coverImage,
-      createTime: article.createTime
-        ? new Date(article.createTime).getTime()
-        : Date.now(),
+      createTime: article.createTime ? new Date(article.createTime).getTime() : Date.now(),
       duration: article.duration || 0,
-      status: article.status?.toLowerCase() || "published",
-    }));
+      status: article.status?.toLowerCase() || 'published',
+    }))
   } catch (err) {
-    console.error("获取文章列表失败:", err);
-    articles.value = [];
-    error.value = "获取文章列表失败，请稍后重试";
+    console.error('获取文章列表失败:', err)
+    articles.value = []
+    error.value = '获取文章列表失败，请稍后重试'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 // 关闭点击外部区域时的菜单
 const handleClickOutside = (e) => {
-  if (activeMenu.value && !e.target.closest(".actions-wrapper")) {
-    activeMenu.value = null;
+  if (activeMenu.value && !e.target.closest('.actions-wrapper')) {
+    activeMenu.value = null
   }
-};
+}
 
 // 查看文章详情
 const viewArticle = (articleId) => {
-  if (!articleId) return;
+  if (!articleId) return
   router.push({
-    name: "articleDetail",
+    name: 'articleDetail',
     params: { id: articleId },
-  });
-};
+  })
+}
 
 onMounted(() => {
-  fetchArticles();
-});
+  fetchArticles()
+})
 </script>
 
 <style scoped>

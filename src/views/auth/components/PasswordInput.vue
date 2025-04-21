@@ -67,8 +67,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import BaseInput from "./BaseInput.vue";
+import { ref, computed } from 'vue'
+import BaseInput from './BaseInput.vue'
 
 const props = defineProps({
   modelValue: String,
@@ -76,17 +76,17 @@ const props = defineProps({
   required: Boolean,
   hasError: Boolean,
   errorMessage: String,
-});
+})
 
-const emit = defineEmits(["update:modelValue"]);
-const showPassword = ref(false);
+const emit = defineEmits(['update:modelValue'])
+const showPassword = ref(false)
 
 const password = computed({
   get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
-});
+  set: (value) => emit('update:modelValue', value),
+})
 
 const togglePassword = () => {
-  showPassword.value = !showPassword.value;
-};
+  showPassword.value = !showPassword.value
+}
 </script>

@@ -13,9 +13,7 @@
             {{ status.label }}
           </button>
         </div>
-        <router-link :to="{ name: 'articleCreate' }" class="new-article-btn">
-          写文章
-        </router-link>
+        <router-link :to="{ name: 'articleCreate' }" class="new-article-btn"> 写文章 </router-link>
       </div>
     </div>
 
@@ -40,9 +38,7 @@
           stroke-linejoin="round"
           style="opacity: 0.7"
         >
-          <path
-            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-          ></path>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="12" y1="18" x2="12" y2="12"></line>
           <line x1="9" y1="15" x2="15" y2="15"></line>
@@ -55,15 +51,8 @@
 
       <!-- 文章列表 -->
       <div v-else class="articles-grid">
-        <div
-          v-for="article in filteredArticles"
-          :key="article.id"
-          class="article-item"
-        >
-          <article-card
-            :article="article"
-            @cover-error="handleCoverError(article)"
-          >
+        <div v-for="article in filteredArticles" :key="article.id" class="article-item">
+          <article-card :article="article" @cover-error="handleCoverError(article)">
             <template #actions>
               <div class="article-actions">
                 <router-link
@@ -79,10 +68,7 @@
                 >
                   编辑
                 </router-link>
-                <button
-                  @click="confirmDelete(article.id)"
-                  class="action-btn delete-btn"
-                >
+                <button @click="confirmDelete(article.id)" class="action-btn delete-btn">
                   删除
                 </button>
               </div>
@@ -98,13 +84,7 @@
         <p class="dialog-title">确定要删除文章</p>
         <p class="dialog-article-title">"{{ articleToDelete?.title }}"？</p>
         <div class="dialog-actions">
-          <button
-            @click="deleteArticle"
-            :disabled="isDeleting"
-            class="confirm-btn"
-          >
-            确定
-          </button>
+          <button @click="deleteArticle" :disabled="isDeleting" class="confirm-btn">确定</button>
           <button @click="cancelDelete" class="cancel-btn">取消</button>
         </div>
       </div>
@@ -120,135 +100,131 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { getMyArticles_get, deleteArticle_delete } from "@/api/article";
-import { ArticleStatus } from "@/pojo/article";
-import ArticleCard from "./components/article-detail-card.vue";
-import { getMyArticlesList_get } from "../../api/article";
-import { onBeforeRouteUpdate } from "vue-router";
-import defaultCover from "@/assets/image/default_cover.jpg";
+import { ref, computed, onMounted } from 'vue'
+import { getMyArticles_get, deleteArticle_delete } from '@/api/article'
+import { ArticleStatus } from '@/pojo/article'
+import ArticleCard from './components/article-detail-card.vue'
+import { getMyArticlesList_get } from '../../api/article'
+import { onBeforeRouteUpdate } from 'vue-router'
+import defaultCover from '@/assets/image/default_cover.jpg'
 
-const articles = ref([]);
-const loading = ref(true);
-const error = ref("");
-const currentStatus = ref("");
-const showDeleteConfirm = ref(false);
-const articleToDelete = ref(null);
-const isDeleting = ref(false);
-const page = ref(1);
+const articles = ref([])
+const loading = ref(true)
+const error = ref('')
+const currentStatus = ref('')
+const showDeleteConfirm = ref(false)
+const articleToDelete = ref(null)
+const isDeleting = ref(false)
+const page = ref(1)
 
 const filteredArticles = computed(() => {
   if (!currentStatus.value) {
-    return articles.value;
+    return articles.value
   }
-  return articles.value.filter(
-    (article) => article.status === currentStatus.value,
-  );
-});
+  return articles.value.filter((article) => article.status === currentStatus.value)
+})
 
 const statuses = [
-  { label: "全部", value: "" },
-  { label: "草稿", value: ArticleStatus.DRAFT },
-  { label: "私密", value: ArticleStatus.PRIVATE },
-  { label: "已发布", value: ArticleStatus.PUBLISHED },
-];
+  { label: '全部', value: '' },
+  { label: '草稿', value: ArticleStatus.DRAFT },
+  { label: '私密', value: ArticleStatus.PRIVATE },
+  { label: '已发布', value: ArticleStatus.PUBLISHED },
+]
 
 const statusLabel = computed(() => {
-  const status = statuses.find((s) => s.value === currentStatus.value);
-  return status ? status.label : "所有";
-});
+  const status = statuses.find((s) => s.value === currentStatus.value)
+  return status ? status.label : '所有'
+})
 
 // 设置状态过滤器
 const setStatus = (status) => {
-  if (currentStatus.value === status) return;
-  currentStatus.value = status;
-  fetchArticles(true);
-};
+  if (currentStatus.value === status) return
+  currentStatus.value = status
+  fetchArticles(true)
+}
 
 // 获取文章列表
 const fetchArticles = async (resetPage = true) => {
   if (resetPage) {
-    page.value = 1;
+    page.value = 1
   }
-  loading.value = true;
-  error.value = "";
+  loading.value = true
+  error.value = ''
   try {
-    const response = await getMyArticlesList_get(page.value);
+    const response = await getMyArticlesList_get(page.value)
     if (!response || !response.data) {
-      throw new Error("获取文章数据失败");
+      throw new Error('获取文章数据失败')
     }
-    const articlesArr = Array.isArray(response.data) ? response.data : [];
+    const articlesArr = Array.isArray(response.data) ? response.data : []
     articles.value = articlesArr
       .map((article) => ({
         ...article,
         id: article.articleId || article.id,
         createTime: new Date(article.createTime || Date.now()).getTime(),
         status: article.status || ArticleStatus.DRAFT,
-        title: article.title || "无标题",
+        title: article.title || '无标题',
         coverImage: article.coverImage || defaultCover,
       }))
-      .sort((a, b) => b.createTime - a.createTime);
+      .sort((a, b) => b.createTime - a.createTime)
   } catch (err) {
-    console.error("获取文章列表失败:", err);
-    error.value = "获取文章列表失败，请稍后再试";
-    articles.value = [];
+    console.error('获取文章列表失败:', err)
+    error.value = '获取文章列表失败，请稍后再试'
+    articles.value = []
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 // 新增重试加载方法
 const retryFetch = () => {
-  error.value = "";
-  fetchArticles(true);
-};
+  error.value = ''
+  fetchArticles(true)
+}
 
 // 打开删除确认框
 const confirmDelete = (articleId) => {
-  articleToDelete.value = articles.value.find((a) => a.id === articleId);
-  showDeleteConfirm.value = true;
-};
+  articleToDelete.value = articles.value.find((a) => a.id === articleId)
+  showDeleteConfirm.value = true
+}
 
 // 取消删除
 const cancelDelete = () => {
-  showDeleteConfirm.value = false;
-  articleToDelete.value = null;
-};
+  showDeleteConfirm.value = false
+  articleToDelete.value = null
+}
 
 // 执行删除
 const deleteArticle = async () => {
-  if (!articleToDelete.value || isDeleting.value) return;
+  if (!articleToDelete.value || isDeleting.value) return
 
-  isDeleting.value = true;
+  isDeleting.value = true
   try {
-    await deleteArticle_delete(articleToDelete.value.id);
-    articles.value = articles.value.filter(
-      (a) => a.id !== articleToDelete.value.id,
-    );
-    showDeleteConfirm.value = false;
-    articleToDelete.value = null;
+    await deleteArticle_delete(articleToDelete.value.id)
+    articles.value = articles.value.filter((a) => a.id !== articleToDelete.value.id)
+    showDeleteConfirm.value = false
+    articleToDelete.value = null
   } catch (err) {
-    error.value = err.message || "删除文章失败";
+    error.value = err.message || '删除文章失败'
   } finally {
-    isDeleting.value = false;
+    isDeleting.value = false
   }
-};
+}
 
 // 处理封面图片加载错误
 const handleCoverError = (article) => {
-  article.coverImage = defaultCover;
-};
+  article.coverImage = defaultCover
+}
 
 // 初始化
 onMounted(() => {
-  fetchArticles(true);
-});
+  fetchArticles(true)
+})
 
 // 添加路由更新守卫
 onBeforeRouteUpdate((to, from, next) => {
-  fetchArticles();
-  next();
-});
+  fetchArticles()
+  next()
+})
 </script>
 
 <style scoped>

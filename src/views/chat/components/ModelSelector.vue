@@ -34,9 +34,7 @@
         <div class="model-option-header">
           <span class="model-name">{{ model.name }}</span>
           <div class="model-tags">
-            <span class="model-tag" v-for="tag in model.tag" :key="tag">{{
-              tag
-            }}</span>
+            <span class="model-tag" v-for="tag in model.tag" :key="tag">{{ tag }}</span>
           </div>
         </div>
         <p class="model-description">{{ model.description }}</p>
@@ -46,85 +44,81 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   modelId: {
     type: String,
     required: true,
   },
-});
+})
 
-const emit = defineEmits(["update:modelId"]);
+const emit = defineEmits(['update:modelId'])
 
 const models = [
   {
-    id: "deepseek-v3",
-    name: "DeepSeek V3",
+    id: 'deepseek-v3',
+    name: 'DeepSeek V3',
     description:
-      "DeepSeek-V3 为自研 MoE 模型，671B 参数，激活 37B，在 14.8T token 上进行了预训练，在长文本、代码、数学、百科、中文 能力上表现优秀。",
-    tag: ["文本生成", "64k"],
+      'DeepSeek-V3 为自研 MoE 模型，671B 参数，激活 37B，在 14.8T token 上进行了预训练，在长文本、代码、数学、百科、中文 能力上表现优秀。',
+    tag: ['文本生成', '64k'],
   },
   {
-    id: "deepseek-r1",
-    name: "DeepSeek R1",
+    id: 'deepseek-r1',
+    name: 'DeepSeek R1',
     description:
-      "DeepSeek-R1 在后训练阶段大规模使用了强化学习技术，在仅有极少标注数据的情况下，极大提升了模型推理能力。",
-    tag: ["模型推理", "64k"],
+      'DeepSeek-R1 在后训练阶段大规模使用了强化学习技术，在仅有极少标注数据的情况下，极大提升了模型推理能力。',
+    tag: ['模型推理', '64k'],
   },
   {
-    id: "qwq-plus",
-    name: "通义千问 QwQ Plus",
+    id: 'qwq-plus',
+    name: '通义千问 QwQ Plus',
     description:
-      "通义千问QwQ推理模型增强版，基于Qwen2.5模型训练的QwQ推理模型，通过强化学习大幅度提升了模型推理能力。",
-    tag: ["模型推理", "128k"],
+      '通义千问QwQ推理模型增强版，基于Qwen2.5模型训练的QwQ推理模型，通过强化学习大幅度提升了模型推理能力。',
+    tag: ['模型推理', '128k'],
   },
   {
-    id: "qwen-max-2025-01-25",
-    name: "通义千问-Max",
+    id: 'qwen-max-2025-01-25',
+    name: '通义千问-Max',
     description:
-      "通义千问系列效果最好的模型，中英文code能力、逻辑能力、多语言能力显著提升，回复风格面向人类偏好进行大幅调整，模型回复详实程度和格式清晰度明显改善，创作类专项、json格式遵循专项、角色扮演专项能力定向提升，此模型为通义千问-Max的2025年1月25日快照版本，预计维护至下一个快照上线前一个月。",
-    tag: ["文本生成", "32k"],
+      '通义千问系列效果最好的模型，中英文code能力、逻辑能力、多语言能力显著提升，回复风格面向人类偏好进行大幅调整，模型回复详实程度和格式清晰度明显改善，创作类专项、json格式遵循专项、角色扮演专项能力定向提升，此模型为通义千问-Max的2025年1月25日快照版本，预计维护至下一个快照上线前一个月。',
+    tag: ['文本生成', '32k'],
   },
-];
+]
 
-const isOpen = ref(false);
-const modelSelectorRef = ref(null);
-const selectorButtonRef = ref(null);
+const isOpen = ref(false)
+const modelSelectorRef = ref(null)
+const selectorButtonRef = ref(null)
 
 const selectedModelName = computed(() => {
-  const model = models.find((m) => m.id === props.modelId);
-  return model ? model.name : "选择模型";
-});
+  const model = models.find((m) => m.id === props.modelId)
+  return model ? model.name : '选择模型'
+})
 
 const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
-};
+  isOpen.value = !isOpen.value
+}
 
 // 处理点击外部关闭下拉菜单
 const handleOutsideClick = (event) => {
-  if (
-    isOpen.value &&
-    modelSelectorRef.value &&
-    !modelSelectorRef.value.contains(event.target)
-  ) {
-    isOpen.value = false;
+  if (isOpen.value && modelSelectorRef.value && !modelSelectorRef.value.contains(event.target)) {
+    isOpen.value = false
   }
-};
+}
 
 // 添加和移除事件监听器
 onMounted(() => {
-  document.addEventListener("click", handleOutsideClick);
-});
+  document.addEventListener('click', handleOutsideClick)
+})
 
 onUnmounted(() => {
-  document.removeEventListener("click", handleOutsideClick);
-});
+  document.removeEventListener('click', handleOutsideClick)
+})
 
 const selectModel = (id) => {
-  emit("update:modelId", id);
-  isOpen.value = false;
-};
+  emit('update:modelId', id)
+  isOpen.value = false
+}
 </script>
 
 <style scoped>

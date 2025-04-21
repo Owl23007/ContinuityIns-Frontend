@@ -40,12 +40,7 @@
               stroke-width="4"
               stroke-linejoin="round"
             />
-            <path
-              d="M9 42H39"
-              stroke="currentColor"
-              stroke-width="4"
-              stroke-linecap="round"
-            />
+            <path d="M9 42H39" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
           </svg>
           主页
         </router-link>
@@ -186,11 +181,7 @@
     <!--移动端菜单-->
     <div class="mobile-menu" :class="{ active: isMobileMenuOpen }">
       <div class="mobile-search">
-        <input
-          type="text"
-          placeholder="世界在你脚下..."
-          class="mobile-search-input"
-        />
+        <input type="text" placeholder="世界在你脚下..." class="mobile-search-input" />
         <button class="search_button">搜索</button>
       </div>
 
@@ -201,25 +192,17 @@
             authStore.user.nickname
           }}</el-avatar>
           <span class="mobile-username">{{
-            authStore.user.nickname + " #" + authStore.user.username || "用户"
+            authStore.user.nickname + ' #' + authStore.user.username || '用户'
           }}</span>
         </div>
         <div class="mobile-user-actions">
-          <router-link
-            to="/profile"
-            class="mobile-action-button"
-            @click="closeMobileMenu"
-          >
+          <router-link to="/profile" class="mobile-action-button" @click="closeMobileMenu">
             <el-icon>
               <User />
             </el-icon>
             <span>个人信息</span>
           </router-link>
-          <router-link
-            to="/settings"
-            class="mobile-action-button"
-            @click="closeMobileMenu"
-          >
+          <router-link to="/settings" class="mobile-action-button" @click="closeMobileMenu">
             <el-icon>
               <Setting />
             </el-icon>
@@ -235,12 +218,7 @@
       </div>
 
       <!-- 未登录时显示登录按钮 -->
-      <router-link
-        v-else
-        to="/auth"
-        class="login-button no-underline"
-        @click="closeMobileMenu"
-      >
+      <router-link v-else to="/auth" class="login-button no-underline" @click="closeMobileMenu">
         <span>登录/注册</span>
       </router-link>
 
@@ -268,12 +246,7 @@
               stroke-width="4"
               stroke-linejoin="round"
             />
-            <path
-              d="M9 42H39"
-              stroke="currentColor"
-              stroke-width="4"
-              stroke-linecap="round"
-            />
+            <path d="M9 42H39" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
           </svg>
           <span>主页</span>
         </div>
@@ -294,11 +267,7 @@
           />
         </svg>
       </router-link>
-      <router-link
-        to="/explore"
-        class="mobile-menu-item"
-        @click="closeMobileMenu"
-      >
+      <router-link to="/explore" class="mobile-menu-item" @click="closeMobileMenu">
         <div class="menu-item-content">
           <svg
             width="24"
@@ -344,11 +313,7 @@
           />
         </svg>
       </router-link>
-      <router-link
-        to="/community"
-        class="mobile-menu-item"
-        @click="closeMobileMenu"
-      >
+      <router-link to="/community" class="mobile-menu-item" @click="closeMobileMenu">
         <div class="menu-item-content">
           <svg
             width="24"
@@ -433,12 +398,7 @@
       </router-link>
 
       <!-- 投稿按钮 - 仅在登录状态显示 -->
-      <router-link
-        v-if="isLoggedIn"
-        to="/submit"
-        class="mobile-menu-item"
-        @click="closeMobileMenu"
-      >
+      <router-link v-if="isLoggedIn" to="/submit" class="mobile-menu-item" @click="closeMobileMenu">
         <div class="menu-item-content">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -479,37 +439,37 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import UserDropdown from "@/components/layout/UserDropdown.vue";
-import logoPic from "@/assets/svg/logo.svg";
-import { User, Setting, SwitchButton } from "@element-plus/icons-vue";
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import UserDropdown from '@/components/layout/UserDropdown.vue'
+import logoPic from '@/assets/svg/logo.svg'
+import { User, Setting, SwitchButton } from '@element-plus/icons-vue'
 
-const authStore = useAuthStore();
-const router = useRouter();
-const isLoggedIn = computed(() => authStore.isAuthenticated);
+const authStore = useAuthStore()
+const router = useRouter()
+const isLoggedIn = computed(() => authStore.isAuthenticated)
 
 const tohome = () => {
-  router.push("/");
-};
+  router.push('/')
+}
 
-const isMobileMenuOpen = ref(false);
+const isMobileMenuOpen = ref(false)
 
 const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value;
-  document.body.style.overflow = isMobileMenuOpen.value ? "hidden" : "";
-};
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+  document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : ''
+}
 
 const closeMobileMenu = () => {
-  isMobileMenuOpen.value = false;
-  document.body.style.overflow = "";
-};
+  isMobileMenuOpen.value = false
+  document.body.style.overflow = ''
+}
 
 const handleLogout = () => {
-  authStore.logout();
-  closeMobileMenu();
-};
+  authStore.logout()
+  closeMobileMenu()
+}
 </script>
 
 <style scoped>
@@ -567,7 +527,7 @@ const handleLogout = () => {
 
 .nav_title {
   font-size: 1.5rem;
-  font-family: "Montserrat", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Montserrat', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-weight: 550;
   letter-spacing: 0.5px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -583,10 +543,10 @@ const handleLogout = () => {
 }
 
 .nav_title::after {
-  content: "Contins";
+  content: 'Contins';
   font-size: 1.6rem;
   font-weight: 700;
-  font-family: "Poppins", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Poppins', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   opacity: 0.9;
   letter-spacing: 1px;
   background: linear-gradient(90deg, #007cf0, #00dfd8);
@@ -745,7 +705,7 @@ const handleLogout = () => {
 }
 
 .login-button:before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -789,11 +749,7 @@ const handleLogout = () => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    rgba(18, 194, 233, 0.1),
-    rgba(196, 113, 237, 0.1)
-  );
+  background: linear-gradient(135deg, rgba(18, 194, 233, 0.1), rgba(196, 113, 237, 0.1));
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
@@ -802,11 +758,7 @@ const handleLogout = () => {
 
 .hamburger-menu:hover {
   transform: scale(1.05);
-  background: linear-gradient(
-    135deg,
-    rgba(18, 194, 233, 0.2),
-    rgba(196, 113, 237, 0.2)
-  );
+  background: linear-gradient(135deg, rgba(18, 194, 233, 0.2), rgba(196, 113, 237, 0.2));
   box-shadow: 0 0 15px rgba(18, 194, 233, 0.15);
 }
 
@@ -1004,7 +956,7 @@ const handleLogout = () => {
 }
 
 .mobile-menu .search_button::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -1043,11 +995,7 @@ const handleLogout = () => {
   margin-bottom: 1.8rem;
   padding: 1.5rem;
   border-radius: 18px;
-  background: linear-gradient(
-    135deg,
-    rgba(18, 194, 233, 0.05),
-    rgba(196, 113, 237, 0.08)
-  );
+  background: linear-gradient(135deg, rgba(18, 194, 233, 0.05), rgba(196, 113, 237, 0.08));
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
@@ -1118,11 +1066,7 @@ const handleLogout = () => {
 }
 
 .mobile-action-button:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(18, 194, 233, 0.1),
-    rgba(196, 113, 237, 0.1)
-  );
+  background: linear-gradient(135deg, rgba(18, 194, 233, 0.1), rgba(196, 113, 237, 0.1));
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(18, 194, 233, 0.1);
 }

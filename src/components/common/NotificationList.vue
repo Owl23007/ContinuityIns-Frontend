@@ -45,11 +45,7 @@
           >
             标为已读
           </el-button>
-          <el-button
-            type="text"
-            size="small"
-            @click="$emit('delete', notification.id)"
-          >
+          <el-button type="text" size="small" @click="$emit('delete', notification.id)">
             删除
           </el-button>
         </div>
@@ -64,10 +60,10 @@
 </template>
 
 <script setup>
-import { ChatLineRound, Star, Bell, InfoFilled } from "@element-plus/icons-vue";
-import { useRouter } from "vue-router";
+import { ChatLineRound, Star, Bell, InfoFilled } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
 const props = defineProps({
   notifications: {
@@ -78,49 +74,49 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-});
+})
 
 // 格式化时间
 const formatTime = (timestamp) => {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diff = now - date;
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diff = now - date
 
   // 不到1分钟
   if (diff < 60000) {
-    return "刚刚";
+    return '刚刚'
   }
   // 不到1小时
   if (diff < 3600000) {
-    return Math.floor(diff / 60000) + "分钟前";
+    return Math.floor(diff / 60000) + '分钟前'
   }
   // 不到24小时
   if (diff < 86400000) {
-    return Math.floor(diff / 3600000) + "小时前";
+    return Math.floor(diff / 3600000) + '小时前'
   }
   // 不到7天
   if (diff < 604800000) {
-    return Math.floor(diff / 86400000) + "天前";
+    return Math.floor(diff / 86400000) + '天前'
   }
   // 超过7天显示具体日期
-  return date.toLocaleDateString();
-};
+  return date.toLocaleDateString()
+}
 
 // 处理通知点击
 const handleClick = (notification) => {
   if (!notification.read) {
-    emit("read", notification.id);
+    emit('read', notification.id)
   }
 
   // 根据通知类型和目标进行跳转
-  if (notification.targetType === "article") {
-    router.push(`/article/${notification.targetId}`);
-  } else if (notification.targetType === "user") {
-    router.push(`/user/${notification.targetId}`);
+  if (notification.targetType === 'article') {
+    router.push(`/article/${notification.targetId}`)
+  } else if (notification.targetType === 'user') {
+    router.push(`/user/${notification.targetId}`)
   }
-};
+}
 
-defineEmits(["read", "delete"]);
+defineEmits(['read', 'delete'])
 </script>
 
 <style scoped>
@@ -153,7 +149,7 @@ defineEmits(["read", "delete"]);
 }
 
 .notification-item.unread::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 1rem;
   right: 1rem;

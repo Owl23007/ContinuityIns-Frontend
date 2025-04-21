@@ -8,10 +8,7 @@
       <el-skeleton :loading="userLoading" animated :throttle="500">
         <template #template>
           <div class="flex items-center gap-4 w-full">
-            <el-skeleton-item
-              variant="circle"
-              style="width: 60px; height: 60px"
-            />
+            <el-skeleton-item variant="circle" style="width: 60px; height: 60px" />
             <div class="flex-1">
               <el-skeleton-item variant="text" style="width: 50%" />
               <el-skeleton-item variant="text" style="width: 80%" />
@@ -44,12 +41,8 @@
             </div>
             <div class="author-details">
               <div class="author-main">
-                <span class="author-name">{{
-                  userInfo?.nickname || userInfo?.username
-                }}</span>
-                <span class="join-time"
-                  >{{ formatJoinTime(userInfo?.createTime) }} 加入</span
-                >
+                <span class="author-name">{{ userInfo?.nickname || userInfo?.username }}</span>
+                <span class="join-time">{{ formatJoinTime(userInfo?.createTime) }} 加入</span>
               </div>
               <el-tooltip
                 :content="userInfo?.signature"
@@ -74,12 +67,7 @@
 
       <div class="article-stats">
         <el-tooltip content="查看阅读统计" placement="top">
-          <el-badge
-            :value="article.viewCount || 0"
-            :max="99999"
-            type="info"
-            class="stat-badge"
-          >
+          <el-badge :value="article.viewCount || 0" :max="99999" type="info" class="stat-badge">
             <el-button size="small" text @click="handleViewClick">
               <el-icon>
                 <View />
@@ -88,22 +76,9 @@
             </el-button>
           </el-badge>
         </el-tooltip>
-        <el-tooltip
-          :content="isLiked ? '取消点赞' : '点赞文章'"
-          placement="top"
-        >
-          <el-badge
-            :value="article.likeCount || 0"
-            :max="99999"
-            type="danger"
-            class="stat-badge"
-          >
-            <el-button
-              size="small"
-              text
-              @click="handleLikeClick"
-              :class="{ 'is-liked': isLiked }"
-            >
+        <el-tooltip :content="isLiked ? '取消点赞' : '点赞文章'" placement="top">
+          <el-badge :value="article.likeCount || 0" :max="99999" type="danger" class="stat-badge">
+            <el-button size="small" text @click="handleLikeClick" :class="{ 'is-liked': isLiked }">
               <el-icon>
                 <Star />
               </el-icon>
@@ -126,10 +101,7 @@
             </el-button>
           </el-badge>
         </el-tooltip>
-        <el-tooltip
-          :content="isCollected ? '取消收藏' : '收藏文章'"
-          placement="top"
-        >
+        <el-tooltip :content="isCollected ? '取消收藏' : '收藏文章'" placement="top">
           <el-badge
             :value="article.collectionCount || 0"
             :max="99999"
@@ -151,13 +123,7 @@
         </el-tooltip>
       </div>
 
-      <el-tag
-        v-if="article.duration"
-        size="small"
-        type="info"
-        effect="plain"
-        class="reading-time"
-      >
+      <el-tag v-if="article.duration" size="small" type="info" effect="plain" class="reading-time">
         <el-icon>
           <Reading />
         </el-icon>
@@ -167,9 +133,7 @@
 
     <div class="article-actions" v-if="isAuthor">
       <el-button-group>
-        <el-button type="primary" @click="$emit('edit')" :icon="Edit">
-          编辑文章
-        </el-button>
+        <el-button type="primary" @click="$emit('edit')" :icon="Edit"> 编辑文章 </el-button>
         <el-button type="danger" :icon="Delete"> 删除文章 </el-button>
       </el-button-group>
     </div>
@@ -177,9 +141,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
-import { ElMessage } from "element-plus";
-import { getUserById_get } from "@/api/user";
+import { ref, computed, onMounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { getUserById_get } from '@/api/user'
 import {
   Calendar,
   View,
@@ -190,8 +154,8 @@ import {
   Edit,
   Delete,
   CircleCheckFilled,
-} from "@element-plus/icons-vue";
-import defaultAvatar from "@/assets/image/default_avatar.png";
+} from '@element-plus/icons-vue'
+import defaultAvatar from '@/assets/image/default_avatar.png'
 
 const props = defineProps({
   article: {
@@ -202,101 +166,95 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-});
+})
 
-const emit = defineEmits([
-  "view-stats",
-  "like",
-  "show-comments",
-  "collect",
-  "edit",
-]);
+const emit = defineEmits(['view-stats', 'like', 'show-comments', 'collect', 'edit'])
 
-const isLiked = ref(false);
-const isCollected = ref(false);
+const isLiked = ref(false)
+const isCollected = ref(false)
 
-const userInfo = ref(null);
-const userLoading = ref(false);
-const userError = ref(null);
+const userInfo = ref(null)
+const userLoading = ref(false)
+const userError = ref(null)
 
 const handleViewClick = () => {
-  emit("view-stats");
-};
+  emit('view-stats')
+}
 
 const handleLikeClick = () => {
-  isLiked.value = !isLiked.value;
+  isLiked.value = !isLiked.value
   ElMessage({
-    type: "success",
-    message: isLiked.value ? "点赞成功" : "已取消点赞",
-  });
-  emit("like", isLiked.value);
-};
+    type: 'success',
+    message: isLiked.value ? '点赞成功' : '已取消点赞',
+  })
+  emit('like', isLiked.value)
+}
 
 const handleCommentClick = () => {
-  emit("show-comments");
-};
+  emit('show-comments')
+}
 
 const handleCollectClick = () => {
-  isCollected.value = !isCollected.value;
+  isCollected.value = !isCollected.value
   ElMessage({
-    type: "success",
-    message: isCollected.value ? "收藏成功" : "已取消收藏",
-  });
-  emit("collect", isCollected.value);
-};
+    type: 'success',
+    message: isCollected.value ? '收藏成功' : '已取消收藏',
+  })
+  emit('collect', isCollected.value)
+}
 
 const fetchUserInfo = async () => {
-  if (!props.article?.createUser?.id) return;
+  if (!props.article?.createUser?.id) return
 
-  userLoading.value = true;
-  userError.value = null;
+  userLoading.value = true
+  userError.value = null
 
   try {
-    const response = await getUserById_get(props.article.createUser.id);
+    const response = await getUserById_get(props.article.createUser.id)
     if (response.code === 0) {
-      userInfo.value = response.data;
+      userInfo.value = response.data
     } else {
-      throw new Error(response.message || "获取用户信息失败");
+      throw new Error(response.message || '获取用户信息失败')
     }
   } catch (err) {
-    userError.value = err.message;
-    ElMessage.error("获取用户信息失败");
+    userError.value = err.message
+    ElMessage.error('获取用户信息失败')
   } finally {
-    userLoading.value = false;
+    userLoading.value = false
   }
-};
+}
 
 watch(
   () => props.article?.createUser?.id,
   (newVal) => {
     if (newVal) {
-      fetchUserInfo();
+      fetchUserInfo()
     }
   },
-  { immediate: true },
-);
+  { immediate: true }
+)
 
 const formatDate = (timestamp) => {
-  if (!timestamp) return "";
-  const date = new Date(timestamp);
-  return date.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
 
 const formatJoinTime = (timestamp) => {
-  if (!timestamp) return "";
-  const date = new Date(timestamp);
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  return `${year}年${month}月`;
-};
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  return `${year}年${month}月`
+}
 
 const handleAvatarError = (e) => {
-  e.target.src = defaultAvatar;
-};
+  e.target.src = defaultAvatar
+}
 </script>
 
 <style scoped>

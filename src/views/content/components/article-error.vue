@@ -20,16 +20,16 @@
 </template>
 
 <script setup>
-import { Refresh } from "@element-plus/icons-vue";
+import { Refresh } from '@element-plus/icons-vue'
 
 defineProps({
   error: {
     type: String,
     required: true,
   },
-});
+})
 
-defineEmits(["retry"]);
+defineEmits(['retry'])
 </script>
 
 <style scoped>

@@ -16,10 +16,7 @@
     <template #dropdown>
       <el-dropdown-menu class="enhanced-dropdown-menu">
         <!-- 用户卡片头部 -->
-        <div
-          class="user-card-header"
-          :style="{ backgroundImage: `url(${userBackground})` }"
-        >
+        <div class="user-card-header" :style="{ backgroundImage: `url(${userBackground})` }">
           <div class="user-card-avatar">
             <el-avatar :size="64" :src="userAvatar" class="avatar-highlight">
               {{ userNameFirst }}
@@ -31,40 +28,28 @@
         <div class="user-card-info">
           <div class="user-identity">
             <h3 class="user-card-name">{{ nickname }}</h3>
-            <span class="username-tag">{{ "#" + userName }}</span>
+            <span class="username-tag">{{ '#' + userName }}</span>
           </div>
           <p class="user-card-email">
             <el-icon>
               <Message />
             </el-icon>
-            {{ userEmail || "未设置邮箱" }}
+            {{ userEmail || '未设置邮箱' }}
           </p>
         </div>
 
         <!-- 菜单项 -->
         <el-dropdown-item @click="goToProfile" class="menu-item">
-          <el-icon>
-            <User /> </el-icon
-          >个人信息
+          <el-icon> <User /> </el-icon>个人信息
         </el-dropdown-item>
         <el-dropdown-item @click="goToContributions" class="menu-item">
-          <el-icon>
-            <Document /> </el-icon
-          >投稿管理
+          <el-icon> <Document /> </el-icon>投稿管理
         </el-dropdown-item>
         <el-dropdown-item @click="goToSettings" class="menu-item">
-          <el-icon>
-            <Setting /> </el-icon
-          >系统设置
+          <el-icon> <Setting /> </el-icon>系统设置
         </el-dropdown-item>
-        <el-dropdown-item
-          divided
-          @click="handleLogout"
-          class="menu-item logout-item"
-        >
-          <el-icon>
-            <SwitchButton /> </el-icon
-          >退出登录
+        <el-dropdown-item divided @click="handleLogout" class="menu-item logout-item">
+          <el-icon> <SwitchButton /> </el-icon>退出登录
         </el-dropdown-item>
       </el-dropdown-menu>
     </template>
@@ -72,9 +57,9 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useRouter } from "vue-router";
-import { ElMessageBox } from "element-plus";
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessageBox } from 'element-plus'
 import {
   CaretBottom,
   User,
@@ -82,58 +67,58 @@ import {
   SwitchButton,
   Message,
   Document,
-} from "@element-plus/icons-vue";
-import { useAuthStore } from "@/stores/auth";
-import defaultCoverImg from "@/assets/image/default_cover.jpg";
+} from '@element-plus/icons-vue'
+import { useAuthStore } from '@/stores/auth'
+import defaultCoverImg from '@/assets/image/default_cover.jpg'
 
-const router = useRouter();
-const authStore = useAuthStore();
+const router = useRouter()
+const authStore = useAuthStore()
 
-const nickname = computed(() => authStore.currentUser?.nickname || "昵称");
-const userName = computed(() => authStore.currentUser?.username || "用户");
-const userEmail = computed(() => authStore.currentUser?.email || null);
-const userNameFirst = computed(() => userName.value.charAt(0));
+const nickname = computed(() => authStore.currentUser?.nickname || '昵称')
+const userName = computed(() => authStore.currentUser?.username || '用户')
+const userEmail = computed(() => authStore.currentUser?.email || null)
+const userNameFirst = computed(() => userName.value.charAt(0))
 
 // 处理图片路径的辅助函数
 const getFullImagePath = (path) => {
-  if (path && !path.startsWith("http")) {
-    return import.meta.env.VITE_API_BASE_URL + path;
+  if (path && !path.startsWith('http')) {
+    return import.meta.env.VITE_API_BASE_URL + path
   }
-  return path;
-};
+  return path
+}
 
 // 用户头像
-const userAvatar = computed(() => getFullImagePath(authStore.user.avatarImage));
+const userAvatar = computed(() => getFullImagePath(authStore.user.avatarImage))
 
 // 用户背景图片，如果未设置则使用默认图片
 const userBackground = computed(
-  () => getFullImagePath(authStore.user.backgroundImage) || defaultCoverImg,
-);
+  () => getFullImagePath(authStore.user.backgroundImage) || defaultCoverImg
+)
 
 const goToProfile = () => {
-  router.push("/profile");
-};
+  router.push('/profile')
+}
 
 const goToContributions = () => {
-  router.push("/article");
-};
+  router.push('/article')
+}
 
 const goToSettings = () => {
-  router.push("/settings");
-};
+  router.push('/settings')
+}
 
 const handleLogout = () => {
-  ElMessageBox.confirm("确认退出登录吗？", "提示", {
-    confirmButtonText: "确认",
-    cancelButtonText: "取消",
-    type: "warning",
+  ElMessageBox.confirm('确认退出登录吗？', '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
   })
     .then(async () => {
-      authStore.logout();
-      router.push("/auth");
+      authStore.logout()
+      router.push('/auth')
     })
-    .catch(() => {});
-};
+    .catch(() => {})
+}
 </script>
 
 <style scoped>

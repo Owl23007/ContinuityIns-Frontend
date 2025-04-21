@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="article-card-horizontal"
-    :class="[`status-${(article.status || '').toLowerCase()}`]"
-  >
+  <div class="article-card-horizontal" :class="[`status-${(article.status || '').toLowerCase()}`]">
     <!-- 封面图片 -->
     <div class="cover-container-horizontal">
       <img
@@ -20,9 +17,7 @@
         <div class="publish-info">
           <span class="publish-time">{{ formatDate(article.createTime) }}</span>
           <span class="dot" v-if="article.duration">·</span>
-          <span class="reading-time" v-if="article.duration">
-            {{ article.duration }} 字
-          </span>
+          <span class="reading-time" v-if="article.duration"> {{ article.duration }} 字 </span>
         </div>
       </div>
 
@@ -43,103 +38,101 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { ArticleStatus } from "@/pojo/article";
-import default_cover from "@/assets/image/default_cover.png";
-import image_fail from "@/assets/image/image_fail_load.png";
+import { computed } from 'vue'
+import { ArticleStatus } from '@/pojo/article'
+import default_cover from '@/assets/image/default_cover.png'
+import image_fail from '@/assets/image/image_fail_load.png'
 
 const props = defineProps({
   article: {
     type: Object,
     required: true,
     default: () => ({
-      id: "",
-      title: "",
-      content: "",
-      coverImg: "",
-      status: "",
+      id: '',
+      title: '',
+      content: '',
+      coverImg: '',
+      status: '',
       createTime: null,
       createUser: null,
       duration: null,
-      coverImgFail: "",
+      coverImgFail: '',
     }),
   },
-});
+})
 
 // 动态状态文本
 const statusText = computed(() => {
-  if (!ArticleStatus) return ""; // Fallback if ArticleStatus is undefined
+  if (!ArticleStatus) return '' // Fallback if ArticleStatus is undefined
   switch (props.article.status) {
     case ArticleStatus.DRAFT:
-      return "草稿";
+      return '草稿'
     case ArticleStatus.PRIVATE:
-      return "私密";
+      return '私密'
     case ArticleStatus.BANNED:
-      return "已禁用";
+      return '已禁用'
     default:
-      return "";
+      return ''
   }
-});
+})
 
 // 处理图片加载失败
 const handleImageError = (e) => {
   if (!e.target.dataset.errorHandled) {
-    e.target.src = image_fail; // 使用默认图片
-    e.target.dataset.errorHandled = true; // Prevent re-triggering
+    e.target.src = image_fail // 使用默认图片
+    e.target.dataset.errorHandled = true // Prevent re-triggering
   }
-};
+}
 
 // 格式化日期
 const formatDate = (timestamp) => {
-  if (!timestamp || isNaN(new Date(timestamp).getTime())) return "";
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diff = now - date;
+  if (!timestamp || isNaN(new Date(timestamp).getTime())) return ''
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diff = now - date
 
   if (diff < 24 * 60 * 60 * 1000) {
-    const hours = Math.floor(diff / (60 * 60 * 1000));
+    const hours = Math.floor(diff / (60 * 60 * 1000))
     if (hours < 1) {
-      const minutes = Math.floor(diff / (60 * 1000));
-      return `${minutes} 分钟前`;
+      const minutes = Math.floor(diff / (60 * 1000))
+      return `${minutes} 分钟前`
     }
-    return `${hours} 小时前`;
+    return `${hours} 小时前`
   }
 
   if (diff < 7 * 24 * 60 * 60 * 1000) {
-    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-    return `${days} 天前`;
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000))
+    return `${days} 天前`
   }
 
   // 如果超过30天，显示月份和日期
   if (diff < 365 * 24 * 60 * 60 * 1000) {
-    return date.toLocaleDateString("zh-CN", {
-      month: "long",
-      day: "numeric",
-    });
+    return date.toLocaleDateString('zh-CN', {
+      month: 'long',
+      day: 'numeric',
+    })
   }
 
   // 超过一年，显示完整日期
-  return date.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
 
 // 获取文章摘要
 const getExcerpt = (content) => {
-  if (!content) return "";
+  if (!content) return ''
   // 移除HTML标签，包括<br>
-  const plainText = content
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]+>/g, "");
+  const plainText = content.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')
   // 移除Markdown语法
-  const noMarkdown = plainText.replace(/[#*`_~\[\]]/g, "");
+  const noMarkdown = plainText.replace(/[#*`_~\[\]]/g, '')
   // 移除多余空行
-  const cleanText = noMarkdown.replace(/\n\s*\n/g, "\n").trim();
+  const cleanText = noMarkdown.replace(/\n\s*\n/g, '\n').trim()
   // 截取前100个字符
-  return cleanText.slice(0, 100) + (cleanText.length > 100 ? "..." : "");
-};
+  return cleanText.slice(0, 100) + (cleanText.length > 100 ? '...' : '')
+}
 </script>
 
 <style scoped>

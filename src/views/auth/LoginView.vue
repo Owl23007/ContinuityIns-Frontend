@@ -2,7 +2,7 @@
   <div class="auth-container">
     <div class="auth-card" :class="{ 'register-mode': !uiState.isLogin }">
       <div class="header">
-        <h2>{{ uiState.isLogin ? "欢迎回来" : "加入我们" }}</h2>
+        <h2>{{ uiState.isLogin ? '欢迎回来' : '加入我们' }}</h2>
         <div class="decorative-line"></div>
       </div>
 
@@ -38,11 +38,7 @@
         </base-input>
 
         <!-- 邮箱输入（注册模式） -->
-        <div
-          class="input-group"
-          :class="{ error: errors.email }"
-          v-if="!uiState.isLogin"
-        >
+        <div class="input-group" :class="{ error: errors.email }" v-if="!uiState.isLogin">
           <input
             type="text"
             v-model="formData.main.email"
@@ -87,10 +83,7 @@
         />
 
         <!-- 密码强度条 -->
-        <PasswordStrength
-          v-if="!uiState.isLogin"
-          :password="formData.main.password"
-        />
+        <PasswordStrength v-if="!uiState.isLogin" :password="formData.main.password" />
 
         <!-- 验证码输入框 -->
         <CaptchaInput
@@ -103,11 +96,7 @@
         />
 
         <!-- 重复密码输入（注册模式） -->
-        <div
-          class="input-group"
-          :class="{ error: errors.passwordConfirm }"
-          v-if="!uiState.isLogin"
-        >
+        <div class="input-group" :class="{ error: errors.passwordConfirm }" v-if="!uiState.isLogin">
           <input
             :type="uiState.showPasswordConfirm ? 'text' : 'password'"
             v-model="formData.main.passwordConfirm"
@@ -184,15 +173,9 @@
 
         <!-- 登录模式选项 -->
         <div v-if="uiState.isLogin" class="options">
-          <a @click="uiState.showForgotPassword = true" style="cursor: pointer"
-            >忘记密码？</a
-          >
+          <a @click="uiState.showForgotPassword = true" style="cursor: pointer">忘记密码？</a>
           <div class="remember-me">
-            <input
-              type="checkbox"
-              v-model="uiState.rememberMe"
-              id="remember-me"
-            />
+            <input type="checkbox" v-model="uiState.rememberMe" id="remember-me" />
             <p>记住我</p>
             <span class="tooltip-icon">
               <svg
@@ -224,28 +207,21 @@
           :disabled="uiState.processing"
           :class="{ processing: uiState.processing }"
         >
-          <span v-if="!uiState.processing">{{
-            uiState.isLogin ? "立即登录" : "注册账号"
-          }}</span>
+          <span v-if="!uiState.processing">{{ uiState.isLogin ? '立即登录' : '注册账号' }}</span>
           <div v-else class="loader"></div>
         </button>
       </form>
 
       <div class="auth-footer">
-        <span>{{ uiState.isLogin ? "新用户？" : "已有账号？" }}</span>
-        <a @click="toggleAuthMode">{{
-          uiState.isLogin ? "创建账号" : "立即登录"
-        }}</a>
+        <span>{{ uiState.isLogin ? '新用户？' : '已有账号？' }}</span>
+        <a @click="toggleAuthMode">{{ uiState.isLogin ? '创建账号' : '立即登录' }}</a>
       </div>
     </div>
 
     <!-- 忘记密码模态框 -->
     <transition name="modal-fade">
       <div v-if="uiState.showForgotPassword" class="modal-mask">
-        <div
-          class="modal-wrapper"
-          @click.self="uiState.showForgotPassword = false"
-        >
+        <div class="modal-wrapper" @click.self="uiState.showForgotPassword = false">
           <div class="modal-container">
             <div class="modal-header">
               <div class="title-group">
@@ -312,10 +288,7 @@
                   <span v-if="!uiState.processingReset">发送重置邮件</span>
                   <div v-else class="mini-loader"></div>
                 </button>
-                <button
-                  class="secondary-btn"
-                  @click="uiState.showForgotPassword = false"
-                >
+                <button class="secondary-btn" @click="uiState.showForgotPassword = false">
                   取消
                 </button>
               </div>
@@ -355,33 +328,33 @@
 </template>
 
 <script setup>
-import { ref, reactive, onBeforeUnmount, watch } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import { sendResetEmail_post } from "@/api/user";
-import { getCaptcha } from "@/api/captcha";
-import BaseInput from "./components/BaseInput.vue";
-import PasswordInput from "./components/PasswordInput.vue";
-import CaptchaInput from "./components/CaptchaInput.vue";
-import PasswordStrength from "./components/PasswordStrength.vue";
+import { ref, reactive, onBeforeUnmount, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { sendResetEmail_post } from '@/api/user'
+import { getCaptcha } from '@/api/captcha'
+import BaseInput from './components/BaseInput.vue'
+import PasswordInput from './components/PasswordInput.vue'
+import CaptchaInput from './components/CaptchaInput.vue'
+import PasswordStrength from './components/PasswordStrength.vue'
 
 // 基础依赖
-const authStore = useAuthStore();
-const router = useRouter();
+const authStore = useAuthStore()
+const router = useRouter()
 
 // 定时器管理
-const timers = ref([]);
+const timers = ref([])
 const setTimer = (callback, delay = 3000) => {
   const timer = setTimeout(() => {
-    callback();
-    timers.value = timers.value.filter((t) => t !== timer);
-  }, delay);
-  timers.value.push(timer);
-};
+    callback()
+    timers.value = timers.value.filter((t) => t !== timer)
+  }, delay)
+  timers.value.push(timer)
+}
 const clearAllTimers = () => {
-  timers.value.forEach((timer) => clearTimeout(timer));
-  timers.value = [];
-};
+  timers.value.forEach((timer) => clearTimeout(timer))
+  timers.value = []
+}
 
 // 组件状态
 const uiState = reactive({
@@ -392,217 +365,217 @@ const uiState = reactive({
   showForgotPassword: false,
   processingReset: false,
   showPasswordConfirm: false,
-  captchaUrl: "",
-  resetCaptchaUrl: "",
-});
+  captchaUrl: '',
+  resetCaptchaUrl: '',
+})
 
 // 表单数据
 const formData = reactive({
   main: {
-    identifier: "",
-    email: "",
-    password: "",
-    passwordConfirm: "",
-    captcha: "",
+    identifier: '',
+    email: '',
+    password: '',
+    passwordConfirm: '',
+    captcha: '',
   },
   reset: {
-    email: "",
-    captcha: "",
-    captchaId: "",
+    email: '',
+    captcha: '',
+    captchaId: '',
   },
-});
+})
 
 // 错误状态
 const errors = reactive({
-  email: "",
-  password: "",
-  resetEmail: "",
-  passwordConfirm: "",
-  captcha: "",
-  resetCaptcha: "",
-  username: "",
-});
+  email: '',
+  password: '',
+  resetEmail: '',
+  passwordConfirm: '',
+  captcha: '',
+  resetCaptcha: '',
+  username: '',
+})
 
 // 消息提示
 const message = reactive({
-  content: "",
-  type: "error",
-});
+  content: '',
+  type: 'error',
+})
 
 // 验证规则
 const validators = {
   email: (value) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!value.trim()) return "请输入邮箱地址";
-    if (!emailRegex.test(value)) return "邮箱格式不正确";
-    return "";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!value.trim()) return '请输入邮箱地址'
+    if (!emailRegex.test(value)) return '邮箱格式不正确'
+    return ''
   },
   password: (value) => {
-    if (value.length < 8) return "密码长度不能少于8位";
-    return "";
+    if (value.length < 8) return '密码长度不能少于8位'
+    return ''
   },
   username: (value) => {
-    if (!value.trim()) return "请输入用户名";
-    const usernameRegex = /^[a-zA-Z0-9]{5,16}$/;
+    if (!value.trim()) return '请输入用户名'
+    const usernameRegex = /^[a-zA-Z0-9]{5,16}$/
     if (!usernameRegex.test(value)) {
       if (value.length < 5 || value.length > 16) {
-        return "用户名长度必须在5-16位之间";
+        return '用户名长度必须在5-16位之间'
       }
-      return "用户名只能包含英文字母和数字";
+      return '用户名只能包含英文字母和数字'
     }
-    return "";
+    return ''
   },
   resetCaptcha: (value) => {
-    if (!value) return "请输入验证码";
-    if (value.length !== 4) return "验证码长度不正确";
-    return "";
+    if (!value) return '请输入验证码'
+    if (value.length !== 4) return '验证码长度不正确'
+    return ''
   },
-};
+}
 
 // 主表单验证
 const validateMainForm = () => {
-  let isValid = true;
+  let isValid = true
 
   // 邮箱验证（注册模式）
   if (!uiState.isLogin) {
-    const emailError = validators.email(formData.main.email);
+    const emailError = validators.email(formData.main.email)
     if (emailError) {
-      errors.email = emailError;
-      isValid = false;
-      setTimer(() => (errors.email = ""));
+      errors.email = emailError
+      isValid = false
+      setTimer(() => (errors.email = ''))
     }
   }
 
   // 密码验证
-  const passwordError = validators.password(formData.main.password);
+  const passwordError = validators.password(formData.main.password)
   if (passwordError) {
-    errors.password = passwordError;
-    isValid = false;
-    setTimer(() => (errors.password = ""));
+    errors.password = passwordError
+    isValid = false
+    setTimer(() => (errors.password = ''))
   }
 
   // 用户名验证（注册模式）
   if (!uiState.isLogin) {
-    const usernameError = validators.username(formData.main.identifier);
+    const usernameError = validators.username(formData.main.identifier)
     if (usernameError) {
-      errors.username = usernameError;
-      isValid = false;
-      setTimer(() => (errors.username = ""));
+      errors.username = usernameError
+      isValid = false
+      setTimer(() => (errors.username = ''))
     }
   }
 
   // 确认密码验证（注册模式）
   if (!uiState.isLogin && !validatePasswordConfirm()) {
-    isValid = false;
+    isValid = false
   }
 
   // 验证码验证（注册模式）
   if (!uiState.isLogin && !validateCaptcha()) {
-    isValid = false;
+    isValid = false
   }
 
   // 基础字段验证
   if (!formData.main.identifier.trim() || !formData.main.password) {
-    isValid = false;
+    isValid = false
   }
 
-  return isValid;
-};
+  return isValid
+}
 
 // 重置邮箱验证
 const validateResetEmail = () => {
-  const error = validators.email(formData.reset.email);
+  const error = validators.email(formData.reset.email)
   if (error) {
-    errors.resetEmail = error;
-    setTimer(() => (errors.resetEmail = ""));
-    return false;
+    errors.resetEmail = error
+    setTimer(() => (errors.resetEmail = ''))
+    return false
   }
-  return true;
-};
+  return true
+}
 
 // 添加确认密码验证方法
 const validatePasswordConfirm = () => {
   if (!formData.main.passwordConfirm) {
-    errors.passwordConfirm = "请确认密码";
-    return false;
+    errors.passwordConfirm = '请确认密码'
+    return false
   }
   if (formData.main.passwordConfirm !== formData.main.password) {
-    errors.passwordConfirm = "两次输入的密码不一致";
-    return false;
+    errors.passwordConfirm = '两次输入的密码不一致'
+    return false
   }
-  errors.passwordConfirm = "";
-  return true;
-};
+  errors.passwordConfirm = ''
+  return true
+}
 
 // 合并后的验证码刷新方法
-const refreshCaptcha = async (type = "main") => {
+const refreshCaptcha = async (type = 'main') => {
   try {
     // 先清空当前验证码url
-    if (type === "main") {
-      uiState.captchaUrl = "";
+    if (type === 'main') {
+      uiState.captchaUrl = ''
     } else {
-      uiState.resetCaptchaUrl = "";
+      uiState.resetCaptchaUrl = ''
     }
 
-    const response = await getCaptcha();
+    const response = await getCaptcha()
     if (response) {
-      const [uuid, ...imageParts] = response.split(":");
+      const [uuid, ...imageParts] = response.split(':')
       if (!uuid || imageParts.length === 0) {
-        throw new Error("验证码数据格式无效");
+        throw new Error('验证码数据格式无效')
       }
 
-      const imageData = imageParts.join(":");
+      const imageData = imageParts.join(':')
 
-      if (type === "main") {
-        formData.main.captchaId = uuid;
-        uiState.captchaUrl = imageData;
+      if (type === 'main') {
+        formData.main.captchaId = uuid
+        uiState.captchaUrl = imageData
       } else {
-        formData.reset.captchaId = uuid;
-        uiState.resetCaptchaUrl = imageData;
+        formData.reset.captchaId = uuid
+        uiState.resetCaptchaUrl = imageData
       }
     } else {
-      throw new Error("验证码获取失败");
+      throw new Error('验证码获取失败')
     }
   } catch (error) {
-    showMessage(error.message || "获取验证码失败");
+    showMessage(error.message || '获取验证码失败')
   }
-};
+}
 
 const validateCaptcha = async () => {
   if (!formData.main.captcha) {
-    errors.captcha = "请输入验证码";
-    return false;
+    errors.captcha = '请输入验证码'
+    return false
   }
   if (formData.main.captcha.length !== 4) {
-    console.log(formData.main.captcha.length);
-    errors.captcha = "验证码长度不正确";
-    return false;
+    console.log(formData.main.captcha.length)
+    errors.captcha = '验证码长度不正确'
+    return false
   }
   // 当验证码长度为4时，清除错误信息
-  errors.captcha = "";
-  return true;
-};
+  errors.captcha = ''
+  return true
+}
 
 // 表单提交
 const handleSubmit = async () => {
   if (!validateMainForm() || uiState.processing) {
-    if (!validateMainForm()) showMessage("请检查输入的内容");
-    return;
+    if (!validateMainForm()) showMessage('请检查输入的内容')
+    return
   }
 
-  uiState.processing = true;
+  uiState.processing = true
   try {
     if (uiState.isLogin) {
-      await handleLogin();
+      await handleLogin()
     } else {
-      await handleRegister();
+      await handleRegister()
     }
   } catch (error) {
-    showMessage(error.message || "操作失败，请检查网络");
+    showMessage(error.message || '操作失败，请检查网络')
   } finally {
-    uiState.processing = false;
+    uiState.processing = false
   }
-};
+}
 
 // 登录处理
 const handleLogin = async () => {
@@ -610,11 +583,11 @@ const handleLogin = async () => {
     identifier: formData.main.identifier,
     password: formData.main.password,
     rememberMe: uiState.rememberMe,
-  });
-  const redirectPath = router.currentRoute?.query?.redirect || "/";
-  router.replace(redirectPath);
-  showMessage("登录成功", "success");
-};
+  })
+  const redirectPath = router.currentRoute?.query?.redirect || '/'
+  router.replace(redirectPath)
+  showMessage('登录成功', 'success')
+}
 
 // 注册处理
 const handleRegister = async () => {
@@ -625,125 +598,125 @@ const handleRegister = async () => {
       password: formData.main.password,
       captchaCode: formData.main.captcha,
       captchaId: formData.main.captchaId,
-    });
-    showMessage("注册成功，请查看邮箱验证", "success");
-    toggleAuthMode();
+    })
+    showMessage('注册成功，请查看邮箱验证', 'success')
+    toggleAuthMode()
   } catch (error) {
-    showMessage(error.message || "注册失败，请重试");
+    showMessage(error.message || '注册失败，请重试')
     // 注册失败时刷新验证码
-    refreshCaptcha();
+    refreshCaptcha()
   }
-};
+}
 
 // 修改发送重置邮件方法
 const sendResetEmail = async () => {
-  if (!validateResetEmail() || uiState.processingReset) return;
+  if (!validateResetEmail() || uiState.processingReset) return
 
   // 验证验证码
-  const captchaError = validators.resetCaptcha(formData.reset.captcha);
+  const captchaError = validators.resetCaptcha(formData.reset.captcha)
   if (captchaError) {
-    errors.resetCaptcha = captchaError;
-    setTimer(() => (errors.resetCaptcha = ""));
-    return;
+    errors.resetCaptcha = captchaError
+    setTimer(() => (errors.resetCaptcha = ''))
+    return
   }
 
-  uiState.processingReset = true;
+  uiState.processingReset = true
   try {
     const res = await sendResetEmail_post({
       email: formData.reset.email,
       captchaCode: formData.reset.captcha,
       captchaId: formData.reset.captchaId,
-    });
-    if (res.code === -1) throw new Error(res.message);
+    })
+    if (res.code === -1) throw new Error(res.message)
 
-    showMessage("重置链接已发送至邮箱", "success");
-    uiState.showForgotPassword = false;
-    formData.reset.email = "";
-    formData.reset.captcha = "";
-    errors.resetEmail = "";
-    errors.resetCaptcha = "";
+    showMessage('重置链接已发送至邮箱', 'success')
+    uiState.showForgotPassword = false
+    formData.reset.email = ''
+    formData.reset.captcha = ''
+    errors.resetEmail = ''
+    errors.resetCaptcha = ''
   } catch (error) {
-    showMessage(error.message || "发送失败，请稍后重试");
-    refreshCaptcha("reset"); // 修改这里，使用 reset 类型
+    showMessage(error.message || '发送失败，请稍后重试')
+    refreshCaptcha('reset') // 修改这里，使用 reset 类型
   } finally {
-    uiState.processingReset = false;
+    uiState.processingReset = false
   }
-};
+}
 
 // 添加用户名验证方法
 const validateUsername = () => {
-  const error = validators.username(formData.main.identifier);
+  const error = validators.username(formData.main.identifier)
   if (error) {
-    errors.username = error;
-    setTimer(() => (errors.username = ""), 3000);
-    return false;
+    errors.username = error
+    setTimer(() => (errors.username = ''), 3000)
+    return false
   }
-  errors.username = "";
-  return true;
-};
+  errors.username = ''
+  return true
+}
 
 // 辅助函数
 const toggleAuthMode = () => {
-  uiState.isLogin = !uiState.isLogin;
-  resetMainForm();
-};
+  uiState.isLogin = !uiState.isLogin
+  resetMainForm()
+}
 
 const resetMainForm = () => {
-  formData.main.identifier = "";
-  formData.main.email = "";
-  formData.main.password = "";
-  formData.main.passwordConfirm = "";
-  formData.main.captcha = "";
-  clearErrors();
+  formData.main.identifier = ''
+  formData.main.email = ''
+  formData.main.password = ''
+  formData.main.passwordConfirm = ''
+  formData.main.captcha = ''
+  clearErrors()
   if (!uiState.isLogin) {
-    refreshCaptcha();
+    refreshCaptcha()
   }
-};
+}
 
 const clearErrors = () => {
-  errors.email = "";
-  errors.password = "";
-  errors.resetEmail = "";
-  errors.passwordConfirm = "";
-  errors.captcha = "";
-};
+  errors.email = ''
+  errors.password = ''
+  errors.resetEmail = ''
+  errors.passwordConfirm = ''
+  errors.captcha = ''
+}
 
-const showMessage = (content, type = "error") => {
-  message.content = content;
-  message.type = type;
-  setTimer(() => (message.content = ""));
-};
+const showMessage = (content, type = 'error') => {
+  message.content = content
+  message.type = type
+  setTimer(() => (message.content = ''))
+}
 
 // 生命周期
 onBeforeUnmount(() => {
-  clearAllTimers();
-});
+  clearAllTimers()
+})
 
 // 自动验证重置邮箱
 watch(
   () => formData.reset.email,
-  () => validateResetEmail(),
-);
+  () => validateResetEmail()
+)
 
 // 在注册模式切换时刷新验证码
 watch(
   () => uiState.isLogin,
   (newVal) => {
     if (!newVal) {
-      refreshCaptcha("main"); // 修改这里，使用 main 类型
+      refreshCaptcha('main') // 修改这里，使用 main 类型
     }
-  },
-);
+  }
+)
 
 // 在 watch 部分修改监听
 watch(
   () => uiState.showForgotPassword,
   (newVal) => {
     if (newVal) {
-      refreshCaptcha("reset"); // 修改这里，使用 reset 类型
+      refreshCaptcha('reset') // 修改这里，使用 reset 类型
     }
-  },
-);
+  }
+)
 </script>
 
 <style src="./styles/login.css"></style>

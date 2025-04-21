@@ -79,14 +79,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useAuthStore } from "@/stores/auth";
-import ImageCropper from "@/components/common/ImageCropper.vue";
-import { uploadFile, validateFile } from "@/api/file";
+import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import ImageCropper from '@/components/common/ImageCropper.vue'
+import { uploadFile, validateFile } from '@/api/file'
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
-const emit = defineEmits(["avatar-updated", "cancel"]);
+const emit = defineEmits(['avatar-updated', 'cancel'])
 
 const props = defineProps({
   isSubmitting: {
@@ -97,54 +97,54 @@ const props = defineProps({
     type: String,
     required: true,
   },
-});
+})
 
-const fileInput = ref(null);
-const selectedFile = ref(null);
-const isUploading = ref(false);
-const uploadError = ref("");
-const isDragging = ref(false);
+const fileInput = ref(null)
+const selectedFile = ref(null)
+const isUploading = ref(false)
+const uploadError = ref('')
+const isDragging = ref(false)
 
 // 触发文件选择框
 function triggerFileInput() {
-  fileInput.value.click();
+  fileInput.value.click()
 }
 
 // 选择文件
 function handleFileSelect(event) {
-  const file = event.target.files[0];
+  const file = event.target.files[0]
   if (file) {
     try {
-      validateFile(file, "avatar");
-      selectedFile.value = file;
-      uploadError.value = "";
+      validateFile(file, 'avatar')
+      selectedFile.value = file
+      uploadError.value = ''
     } catch (error) {
-      uploadError.value = error.message;
+      uploadError.value = error.message
     }
   }
 }
 
 // 处理拖拽进入
 function handleDragEnter(e) {
-  isDragging.value = true;
+  isDragging.value = true
 }
 
 // 处理拖拽离开
 function handleDragLeave(e) {
-  isDragging.value = false;
+  isDragging.value = false
 }
 
 // 处理拖拽放下
 function handleDrop(e) {
-  isDragging.value = false;
-  const file = e.dataTransfer.files[0];
+  isDragging.value = false
+  const file = e.dataTransfer.files[0]
   if (file) {
     try {
-      validateFile(file, "avatar");
-      selectedFile.value = file;
-      uploadError.value = "";
+      validateFile(file, 'avatar')
+      selectedFile.value = file
+      uploadError.value = ''
     } catch (error) {
-      uploadError.value = error.message;
+      uploadError.value = error.message
     }
   }
 }
@@ -152,37 +152,37 @@ function handleDrop(e) {
 // 处理裁剪完成
 async function handleCropComplete(cropResult) {
   if (!cropResult || !cropResult.file) {
-    uploadError.value = "图片处理失败";
-    return;
+    uploadError.value = '图片处理失败'
+    return
   }
 
   if (!props.token) {
-    uploadError.value = "未登录，请重新登录后再试";
-    return;
+    uploadError.value = '未登录，请重新登录后再试'
+    return
   }
 
-  isUploading.value = true;
-  uploadError.value = "";
+  isUploading.value = true
+  uploadError.value = ''
 
   try {
-    const { url: accessUrl } = await uploadFile(cropResult.file, "avatar");
-    await authStore.updateAvatar(accessUrl);
-    emit("avatar-updated");
-    return;
+    const { url: accessUrl } = await uploadFile(cropResult.file, 'avatar')
+    await authStore.updateAvatar(accessUrl)
+    emit('avatar-updated')
+    return
   } catch (error) {
-    console.error("上传头像失败:", error);
-    uploadError.value = error.message || "上传失败，请重试";
+    console.error('上传头像失败:', error)
+    uploadError.value = error.message || '上传失败，请重试'
   } finally {
-    isUploading.value = false;
+    isUploading.value = false
   }
 }
 
 // 重置上传状态
 function resetUpload() {
-  selectedFile.value = null;
-  uploadError.value = "";
+  selectedFile.value = null
+  uploadError.value = ''
   if (fileInput.value) {
-    fileInput.value.value = "";
+    fileInput.value.value = ''
   }
 }
 </script>

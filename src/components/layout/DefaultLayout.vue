@@ -11,13 +11,13 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useRoute } from "vue-router";
-import AppHeader from "./AppHeader.vue";
-import AppFooter from "./AppFooter.vue";
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import AppHeader from './AppHeader.vue'
+import AppFooter from './AppFooter.vue'
 
-const route = useRoute();
-const isChat = computed(() => route.path === "/chat");
+const route = useRoute()
+const isChat = computed(() => route.path === '/chat')
 </script>
 
 <style>

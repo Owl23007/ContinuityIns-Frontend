@@ -1,10 +1,6 @@
 <template>
   <Teleport to="body">
-    <transition-group
-      name="notification"
-      tag="div"
-      class="notification-container"
-    >
+    <transition-group name="notification" tag="div" class="notification-container">
       <div
         v-for="notification in notifications"
         :key="notification.id"
@@ -13,62 +9,60 @@
       >
         <span class="notification-icon">{{ getIcon(notification.type) }}</span>
         <span class="notification-message">{{ notification.message }}</span>
-        <button class="notification-close" @click="close(notification.id)">
-          &times;
-        </button>
+        <button class="notification-close" @click="close(notification.id)">&times;</button>
       </div>
     </transition-group>
   </Teleport>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue'
 
-const notifications = ref([]);
-let nextId = 1;
+const notifications = ref([])
+let nextId = 1
 
 // 显示通知
-function show(message, type = "info", duration = 3000) {
-  const id = nextId++;
+function show(message, type = 'info', duration = 3000) {
+  const id = nextId++
 
   const notification = {
     id,
     message,
     type,
-  };
+  }
 
-  notifications.value.push(notification);
+  notifications.value.push(notification)
 
   // 自动关闭
   if (duration > 0) {
     setTimeout(() => {
-      close(id);
-    }, duration);
+      close(id)
+    }, duration)
   }
 
-  return id;
+  return id
 }
 
 // 关闭通知
 function close(id) {
-  const index = notifications.value.findIndex((n) => n.id === id);
+  const index = notifications.value.findIndex((n) => n.id === id)
   if (index !== -1) {
-    notifications.value.splice(index, 1);
+    notifications.value.splice(index, 1)
   }
 }
 
 // 根据类型获取图标
 function getIcon(type) {
   switch (type) {
-    case "success":
-      return "✓";
-    case "error":
-      return "✗";
-    case "warning":
-      return "⚠";
-    case "info":
+    case 'success':
+      return '✓'
+    case 'error':
+      return '✗'
+    case 'warning':
+      return '⚠'
+    case 'info':
     default:
-      return "ℹ";
+      return 'ℹ'
   }
 }
 
@@ -76,7 +70,7 @@ function getIcon(type) {
 defineExpose({
   show,
   close,
-});
+})
 </script>
 
 <style scoped>

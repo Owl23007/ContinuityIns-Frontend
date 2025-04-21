@@ -28,56 +28,50 @@
     </div>
 
     <div class="form-actions">
-      <button type="button" @click="$emit('cancel')" class="cancel-btn">
-        取消
-      </button>
-      <button
-        type="submit"
-        class="submit-btn"
-        :disabled="isSubmitting || !hasChanges"
-      >
-        {{ isSubmitting ? "保存中..." : "保存" }}
+      <button type="button" @click="$emit('cancel')" class="cancel-btn">取消</button>
+      <button type="submit" class="submit-btn" :disabled="isSubmitting || !hasChanges">
+        {{ isSubmitting ? '保存中...' : '保存' }}
       </button>
     </div>
   </form>
 </template>
 
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, computed } from 'vue'
 
 const props = defineProps({
   nickname: {
     type: String,
-    default: "",
+    default: '',
   },
   signature: {
     type: String,
-    default: "",
+    default: '',
   },
   isSubmitting: {
     type: Boolean,
     default: false,
   },
-});
+})
 
-const emits = defineEmits(["update", "cancel"]);
+const emits = defineEmits(['update', 'cancel'])
 
 const form = reactive({
   nickname: props.nickname,
   signature: props.signature,
-});
+})
 
 const hasChanges = computed(() => {
-  return form.nickname !== props.nickname || form.signature !== props.signature;
-});
+  return form.nickname !== props.nickname || form.signature !== props.signature
+})
 
 function handleSubmit() {
-  if (!hasChanges.value || props.isSubmitting) return;
+  if (!hasChanges.value || props.isSubmitting) return
 
-  emits("update", {
+  emits('update', {
     nickname: form.nickname.trim(),
     signature: form.signature.trim(),
-  });
+  })
 }
 </script>
 

@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import logoPic from "@/assets/svg/logo.svg";
+import logoPic from '@/assets/svg/logo.svg'
 </script>
 
 <style scoped>
@@ -47,17 +47,13 @@ import logoPic from "@/assets/svg/logo.svg";
 }
 
 .auth-layout::before {
-  content: "";
+  content: '';
   position: absolute;
   width: 200%;
   height: 200%;
   top: -50%;
   left: -50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.07) 8%,
-    transparent 8%
-  );
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 8%, transparent 8%);
   background-size: 25px 25px;
   transform: rotate(30deg);
   animation: moveBackground 60s linear infinite;
@@ -65,7 +61,7 @@ import logoPic from "@/assets/svg/logo.svg";
 }
 
 .auth-layout::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   backdrop-filter: blur(100px);

@@ -1,8 +1,6 @@
 <template>
   <!-- 调试用 - 确保组件渲染 -->
-  <div v-if="!article" style="color: red; padding: 20px">
-    警告：article数据为空！
-  </div>
+  <div v-if="!article" style="color: red; padding: 20px">警告：article数据为空！</div>
 
   <el-card v-else class="article-card" :body-style="{ padding: '0px' }">
     <div class="cover-container" @click="goToArticleDetail">
@@ -17,12 +15,12 @@
     </div>
     <div class="article-content">
       <h3 class="article-title" @click="goToArticleDetail">
-        {{ article.title || "无标题" }}
+        {{ article.title || '无标题' }}
       </h3>
-      <p class="article-summary">{{ article.summary || "暂无摘要" }}</p>
+      <p class="article-summary">{{ article.summary || '暂无摘要' }}</p>
       <div class="article-meta">
         <span class="author clickable" @click="goToUserPage">{{
-          article.author || "未知作者"
+          article.author || '未知作者'
         }}</span>
         <span class="date">{{ formatDate(article.date) }}</span>
       </div>
@@ -53,70 +51,70 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import defaultCover from "@/assets/image/default_cover.png";
-import { useRouter } from "vue-router";
-import { View, Star } from "@element-plus/icons-vue";
+import { ref, onMounted } from 'vue'
+import defaultCover from '@/assets/image/default_cover.png'
+import { useRouter } from 'vue-router'
+import { View, Star } from '@element-plus/icons-vue'
 
-const router = useRouter();
+const router = useRouter()
 
 const props = defineProps({
   article: {
     type: Object,
     required: true,
     validator: (value) => {
-      console.log("ArticleCard props验证:", value);
-      return value !== null;
+      console.log('ArticleCard props验证:', value)
+      return value !== null
     },
   },
-});
+})
 
-const showDefaultCover = ref(!props.article.cover);
-const imageLoaded = ref(false);
+const showDefaultCover = ref(!props.article.cover)
+const imageLoaded = ref(false)
 
 // 图片加载错误处理
 const handleImageError = () => {
-  console.log("封面图片加载失败:", props.article.cover);
-  showDefaultCover.value = true;
-};
+  console.log('封面图片加载失败:', props.article.cover)
+  showDefaultCover.value = true
+}
 
 // 图片加载成功处理
 const handleImageLoad = () => {
-  imageLoaded.value = true;
-};
+  imageLoaded.value = true
+}
 
 const formatDate = (dateString) => {
-  if (!dateString) return "未知日期";
+  if (!dateString) return '未知日期'
   try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+    const date = new Date(dateString)
+    return date.toLocaleDateString()
   } catch (e) {
-    console.error("日期格式化错误:", e);
-    return dateString; // 返回原始字符串
+    console.error('日期格式化错误:', e)
+    return dateString // 返回原始字符串
   }
-};
+}
 
 // 跳转到文章详情页
 const goToArticleDetail = () => {
   if (props.article && props.article.id) {
-    router.push(`/article/${props.article.id}`);
+    router.push(`/article/${props.article.id}`)
   } else {
-    console.error("文章ID不存在，无法跳转到详情页");
+    console.error('文章ID不存在，无法跳转到详情页')
   }
-};
+}
 
 // 跳转到用户主页
 const goToUserPage = () => {
   if (props.article && props.article.authorId) {
-    router.push(`/user/${props.article.authorId}`);
+    router.push(`/user/${props.article.authorId}`)
   } else {
-    console.error("作者ID不存在，无法跳转到用户主页");
+    console.error('作者ID不存在，无法跳转到用户主页')
   }
-};
+}
 
 onMounted(() => {
-  console.log("ArticleCard已挂载，数据:", props.article);
-});
+  console.log('ArticleCard已挂载，数据:', props.article)
+})
 </script>
 
 <style scoped>

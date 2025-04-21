@@ -8,11 +8,7 @@
           class="avatar"
           @error="$emit('avatar-error', $event)"
         />
-        <div
-          class="avatar-hover"
-          v-if="isOwnProfile"
-          @click="$emit('change-avatar')"
-        >
+        <div class="avatar-hover" v-if="isOwnProfile" @click="$emit('change-avatar')">
           <el-icon>
             <Camera />
           </el-icon>
@@ -54,28 +50,19 @@
         </button>
         <template #dropdown>
           <el-dropdown-menu class="user-dropdown-menu">
-            <el-dropdown-item
-              @click="$emit('edit-profile')"
-              class="dropdown-item"
-            >
+            <el-dropdown-item @click="$emit('edit-profile')" class="dropdown-item">
               <el-icon>
                 <Edit />
               </el-icon>
               编辑资料
             </el-dropdown-item>
-            <el-dropdown-item
-              @click="$emit('change-avatar')"
-              class="dropdown-item"
-            >
+            <el-dropdown-item @click="$emit('change-avatar')" class="dropdown-item">
               <el-icon>
                 <Camera />
               </el-icon>
               更换头像
             </el-dropdown-item>
-            <el-dropdown-item
-              @click="$emit('change-background')"
-              class="dropdown-item"
-            >
+            <el-dropdown-item @click="$emit('change-background')" class="dropdown-item">
               <el-icon>
                 <Picture />
               </el-icon>
@@ -109,9 +96,7 @@
             <el-icon class="info-icon">
               <ChatDotRound />
             </el-icon>
-            <span class="info-text">{{
-              user.signature || "这个人很懒，什么也没留下~"
-            }}</span>
+            <span class="info-text">{{ user.signature || '这个人很懒，什么也没留下~' }}</span>
           </div>
         </div>
       </div>
@@ -120,7 +105,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed } from 'vue'
 import {
   Message,
   ChatDotRound,
@@ -129,7 +114,7 @@ import {
   Setting,
   Picture,
   UserFilled,
-} from "@element-plus/icons-vue";
+} from '@element-plus/icons-vue'
 
 const props = defineProps({
   user: {
@@ -152,17 +137,17 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-});
+})
 
 defineEmits([
-  "avatar-error",
-  "edit-profile",
-  "change-avatar",
-  "change-background",
-  "delete-account",
-]);
+  'avatar-error',
+  'edit-profile',
+  'change-avatar',
+  'change-background',
+  'delete-account',
+])
 
-const avatarUrl = computed(() => props.user.avatarImage || props.defaultAvatar);
+const avatarUrl = computed(() => props.user.avatarImage || props.defaultAvatar)
 </script>
 
 <style scoped>

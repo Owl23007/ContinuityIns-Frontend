@@ -38,20 +38,20 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import BaseInput from "./BaseInput.vue";
+import { computed } from 'vue'
+import BaseInput from './BaseInput.vue'
 
 const props = defineProps({
   modelValue: String,
   imageUrl: String,
   hasError: Boolean,
   errorMessage: String,
-});
+})
 
-const emit = defineEmits(["update:modelValue", "refresh"]);
+const emit = defineEmits(['update:modelValue', 'refresh'])
 
 const captchaValue = computed({
   get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
-});
+  set: (value) => emit('update:modelValue', value),
+})
 </script>

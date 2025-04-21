@@ -26,7 +26,7 @@ defineProps({
   label: String,
   type: {
     type: String,
-    default: "text",
+    default: 'text',
   },
   required: {
     type: Boolean,
@@ -36,7 +36,7 @@ defineProps({
   errorMessage: String,
   maxLength: Number,
   placeholder: String,
-});
+})
 
-defineEmits(["update:modelValue"]);
+defineEmits(['update:modelValue'])
 </script>
