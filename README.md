@@ -27,11 +27,18 @@ yarn install
 
 ### 3. 环境配置
 
-在项目根目录创建 .env 文件：
+在项目根目录创建以下环境配置文件：
+
+**.env.development**
 
 ```env
-VITE_API_BASE_URL=http://your-api-domain.com
-VITE_APP_TITLE=存续院
+VITE_API_BASE_URL=http://localhost:8080 // 开发后端API 地址
+```
+
+**.env.production**
+
+```env
+VITE_API_BASE_URL=http://your-api-domain.com // 部署后端API 地址
 ```
 
 ### 4. 启动开发服务器
@@ -76,29 +83,29 @@ FrontEnd/
 
 在 http.js 中可配置 API 请求基础设置：
 
-````javascript
+```javascript
 export const baseConfig = {
   timeout: 5000,
   headers: {
-    'Content-Type': 'application/json'
-  }
-};
-````
+    'Content-Type': 'application/json',
+  },
+}
+```
 
 ### 路由配置
 
 在 index.js 中配置路由规则：
 
-````javascript
+```javascript
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/Home.vue')
-  }
+    component: () => import('@/views/Home.vue'),
+  },
   // ...其他路由
-];
-````
+]
+```
 
 ## 🚨 注意事项
 
@@ -113,6 +120,7 @@ const routes = [
 ## 🆘 常见问题
 
 ### 1. 安装依赖失败
+
 ```bash
 # 清理 npm 缓存
 npm cache clean --force
@@ -121,12 +129,14 @@ npm install
 ```
 
 ### 2. 开发服务器启动失败
+
 - 检查端口占用情况
 - 确认环境变量配置正确
 
 ## 📞 技术支持
 
 如遇问题，请：
+
 1. 查看项目 Wiki
 2. 提交 Issue
 3. 联系技术支持团队
