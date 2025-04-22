@@ -25,7 +25,7 @@
       <div class="meta-info">
         <span class="publish-time">{{ formatDate(article.createTime) }}</span>
         <span class="divider">·</span>
-        <span class="word-count">{{ article.duration || '1' }}字</span>
+        <span class="word-count">{{ article.wordCount || '1' }}字</span>
       </div>
     </div>
   </article>
@@ -48,7 +48,7 @@ const props = defineProps({
       coverImg: '',
       status: '',
       createTime: null,
-      duration: null,
+      wordCount: null,
       views: 0,
       videoDuration: '',
     }),

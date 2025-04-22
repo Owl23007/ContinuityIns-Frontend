@@ -16,8 +16,8 @@
       <div class="meta-row-horizontal">
         <div class="publish-info">
           <span class="publish-time">{{ formatDate(article.createTime) }}</span>
-          <span class="dot" v-if="article.duration">·</span>
-          <span class="reading-time" v-if="article.duration"> {{ article.duration }} 字 </span>
+          <span class="dot" v-if="article.wordCount">·</span>
+          <span class="reading-time" v-if="article.wordCount"> {{ article.wordCount }} 字 </span>
         </div>
       </div>
 
@@ -55,7 +55,7 @@ const props = defineProps({
       status: '',
       createTime: null,
       createUser: null,
-      duration: null,
+      wordCount: 0,
       coverImgFail: '',
     }),
   },

@@ -442,7 +442,7 @@ const handleFollow = async () => {
 
   try {
     isFollowing.value = !isFollowing.value
-    // TODO: 调用关注/取消关注的 API
+
     showNotification(isFollowing.value ? '关注成功' : '已取消关注', 'success')
   } catch (error) {
     isFollowing.value = !isFollowing.value // 恢复状态

@@ -22,7 +22,6 @@
         <!-- 搜索过滤器 -->
         <div class="search-filters">
           <el-radio-group v-model="searchType" size="large">
-            <el-radio-button label="all">全部内容</el-radio-button>
             <el-radio-button label="article">文章</el-radio-button>
             <el-radio-button label="question">问答</el-radio-button>
             <el-radio-button label="user">用户</el-radio-button>
@@ -274,6 +273,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { Search, ArrowDown, Setting, Clock, Star, View, ChatRound } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getCategories_get, getHotTags_get, searchContent } from '@/api/recommend'
+import defaultCover from '@/assets/image/default_cover.png'
 
 const router = useRouter()
 const route = useRoute()
@@ -295,7 +295,7 @@ const searchHistory = ref([])
 const hotSearches = ref([])
 
 // 筛选相关
-const searchType = ref('all')
+const searchType = ref('article') // 默认改为'article'
 const currentSort = ref('relevance')
 const sortOptions = {
   relevance: '相关度排序',
@@ -338,7 +338,12 @@ const getSearchParamsFromUrl = () => {
   const { keyword, type, page, sort } = route.query
   if (keyword) {
     searchKeyword.value = keyword
-    searchType.value = type || 'all'
+    // 只允许 article/question/user
+    if (['article', 'question', 'user'].includes(type)) {
+      searchType.value = type
+    } else {
+      searchType.value = 'article'
+    }
     currentPage.value = parseInt(page) || 1
     currentSort.value = sort || 'relevance'
     handleSearch()
@@ -390,8 +395,59 @@ const handleSearch = async () => {
     }
 
     const response = await searchContent(searchParams)
-    searchResults.value = response.list || []
-    totalResults.value = response.total || 0
+    // 数据字段映射
+    const data = response
+    searchResults.value = (data.list || []).map((item) => {
+      if (searchType.value === 'article') {
+        return {
+          id: item.articleId || item.id,
+          type: 'article',
+          title: item.title,
+          summary: item.summary,
+          snippet: item.summary || '', // 可根据需要调整
+          cover: item.coverImage || defaultCover,
+          views: item.viewCount,
+          likes: item.likeCount,
+          collects: item.collectionCount,
+          publishDate: item.createTime || item.publishDate,
+          author: {
+            id: item.userId,
+            name: item.authorName || '', // 需后端补充
+            avatar: item.authorAvatar || '', // 需后端补充
+          },
+          tags: item.tags || [],
+        }
+      }
+      if (searchType.value === 'question') {
+        return {
+          id: item.questionId || item.id,
+          type: 'question',
+          title: item.title,
+          snippet: item.summary || '',
+          publishDate: item.createTime || item.publishDate,
+          author: {
+            id: item.userId,
+            name: item.authorName || '',
+            avatar: item.authorAvatar || '',
+          },
+          answerCount: item.answerCount || 0,
+          tags: item.tags || [],
+        }
+      }
+      if (searchType.value === 'user') {
+        return {
+          id: item.userId || item.id,
+          type: 'user',
+          name: item.name,
+          avatar: item.avatar,
+          bio: item.bio,
+          articleCount: item.articleCount,
+          followerCount: item.followerCount,
+        }
+      }
+      return item
+    })
+    totalResults.value = data.total || 0
 
     if (searchResults.value.length === 0) {
       ElMessage.info('没有找到相关内容')

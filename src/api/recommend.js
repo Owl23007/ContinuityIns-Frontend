@@ -130,7 +130,7 @@ export const getHotSearchKeywords_get = async () => {
   return res.data
 }
 
-export const searchContent = async (searchParams) => {
-  const res = await publicRequest('POST', '/search/content', { data: searchParams });
-  return { data: res.data.map(transformArticleData) };
+export const searchContent = async (data) => {
+  const res = await publicRequest('POST', '/search/content', data);
+  return res.data;
 };

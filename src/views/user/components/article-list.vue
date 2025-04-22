@@ -104,7 +104,7 @@ const fetchArticles = async () => {
       content: article.content || '',
       coverImg: article.coverImg || article.coverImage,
       createTime: article.createTime ? new Date(article.createTime).getTime() : Date.now(),
-      duration: article.duration || 0,
+      wordCount: article.wordCount || 0,
       status: article.status?.toLowerCase() || 'published',
     }))
   } catch (err) {

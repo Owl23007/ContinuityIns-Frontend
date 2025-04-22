@@ -42,7 +42,7 @@
             <div class="author-details">
               <div class="author-main">
                 <span class="author-name">{{ userInfo?.nickname || userInfo?.username }}</span>
-                <span class="join-time">{{ formatJoinTime(userInfo?.createTime) }} 加入</span>
+                <span class="join-time">上次在线:{{ formatJoinTime(userInfo?.lastLogin) }} </span>
               </div>
               <el-tooltip
                 :content="userInfo?.signature"
@@ -123,11 +123,11 @@
         </el-tooltip>
       </div>
 
-      <el-tag v-if="article.duration" size="small" type="info" effect="plain" class="reading-time">
+      <el-tag v-if="article.wordCount" size="small" type="info" effect="plain" class="reading-time">
         <el-icon>
           <Reading />
         </el-icon>
-        {{ article.duration }} 字
+        {{ article.wordCount }} 字
       </el-tag>
     </div>
 

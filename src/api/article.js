@@ -7,7 +7,7 @@ const transformArticleData = (article) => ({
   coverImg: article.coverImage,
   status: article.status,
   createTime: article.createTime,
-  duration: article.duration,
+  wordCount: article.wordCount,
   createUser: {
     id: article.userId,
   },
@@ -85,5 +85,12 @@ export const updateArticleStatus_put = async (articleId, status) => {
 
 // 删除文章
 export const deleteArticle_delete = async (articleId) => {
-  return privateRequest('DELETE', `/article/${articleId}`)
+  const res = await privateRequest('DELETE', `/article/${articleId}`)
+  if (res.code === -1) {
+    throw new Error(res.message || '未登录或登录已过期')
+  }
+  if (res.code !== 0) {
+    throw new Error(res.message || '删除文章失败')
+  }
+  return res
 }
