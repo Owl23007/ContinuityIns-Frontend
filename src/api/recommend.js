@@ -1,10 +1,11 @@
-import { publicRequest } from './http'
+import { publicRequest, privateRequest } from './http'
+import defaultCover from '@/assets/image/default_cover.png'
 
 // 转换文章数据结构
 const transformArticleData = (item) => {
   // 确保所有字段都有合理值
-  const cover = item.cover || 'https://via.placeholder.com/300x200?text=No+Cover'
-  const summary = item.content
+  const cover = item.cover || defaultCover
+  const summary = item.summary
     ? item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '')
     : '暂无摘要'
 
@@ -116,3 +117,20 @@ export const getCategories_get = async () => {
   const res = await publicRequest('GET', '/article/categories')
   return res.data
 }
+
+// 搜索文章
+export const searchArticles = async (keyword) => {
+  const res = await publicRequest('GET', '/article/search', { params: { keyword } })
+  return { data: res.data.map(transformArticleData) }
+}
+
+// 获取热门搜索关键词
+export const getHotSearchKeywords_get = async () => {
+  const res = await publicRequest('GET', '/search/hot')
+  return res.data
+}
+
+export const searchContent = async (searchParams) => {
+  const res = await publicRequest('POST', '/search/content', { data: searchParams });
+  return { data: res.data.map(transformArticleData) };
+};

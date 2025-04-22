@@ -64,13 +64,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { Search } from '@element-plus/icons-vue'
 import ArticleCard from './components/ArticleCard.vue'
-import { fetchArticles, getHotTags_get, getCategories_get } from '@/api/recommend'
+import { fetchArticles, getHotTags_get, getCategories_get, searchArticles } from '@/api/recommend'
 
 const loading = ref(true)
 const articles = ref([])
 const tags = ref([])
 const categories = ref([])
+const searchKeyword = ref('') // 搜索关键词
+const isSearching = ref(false) // 是否正在搜索
 
 // 加载数据
 const loadData = async () => {
@@ -123,12 +126,74 @@ const loadData = async () => {
 
 // 分类筛选
 const filterByCategory = (categoryId) => {
+  // 重置搜索状态
+  searchKeyword.value = ''
+  isSearching.value = false
   // 实现分类筛选逻辑
+  loadArticlesByCategory(categoryId)
 }
 
 // 标签筛选
 const filterByTag = (tagId) => {
+  // 重置搜索状态
+  searchKeyword.value = ''
+  isSearching.value = false
   // 实现标签筛选逻辑
+  loadArticlesByTag(tagId)
+}
+
+// 根据分类加载文章
+const loadArticlesByCategory = async (categoryId) => {
+  loading.value = true
+  try {
+    // 待实现: 调用API按分类获取文章
+    // const res = await fetchArticlesByCategory(categoryId)
+    // articles.value = res?.list || []
+    console.log('按分类筛选:', categoryId)
+  } catch (error) {
+    console.error('按分类加载文章失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 根据标签加载文章
+const loadArticlesByTag = async (tagId) => {
+  loading.value = true
+  try {
+    // 待实现: 调用API按标签获取文章
+    // const res = await fetchArticlesByTag(tagId)
+    // articles.value = res?.list || []
+    console.log('按标签筛选:', tagId)
+  } catch (error) {
+    console.error('按标签加载文章失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 搜索处理函数
+const handleSearch = async () => {
+  if (!searchKeyword.value.trim()) {
+    // 如果搜索框为空，重新加载所有文章
+    isSearching.value = false
+    await loadData()
+    return
+  }
+
+  loading.value = true
+  isSearching.value = true
+
+  try {
+    const searchResults = await searchArticles(searchKeyword.value.trim())
+    articles.value = searchResults?.list || []
+    console.log('搜索结果:', articles.value.length, '条')
+  } catch (error) {
+    console.error('搜索失败:', error)
+    articles.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(() => {
@@ -200,5 +265,13 @@ onMounted(() => {
   border-radius: 4px;
   background-color: #fff;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.search-card {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
 }
 </style>

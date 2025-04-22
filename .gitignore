@@ -111,3 +111,5 @@ public
 .env.development
 .env.production
 nginx.conf
+
+package-lock.json

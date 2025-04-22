@@ -29,9 +29,19 @@ const notFoundRoute = {
   },
 }
 
+// 搜索页面路由
+const searchRoute = {
+  path: '/search',
+  name: 'Search',
+  component: () => import('@/views/search/SearchView.vue'),
+  meta: {
+    title: '内容搜索 - 存续院',
+  },
+}
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [...devRoutes, ...auth, ...content, ...user, ...ai, notFoundRoute],
+  routes: [...devRoutes, ...auth, ...content, ...user, ...ai, searchRoute, notFoundRoute],
 })
 
 function hasValidToken() {

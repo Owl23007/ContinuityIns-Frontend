@@ -131,8 +131,14 @@
       </div>
 
       <div class="nav_search">
-        <input type="text" placeholder="世界在你脚下..." class="search_input" />
-        <button class="search_button">搜索</button>
+        <input
+          type="text"
+          placeholder="世界在你脚下..."
+          class="search_input"
+          v-model="searchKeyword"
+          @keyup.enter="handleSearch"
+        />
+        <button class="search_button" @click="handleSearch">搜索</button>
       </div>
     </div>
 
@@ -181,8 +187,14 @@
     <!--移动端菜单-->
     <div class="mobile-menu" :class="{ active: isMobileMenuOpen }">
       <div class="mobile-search">
-        <input type="text" placeholder="世界在你脚下..." class="mobile-search-input" />
-        <button class="search_button">搜索</button>
+        <input
+          type="text"
+          placeholder="世界在你脚下..."
+          class="mobile-search-input"
+          v-model="searchKeyword"
+          @keyup.enter="handleSearch"
+        />
+        <button class="search_button" @click="handleSearch">搜索</button>
       </div>
 
       <!-- 登录后显示用户信息和直接操作按钮 -->
@@ -449,6 +461,22 @@ import { User, Setting, SwitchButton } from '@element-plus/icons-vue'
 const authStore = useAuthStore()
 const router = useRouter()
 const isLoggedIn = computed(() => authStore.isAuthenticated)
+
+// 搜索相关
+const searchKeyword = ref('')
+
+const handleSearch = () => {
+  if (searchKeyword.value.trim()) {
+    router.push({
+      path: '/search',
+      query: { keyword: searchKeyword.value.trim() },
+    })
+    // 如果移动菜单是打开的状态，进行搜索时关闭它
+    if (isMobileMenuOpen.value) {
+      closeMobileMenu()
+    }
+  }
+}
 
 const tohome = () => {
   router.push('/')
