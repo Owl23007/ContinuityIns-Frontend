@@ -146,7 +146,7 @@ export default {
 
     // 创建新帖子
     const createPost = () => {
-      router.push('/community/create')
+      router.push('/community/new')
     }
 
     onMounted(() => {
