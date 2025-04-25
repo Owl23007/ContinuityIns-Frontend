@@ -4,8 +4,11 @@
 
   <el-card v-else class="article-card" :body-style="{ padding: '0px' }">
     <div class="cover-container" @click="goToArticleDetail">
+      <div v-if="isLoading" class="loading-container">
+        <el-skeleton-item variant="image" style="width: 100%; height: 100%" />
+      </div>
       <img
-        v-if="!showDefaultCover"
+        v-else-if="!showDefaultCover"
         :src="article.cover"
         class="article-cover"
         @error="handleImageError"
@@ -64,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import defaultCover from '@/assets/image/default_cover.png'
 import { useRouter } from 'vue-router'
 import { View, Star } from '@element-plus/icons-vue'
@@ -82,18 +85,30 @@ const props = defineProps({
   },
 })
 
-const showDefaultCover = ref(!props.article.cover)
-const imageLoaded = ref(false)
+// 图片加载相关状态
+const isLoading = ref(true)
+const imageLoadFailed = ref(false)
+const isValidCoverUrl = computed(() => {
+  if (!props.article.cover) return false
+  // 检查是否为空字符串或不是有效的URL格式
+  return (
+    props.article.cover.trim() !== '' &&
+    (props.article.cover.startsWith('http') || props.article.cover.startsWith('/'))
+  )
+})
+const showDefaultCover = computed(() => !isValidCoverUrl.value || imageLoadFailed.value)
 
 // 图片加载错误处理
 const handleImageError = () => {
   console.log('封面图片加载失败:', props.article.cover)
-  showDefaultCover.value = true
+  imageLoadFailed.value = true
+  isLoading.value = false
 }
 
 // 图片加载成功处理
 const handleImageLoad = () => {
-  imageLoaded.value = true
+  console.log('封面图片加载成功:', props.article.cover)
+  isLoading.value = false
 }
 
 const formatDate = (dateString) => {
@@ -127,6 +142,19 @@ const goToUserPage = () => {
 
 onMounted(() => {
   console.log('ArticleCard已挂载，数据:', props.article)
+  // 如果URL无效，立即停止加载状态
+  if (!isValidCoverUrl.value) {
+    isLoading.value = false
+  } else {
+    // 设置超时，防止图片长时间加载
+    setTimeout(() => {
+      if (isLoading.value) {
+        console.warn('图片加载超时:', props.article.cover)
+        isLoading.value = false
+        imageLoadFailed.value = true
+      }
+    }, 5000)
+  }
 })
 </script>
 
@@ -273,5 +301,17 @@ onMounted(() => {
 
 .icon.like-icon:hover {
   color: #409eff;
+}
+
+.loading-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
 }
 </style>
