@@ -3,316 +3,191 @@
     <div class="community-header">
       <h1>社区</h1>
       <div class="search-bar">
-        <el-input
-          v-model="searchQuery"
-          placeholder="搜索社区内容"
-          prefix-icon="el-icon-search"
-          @input="handleSearch"
-        ></el-input>
+        <el-input placeholder="搜索社区内容" prefix-icon="el-icon-search"></el-input>
       </div>
     </div>
 
     <div class="community-content">
       <div class="filters">
-        <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+        <el-tabs value="all">
           <el-tab-pane label="全部" name="all"></el-tab-pane>
           <el-tab-pane label="热门" name="hot"></el-tab-pane>
           <el-tab-pane label="最新" name="latest"></el-tab-pane>
         </el-tabs>
 
-        <el-button type="primary" @click="createPost">发布帖子</el-button>
+        <el-button type="primary">发布帖子</el-button>
       </div>
 
-      <!-- 添加分类和标签筛选 -->
       <div class="filter-options">
         <div class="category-filter">
           <span class="filter-label">分类：</span>
-          <el-radio-group v-model="selectedCategory" @change="handleFilterChange">
+          <el-radio-group value="">
             <el-radio-button label="">全部</el-radio-button>
-            <el-radio-button
-              v-for="category in categories"
-              :key="category.value"
-              :label="category.value"
-            >
-              {{ category.label }}
-            </el-radio-button>
+            <el-radio-button label="tech">技术分享</el-radio-button>
+            <el-radio-button label="question">技术问答</el-radio-button>
+            <el-radio-button label="experience">经验总结</el-radio-button>
+            <el-radio-button label="career">职业发展</el-radio-button>
+            <el-radio-button label="news">行业资讯</el-radio-button>
           </el-radio-group>
         </div>
 
         <div class="tag-filter">
           <span class="filter-label">标签：</span>
           <el-tag
-            v-for="tag in popularTags"
-            :key="tag.value"
-            :effect="selectedTags.includes(tag.value) ? 'dark' : 'plain'"
-            @click="toggleTag(tag.value)"
+            v-for="tag in ['前端开发', '后端开发', '移动开发', '架构设计', '云原生', '人工智能']"
+            :key="tag"
+            effect="plain"
             class="filter-tag"
           >
-            {{ tag.label }}
+            {{ tag }}
           </el-tag>
-          <el-popover placement="bottom" trigger="click" width="300">
+          <el-popover placement="bottom" trigger="click" width="400">
             <template #reference>
               <el-button size="small" text>更多标签</el-button>
             </template>
             <div class="all-tags">
               <el-tag
-                v-for="tag in allTags"
-                :key="tag.value"
-                :effect="selectedTags.includes(tag.value) ? 'dark' : 'plain'"
-                @click="toggleTag(tag.value)"
+                v-for="tag in [
+                  'Vue.js',
+                  'React',
+                  'Angular',
+                  'Node.js',
+                  'Java',
+                  'Python',
+                  'Go',
+                  'C++',
+                  'Docker',
+                  'Kubernetes',
+                  'DevOps',
+                  '微服务',
+                  '分布式',
+                  '高并发',
+                  '数据库',
+                  'Redis',
+                  'MongoDB',
+                  '机器学习',
+                  '深度学习',
+                  '数据分析',
+                  '网络安全',
+                  '区块链',
+                  '物联网',
+                ]"
+                :key="tag"
+                effect="plain"
                 class="filter-tag"
               >
-                {{ tag.label }}
+                {{ tag }}
               </el-tag>
             </div>
           </el-popover>
-          <el-button size="small" text v-if="selectedTags.length > 0" @click="clearTags">
-            清除标签
-          </el-button>
         </div>
       </div>
 
       <div class="posts-list">
-        <el-skeleton :rows="6" animated v-if="loading" />
-        <div v-else-if="posts.length === 0" class="no-posts">
-          暂无内容，成为第一个发帖的用户吧！
-        </div>
-        <div v-else>
-          <div v-for="post in posts" :key="post.id" class="post-card" @click="viewPost(post.id)">
-            <div class="post-header">
-              <div class="user-info">
-                <el-avatar :size="40" :src="post.author.avatar"></el-avatar>
-                <span class="author-name">{{ post.author.name }}</span>
-              </div>
-              <span class="post-time">{{ formatDate(post.createTime) }}</span>
+        <div v-for="i in 5" :key="i" class="post-card">
+          <div class="post-header">
+            <div class="user-info">
+              <el-avatar
+                :size="40"
+                :src="
+                  [
+                    'http://image.woyioii.cn/avatar/avatar-100001',
+                    'http://image.woyioii.cn/avatar/avatar-100002',
+                    'http://image.woyioii.cn/avatar/avatar-100003',
+                    'http://image.woyioii.cn/avatar/avatar-100004',
+                    'http://image.woyioii.cn/avatar/avatar-100005',
+                  ][i - 1]
+                "
+              ></el-avatar>
+              <span class="author-name">{{
+                ['Owl', '啊啊啊老张', 'notLast', '云专家', 'JavaNotEasy'][i - 1]
+              }}</span>
+              <el-tag size="small" type="success" effect="plain" class="user-level"
+                >Lv.{{ i + 3 }}</el-tag
+              >
             </div>
-            <div class="post-title">{{ post.title }}</div>
-            <div class="post-content-preview">{{ post.preview }}</div>
-            <div class="post-stats">
-              <span><i class="el-icon-view"></i> {{ post.views }}</span>
-              <span><i class="el-icon-chat-dot-round"></i> {{ post.comments }}</span>
-              <span><i class="el-icon-star-off"></i> {{ post.likes }}</span>
+            <div class="post-meta">
+              <el-tag size="small" type="info" effect="plain">{{
+                ['技术分享', '经验总结', '技术问答', '职业发展', '行业资讯'][i - 1]
+              }}</el-tag>
+              <span class="post-time">2024-01-{{ i.toString().padStart(2, '0') }}</span>
             </div>
           </div>
-
-          <el-pagination
-            background
-            layout="prev, pager, next"
-            :total="total"
-            :page-size="pageSize"
-            :current-page="currentPage"
-            @current-change="handlePageChange"
-          ></el-pagination>
+          <div class="post-title">
+            {{
+              [
+                '深入浅出Vue3组件设计模式与最佳实践',
+                '聊聊我在大厂这三年的技术成长之路',
+                '从零搭建一个企业级微服务架构实践分享',
+                '前端工程师应该掌握的算法知识总结',
+                '云原生时代的后端架构演进',
+              ][i - 1]
+            }}
+          </div>
+          <div class="post-content-preview">
+            {{
+              [
+                '在本文中，我将分享在实际项目中总结的Vue3组件设计经验，包括组件解耦、状态管理、性能优化等关键话题...',
+                '回首这三年的技术生涯，从团队协作到技术选型，从代码质量到架构设计，这些经验教训值得分享...',
+                '本文将详细介绍如何基于Spring Cloud构建微服务架构，包括服务注册、配置中心、服务熔断等核心组件的实践...',
+                '作为前端工程师，掌握必要的算法知识不仅能优化代码性能，还能提升解决问题的能力...',
+                '从单体应用到微服务，从传统部署到容器化，云原生技术栈正在重塑后端架构的未来...',
+              ][i - 1]
+            }}
+          </div>
+          <div class="post-tags">
+            <el-tag
+              size="small"
+              effect="plain"
+              v-for="tag in [
+                ['Vue3', '组件设计', '最佳实践'],
+                ['职业成长', '技术管理', '经验分享'],
+                ['微服务', 'Spring Cloud', '架构设计'],
+                ['算法', '前端开发', '技术进阶'],
+                ['云原生', '架构演进', '技术趋势'],
+              ][i - 1]"
+              :key="tag"
+              >{{ tag }}</el-tag
+            >
+          </div>
+          <div class="post-stats">
+            <span class="stat-item"><View class="icon" /> {{ i * 1000 + 500 }}</span>
+            <span class="stat-item"><ChatDotRound class="icon" /> {{ i * 50 + 20 }}</span>
+            <span class="stat-item"><Star class="icon" /> {{ i * 100 + 30 }}</span>
+            <span class="stat-item"><Share class="icon" /> {{ i * 20 + 5 }}</span>
+          </div>
         </div>
+
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="50"
+          :page-size="10"
+          :current-page="1"
+        ></el-pagination>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { View, ChatDotRound, Star, Share } from '@element-plus/icons-vue'
 
 export default {
   name: 'CommunityView',
-  setup() {
-    const router = useRouter()
-    const loading = ref(true)
-    const posts = ref([])
-    const total = ref(0)
-    const currentPage = ref(1)
-    const pageSize = ref(10)
-    const searchQuery = ref('')
-    const activeTab = ref('all')
-
-    // 添加分类和标签状态
-    const selectedCategory = ref('')
-    const selectedTags = ref([])
-
-    // 分类选项 - 改为动态获取
-    const categories = ref([
-      { label: '全部', value: '' }, // 默认选项
-    ])
-
-    // 加载分类数据
-    const loadCategories = async () => {
-      try {
-        // 从后端获取社区分类
-        const response = await getCategoriesByModule('community')
-        if (response && response.data) {
-          // 将后端数据转换为前端所需格式
-          const backendCategories = response.data.map((item) => ({
-            label: item.name,
-            value: item.id.toString(),
-            description: item.description,
-          }))
-
-          // 合并默认的"全部"选项与后端数据
-          categories.value = [{ label: '全部', value: '' }, ...backendCategories]
-        }
-      } catch (error) {
-        console.error('获取分类列表失败:', error)
-      }
-    }
-
-    // 标签选项
-    const allTags = ref([
-      { label: 'JavaScript', value: 'javascript' },
-      { label: 'Vue', value: 'vue' },
-      { label: 'React', value: 'react' },
-      { label: 'Node.js', value: 'nodejs' },
-      { label: '前端', value: 'frontend' },
-      { label: '后端', value: 'backend' },
-      { label: '数据库', value: 'database' },
-      { label: '云计算', value: 'cloud' },
-      { label: '人工智能', value: 'ai' },
-      { label: '机器学习', value: 'ml' },
-      { label: '开源', value: 'opensource' },
-      { label: '求职', value: 'job' },
-    ])
-
-    // 热门标签（只展示一部分）
-    const popularTags = computed(() => {
-      return allTags.value.slice(0, 5)
-    })
-
-    // 获取社区帖子列表
-    const fetchPosts = async () => {
-      loading.value = true
-      try {
-        // 这里需要替换为实际的API调用
-        // const response = await api.getPosts({
-        //   page: currentPage.value,
-        //   pageSize: pageSize.value,
-        //   query: searchQuery.value,
-        //   tab: activeTab.value,
-        //   category: selectedCategory.value,
-        //   tags: selectedTags.value
-        // })
-        // posts.value = response.data.items
-        // total.value = response.data.total
-
-        // 模拟数据
-        setTimeout(() => {
-          posts.value = Array.from({ length: 5 }, (_, i) => ({
-            id: i + 1,
-            title: `社区帖子标题 ${i + 1}`,
-            preview: '这是帖子内容的预览，点击查看完整内容...',
-            createTime: new Date().getTime() - i * 86400000,
-            author: {
-              name: `用户${i + 1}`,
-              avatar: '',
-            },
-            views: Math.floor(Math.random() * 1000),
-            comments: Math.floor(Math.random() * 50),
-            likes: Math.floor(Math.random() * 100),
-            category: categories.value[Math.floor(Math.random() * categories.value.length)].value,
-            tags: [allTags.value[Math.floor(Math.random() * allTags.value.length)].value],
-          }))
-          total.value = 100
-          loading.value = false
-        }, 1000)
-      } catch (error) {
-        console.error('获取帖子列表失败:', error)
-      } finally {
-        loading.value = false
-      }
-    }
-
-    // 处理分类和标签变化
-    const handleFilterChange = () => {
-      currentPage.value = 1
-      fetchPosts()
-    }
-
-    // 切换标签选择
-    const toggleTag = (tagValue) => {
-      const index = selectedTags.value.indexOf(tagValue)
-      if (index === -1) {
-        selectedTags.value.push(tagValue)
-      } else {
-        selectedTags.value.splice(index, 1)
-      }
-      handleFilterChange()
-    }
-
-    // 清除所有选中标签
-    const clearTags = () => {
-      selectedTags.value = []
-      handleFilterChange()
-    }
-
-    // 格式化日期
-    const formatDate = (timestamp) => {
-      const date = new Date(timestamp)
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-    }
-
-    // 处理页码变化
-    const handlePageChange = (page) => {
-      currentPage.value = page
-      fetchPosts()
-    }
-
-    // 处理搜索
-    const handleSearch = () => {
-      currentPage.value = 1
-      fetchPosts()
-    }
-
-    // 处理标签点击
-    const handleTabClick = () => {
-      currentPage.value = 1
-      fetchPosts()
-    }
-
-    // 查看帖子详情
-    const viewPost = (postId) => {
-      router.push(`/community/post/${postId}`)
-    }
-
-    // 创建新帖子
-    const createPost = () => {
-      router.push('/community/new')
-    }
-
-    onMounted(() => {
-      fetchPosts()
-      loadCategories() // 加载分类数据
-      // 这里可以添加获取标签列表的API调用
-      // loadTags()
-    })
-
-    return {
-      loading,
-      posts,
-      total,
-      currentPage,
-      pageSize,
-      searchQuery,
-      activeTab,
-      categories,
-      allTags,
-      popularTags,
-      selectedCategory,
-      selectedTags,
-      formatDate,
-      handlePageChange,
-      handleSearch,
-      handleTabClick,
-      handleFilterChange,
-      toggleTag,
-      clearTags,
-      viewPost,
-      createPost,
-    }
+  components: {
+    View,
+    ChatDotRound,
+    Star,
+    Share,
   },
 }
 </script>
 
 <style scoped>
 .community-container {
-  max-width: 1200px;
+  max-width: 90%; /* 从1200px调整为1400px */
+  min-width: 80%;
   margin: 0 auto;
   padding: 20px;
 }
@@ -325,7 +200,7 @@ export default {
 }
 
 .search-bar {
-  width: 300px;
+  width: 400px; /* 从300px调整为400px */
 }
 
 .filters {
@@ -365,6 +240,16 @@ export default {
   font-weight: bold;
 }
 
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-level {
+  margin-left: 8px;
+}
+
 .post-title {
   font-size: 18px;
   font-weight: bold;
@@ -381,10 +266,27 @@ export default {
   -webkit-box-orient: vertical;
 }
 
+.post-tags {
+  margin: 10px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .post-stats {
   display: flex;
   gap: 15px;
   color: #909399;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-item i {
+  font-size: 16px;
 }
 
 .no-posts {
@@ -426,5 +328,10 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
 }
 </style>

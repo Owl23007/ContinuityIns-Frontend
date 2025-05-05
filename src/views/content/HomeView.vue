@@ -32,6 +32,18 @@
                 <ArticleCard :article="article" class="article-item" />
               </el-col>
             </el-row>
+            <!-- 分页器 -->
+            <div class="pagination-container">
+              <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :total="totalArticles"
+                :page-sizes="[12, 24, 36]"
+                layout="total, sizes, prev, pager, next, jumper"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+              />
+            </div>
           </template>
         </el-col>
 
@@ -122,42 +134,41 @@ const isSearching = ref(false) // 是否正在搜索
 
 const router = useRouter() // 获取 router 实例
 
-// 计算父分类（顶级分类）
-const parentCategories = computed(() => {
-  // 过滤顶级分类，并排除"杂谈"分类 (categoryId=10)
-  return categories.value.filter(
-    (category) => category.parentId === 0 && category.categoryId !== 10
-  )
-})
+const currentPage = ref(1)
+const pageSize = ref(12)
+const totalArticles = ref(0) // 改为 ref，不再使用 computed
 
-// 获取指定父分类下的子分类
-const getSubCategories = (parentId) => {
-  return categories.value.filter((category) => category.parentId === parentId)
-}
-
-// 加载数据
-const loadData = async () => {
+// 修改加载数据方法，添加分页参数处理
+const loadData = async (page = 1, size = 12) => {
   loading.value = true
 
   try {
     try {
-      const res = await fetchArticles()
+      // 构造分页参数
+      const params = {
+        page,
+        pageSize: size,
+      }
+
+      const res = await fetchArticles(params)
       console.log('完整API响应:', res)
 
-      // 直接从res.list获取数据
-      const articlesData = res?.list || []
-      console.log('文章数据:', articlesData)
+      if (res?.list && typeof res.total === 'number') {
+        articles.value = res.list
+        totalArticles.value = res.total
+        currentPage.value = res.page || page
+        pageSize.value = res.pageSize || size
 
-      if (articlesData.length > 0) {
-        articles.value = articlesData
-        console.log('成功加载文章:', articles.value.length, '条')
+        console.log(
+          `加载第 ${currentPage.value} 页数据，每页 ${pageSize.value} 条，总计 ${totalArticles.value} 条`
+        )
       } else {
-        console.warn('文章列表为空')
-        articles.value = []
+        console.warn('文章数据格式异常')
+        resetPagination()
       }
     } catch (error) {
       console.error('加载文章失败:', error)
-      articles.value = []
+      resetPagination()
     }
 
     // 加载标签和分类数据，使用try-catch分别处理，避免一个失败影响另一个
@@ -183,10 +194,42 @@ const loadData = async () => {
     }
   } catch (error) {
     console.log(' 加载数据失败:', error)
-    articles.value = [] // 确保数据为空数组
+    resetPagination()
   } finally {
     loading.value = false
   }
+}
+
+// 添加重置分页状态的方法
+const resetPagination = () => {
+  articles.value = []
+  totalArticles.value = 0
+  currentPage.value = 1
+  pageSize.value = 12
+}
+
+// 修改分页处理函数
+const handleSizeChange = (val) => {
+  pageSize.value = val
+  loadData(1, val) // 切换每页数量时重置为第一页
+}
+
+const handleCurrentChange = (val) => {
+  currentPage.value = val
+  loadData(val, pageSize.value)
+}
+
+// 计算父分类（顶级分类）
+const parentCategories = computed(() => {
+  // 过滤顶级分类，并排除"杂谈"分类 (categoryId=10)
+  return categories.value.filter(
+    (category) => category.parentId === 0 && category.categoryId !== 10
+  )
+})
+
+// 获取指定父分类下的子分类
+const getSubCategories = (parentId) => {
+  return categories.value.filter((category) => category.parentId === parentId)
 }
 
 // 分类筛选
@@ -205,8 +248,8 @@ const filterByTag = (tagId, tagName) => {
     path: '/search',
     query: {
       keyword: tagName,
-      type: 'article' // 默认搜索文章类型
-    }
+      type: 'article', // 默认搜索文章类型
+    },
   })
 }
 
@@ -590,5 +633,12 @@ const loadArticlesByParentCategory = async (parentCategoryId) => {
 
 .search-input {
   width: 100%;
+}
+
+.pagination-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
 }
 </style>

@@ -392,7 +392,8 @@ async function handleProfileUpdate(data) {
   }
 }
 
-function handleAvatarUpdated() {
+function handleAvatarUpdated(newAvatar) {
+  avatarImage.value = newAvatar
   showNotification('头像更新成功', 'success')
   closeModal()
 }
