@@ -435,12 +435,26 @@ const isFollowing = ref(false)
 
 // 添加关注处理函数
 const handleFollow = async () => {
-  if (!user.value?.id) {
+  if (!authStore.isAuthenticated) {
+    showNotification('请先登录', 'warning')
+    router.push('/auth')
+    return
+  }
+
+  const targetUserId = user.value?.userId
+  if (!targetUserId) {
     showNotification('用户信息不完整', 'error')
     return
   }
 
   try {
+    const params = {
+      userId: authStore.user.userId,
+      followUserId: targetUserId,
+    }
+
+    // TODO: 调用关注/取消关注API
+    // const response = await followUser(params)
     isFollowing.value = !isFollowing.value
 
     showNotification(isFollowing.value ? '关注成功' : '已取消关注', 'success')
