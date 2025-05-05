@@ -4,17 +4,12 @@
 
   <el-card v-else class="article-card" :body-style="{ padding: '0px' }">
     <div class="cover-container" @click="goToArticleDetail">
-      <div v-if="isLoading" class="loading-container">
-        <el-skeleton-item variant="image" style="width: 100%; height: 100%" />
-      </div>
       <img
-        v-else-if="!showDefaultCover"
-        :src="article.coverImage || article.cover"
+        :src="coverUrl"
         class="article-cover"
-        @error="handleImageError"
-        @load="handleImageLoad"
+        @error="imageLoadFailed = true"
+        :class="{ loading: isLoading }"
       />
-      <img v-else :src="defaultCover" class="article-cover" />
     </div>
     <div class="article-content">
       <h3 class="article-title" @click="goToArticleDetail">
@@ -25,14 +20,14 @@
         <span class="author clickable" @click="goToUserPage">{{
           article.author || '未知作者'
         }}</span>
-        <span class="date">{{ formatDate(article.date) }}</span>
+        <span class="date">{{ formatDate(article.date || article._raw?.create_time) }}</span>
       </div>
       <div class="article-actions">
         <el-button type="text">
           <el-icon>
             <View />
           </el-icon>
-          <span>{{ article.views || 0 }}</span>
+          <span>{{ article._raw?.view_count || article.views || 0 }}</span>
         </el-button>
         <el-button type="text" class="like-btn">
           <svg
@@ -48,13 +43,13 @@
               p-id="1990"
             ></path>
           </svg>
-          <span>{{ article.likes || 0 }}</span>
+          <span>{{ article._raw?.like_count || article.likes || 0 }}</span>
         </el-button>
         <el-button type="text">
           <el-icon>
             <Star />
           </el-icon>
-          <span>{{ article.collects || 0 }}</span>
+          <span>{{ article._raw?.collection_count || article.collects || 0 }}</span>
         </el-button>
       </div>
     </div>
@@ -85,31 +80,15 @@ const props = defineProps({
   },
 })
 
-// 图片加载相关状态
+// 简化的图片加载状态
 const isLoading = ref(true)
 const imageLoadFailed = ref(false)
-const isValidCoverUrl = computed(() => {
-  if (!props.article.cover) return false
-  // 检查是否为空字符串或不是有效的URL格式
-  return (
-    props.article.cover.trim() !== '' &&
-    (props.article.cover.startsWith('http') || props.article.cover.startsWith('/'))
-  )
+
+// 简化的封面URL处理逻辑
+const coverUrl = computed(() => {
+  const url = props.article.cover || props.article._raw?.cover || defaultCover
+  return url.startsWith('/') ? `${import.meta.env.VITE_API_BASE_URL}${url}` : url
 })
-const showDefaultCover = computed(() => !isValidCoverUrl.value || imageLoadFailed.value)
-
-// 图片加载错误处理
-const handleImageError = () => {
-  console.log('封面图片加载失败:', props.article.cover)
-  imageLoadFailed.value = true
-  isLoading.value = false
-}
-
-// 图片加载成功处理
-const handleImageLoad = () => {
-  console.log('封面图片加载成功:', props.article.cover)
-  isLoading.value = false
-}
 
 const formatDate = (dateString) => {
   if (!dateString) return '未知日期'
@@ -124,8 +103,9 @@ const formatDate = (dateString) => {
 
 // 跳转到文章详情页
 const goToArticleDetail = () => {
-  if (props.article && props.article.id) {
-    router.push(`/article/${props.article.id}`)
+  const articleId = props.article.id || props.article._raw?.article_id
+  if (articleId) {
+    router.push(`/article/${articleId}`)
   } else {
     console.error('文章ID不存在，无法跳转到详情页')
   }
@@ -133,28 +113,19 @@ const goToArticleDetail = () => {
 
 // 跳转到用户主页
 const goToUserPage = () => {
-  if (props.article && props.article.authorId) {
-    router.push(`/user/${props.article.authorId}`)
+  const userId = props.article.authorId || props.article._raw?.user_id
+  if (userId) {
+    router.push(`/user/${userId}`)
   } else {
     console.error('作者ID不存在，无法跳转到用户主页')
   }
 }
 
 onMounted(() => {
-  console.log('ArticleCard已挂载，数据:', props.article)
-  // 如果URL无效，立即停止加载状态
-  if (!isValidCoverUrl.value) {
+  // 5秒后自动关闭加载状态
+  setTimeout(() => {
     isLoading.value = false
-  } else {
-    // 设置超时，防止图片长时间加载
-    setTimeout(() => {
-      if (isLoading.value) {
-        console.warn('图片加载超时:', props.article.cover)
-        isLoading.value = false
-        imageLoadFailed.value = true
-      }
-    }, 5000)
-  }
+  }, 5000)
 })
 </script>
 
@@ -186,6 +157,11 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: opacity 0.3s;
+}
+
+.article-cover.loading {
+  opacity: 0.6;
 }
 
 .default-cover {
