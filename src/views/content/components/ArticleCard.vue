@@ -7,7 +7,7 @@
       <img
         :src="coverUrl"
         class="article-cover"
-        @error="imageLoadFailed = true"
+        @error="handleImageError"
         :class="{ loading: isLoading }"
       />
     </div>
@@ -80,15 +80,26 @@ const props = defineProps({
   },
 })
 
-// 简化的图片加载状态
+// 图片加载相关状态
 const isLoading = ref(true)
 const imageLoadFailed = ref(false)
 
-// 简化的封面URL处理逻辑
+// 改进的封面URL处理逻辑
 const coverUrl = computed(() => {
-  const url = props.article.cover || props.article._raw?.cover || defaultCover
+  // 如果图片加载失败或没有封面，使用默认封面
+  if (imageLoadFailed.value || (!props.article.cover && !props.article._raw?.cover)) {
+    return defaultCover
+  }
+
+  const url = props.article.cover || props.article._raw?.cover
   return url.startsWith('/') ? `${import.meta.env.VITE_API_BASE_URL}${url}` : url
 })
+
+// 图片加载错误处理
+const handleImageError = () => {
+  imageLoadFailed.value = true
+  isLoading.value = false
+}
 
 const formatDate = (dateString) => {
   if (!dateString) return '未知日期'

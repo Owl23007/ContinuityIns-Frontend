@@ -12,7 +12,7 @@ const transformArticleData = (item) => {
   return {
     id: item.article_id || 0,
     title: item.title || '无标题',
-    cover: cover,
+    cover: item.cover_image,
     summary: summary,
     author: item.author || `用户${item.user_id || '未知'}`,
     date: item.create_time || item.update_time || new Date().toISOString(),
