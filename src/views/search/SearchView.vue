@@ -83,9 +83,9 @@
                 <el-option label="全部分类" value="" />
                 <el-option
                   v-for="category in categories"
-                  :key="category.id"
+                  :key="category.categoryId"
                   :label="category.name"
-                  :value="category.id"
+                  :value="category.categoryId"
                 />
               </el-select>
             </div>
@@ -100,7 +100,7 @@
                 placeholder="选择标签"
                 clearable
               >
-                <el-option v-for="tag in tags" :key="tag.id" :label="tag.name" :value="tag.id" />
+                <el-option v-for="tag in tags" :key="tag.id" :label="tag.tagName" :value="tag.id" />
               </el-select>
             </div>
 
@@ -545,18 +545,20 @@ const handleCurrentChange = (page) => {
 // 加载分类和标签数据
 const loadCategoriesAndTags = async () => {
   try {
-    const [categoriesRes, tagsRes, hotSearchesRes] = await Promise.all([
-      getCategories_get(),
-      getHotTags_get(),
-      getHotSearches(),
-    ])
+    // 获取分类和标签数据
+    const [categoriesRes, tagsRes] = await Promise.all([getCategories_get(), getHotTags_get()])
 
+    // 直接使用响应数据，不需要 .data
     categories.value = categoriesRes || []
     tags.value = tagsRes || []
-    hotSearches.value = hotSearchesRes || []
+    // 暂时移除 hotSearches 的加载，因为 API 还未实现
+    hotSearches.value = ['前端开发', 'Vue3', 'JavaScript'] // 临时数据
   } catch (error) {
     console.error('加载分类和标签数据失败:', error)
     ElMessage.error('加载筛选数据失败')
+    categories.value = []
+    tags.value = []
+    hotSearches.value = []
   }
 }
 

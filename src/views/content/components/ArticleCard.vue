@@ -9,7 +9,7 @@
       </div>
       <img
         v-else-if="!showDefaultCover"
-        :src="article.cover"
+        :src="article.coverImage || article.cover"
         class="article-cover"
         @error="handleImageError"
         @load="handleImageLoad"
