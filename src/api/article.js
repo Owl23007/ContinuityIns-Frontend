@@ -8,6 +8,8 @@ const transformArticleData = (article) => ({
   status: article.status,
   createTime: article.createTime,
   wordCount: article.wordCount,
+  categoryId: article.category,
+  tags: article.tags,
   createUser: {
     id: article.userId,
   },
@@ -41,12 +43,13 @@ export const getArticleById_get = async (id) => {
 
 // 创建文章
 export const createArticle_post = async (articleData) => {
-  // 适配后端字段，coverImg => coverImage, userId 由后端自动获取
   const data = {
     title: articleData.title,
     content: articleData.content,
     coverImage: articleData.coverImg,
     status: articleData.status,
+    categoryId: articleData.category,
+    tags: articleData.tags,
   }
   // 过滤掉 undefined/null/空字符串字段，避免负载为 {}
   Object.keys(data).forEach((key) => {
@@ -59,12 +62,14 @@ export const createArticle_post = async (articleData) => {
 }
 
 // 更新文章
-export const updateArticle_put = async (articleId, updates) => {
+export const updateArticle_put = async (articleId, articleData) => {
   const data = {
-    title: updates.title,
-    content: updates.content,
-    coverImage: updates.coverImg,
-    status: updates.status,
+    title: articleData.title,
+    content: articleData.content,
+    coverImage: articleData.coverImg,
+    status: articleData.status,
+    categoryId: articleData.category,
+    tags: articleData.tags,
   }
   Object.keys(data).forEach((key) => {
     if (data[key] === undefined || data[key] === null || data[key] === '') {

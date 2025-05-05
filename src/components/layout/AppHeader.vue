@@ -47,7 +47,7 @@
       </div>
 
       <div class="header_button">
-        <router-link to="/explore" class="no-underline">
+        <router-link to="/search" class="no-underline">
           <svg
             width="24"
             height="24"
@@ -77,7 +77,7 @@
         </router-link>
       </div>
 
-      <div class="header_button">
+      <!--<div class="header_button">
         <router-link to="/community" class="no-underline">
           <svg
             width="24"
@@ -110,7 +110,7 @@
           </svg>
           社区
         </router-link>
-      </div>
+      </div>-->
 
       <div class="header_button">
         <router-link to="/chat" class="no-underline">
@@ -325,7 +325,7 @@
           />
         </svg>
       </router-link>
-      <router-link to="/community" class="mobile-menu-item" @click="closeMobileMenu">
+      <!--<router-link to="/community" class="mobile-menu-item" @click="closeMobileMenu">
         <div class="menu-item-content">
           <svg
             width="24"
@@ -374,7 +374,7 @@
             stroke-linejoin="round"
           />
         </svg>
-      </router-link>
+      </router-link>-->
       <router-link to="/chat" class="mobile-menu-item" @click="closeMobileMenu">
         <div class="menu-item-content">
           <svg

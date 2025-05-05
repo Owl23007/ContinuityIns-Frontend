@@ -21,7 +21,13 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (state) => !!state.token,
     currentUser: (state) => state.user,
-    userAvatar: (state) => state.user?.avatar || '/default-avatar.png',
+    userAvatar: (state) => {
+      const avatarUrl = state.user?.avatarImage || '/default-avatar.png'
+      // 如果是相对路径，直接返回
+      if (avatarUrl.startsWith('/')) return avatarUrl
+      // 强制使用 http 协议
+      return avatarUrl.replace(/^(http|https):\/\//, 'http://')
+    },
   },
 
   actions: {
@@ -54,7 +60,24 @@ export const useAuthStore = defineStore('auth', {
       oppositeStorage.removeItem('user')
     },
 
+    // 添加处理URL的辅助函数
+    _processUrl(url) {
+      if (!url) return url
+      if (url.startsWith('/')) return url
+      // 强制使用 http 协议
+      return url.replace(/^(http|https):\/\//, 'http://')
+    },
+
     setUser(user) {
+      // 处理用户头像和背景图片的URL
+      if (user) {
+        if (user.avatarImage) {
+          user.avatarImage = this._processUrl(user.avatarImage)
+        }
+        if (user.backgroundImage) {
+          user.backgroundImage = this._processUrl(user.backgroundImage)
+        }
+      }
       this.user = user
       const storage = this.rememberMe ? localStorage : sessionStorage
       storage.setItem('user', JSON.stringify(user))
@@ -63,12 +86,15 @@ export const useAuthStore = defineStore('auth', {
     async updateUserProfile({ nickname, signature, avatarImage, backgroundImage }) {
       if (!this.token) throw new Error('未登录')
 
-      //  检查是否提供了头像或背景图片
       if (avatarImage) {
+        // 处理头像URL
+        avatarImage = this._processUrl(avatarImage)
         return this.updateAvatar(avatarImage)
       }
 
       if (backgroundImage) {
+        // 处理背景图片URL
+        backgroundImage = this._processUrl(backgroundImage)
         return this.updateBackground(backgroundImage)
       }
 
@@ -106,7 +132,6 @@ export const useAuthStore = defineStore('auth', {
       try {
         const res = await updateBackground_patch(backgroundUrl)
         if (res.code === 0) {
-          // Update the user data in store with the new background
           this.setUser({ ...this.user, backgroundImage: backgroundUrl })
           return true
         }
@@ -153,7 +178,7 @@ export const useAuthStore = defineStore('auth', {
     async fetchUserInfo() {
       if (!this.token) return null
       try {
-        const res = await getUserInfo_get(this.token)
+        const res = await getUserInfo_get()
         if (res.code === 0) {
           this.setUser(res.data)
           return res.data

@@ -147,7 +147,16 @@ defineEmits([
   'delete-account',
 ])
 
-const avatarUrl = computed(() => props.user.avatarImage || props.defaultAvatar)
+// 处理头像URL，确保使用当前页面相同的协议
+const processAvatarUrl = (url) => {
+  if (!url) return props.defaultAvatar
+  // 如果是相对路径，直接返回
+  if (url.startsWith('/')) return url
+  // 替换URL的协议为当前页面的协议
+  return url.replace(/^(http|https):\/\//, window.location.protocol + '//')
+}
+
+const avatarUrl = computed(() => processAvatarUrl(props.user.avatarImage))
 </script>
 
 <style scoped>

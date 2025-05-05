@@ -79,21 +79,11 @@ const userName = computed(() => authStore.currentUser?.username || '用户')
 const userEmail = computed(() => authStore.currentUser?.email || null)
 const userNameFirst = computed(() => userName.value.charAt(0))
 
-// 处理图片路径的辅助函数
-const getFullImagePath = (path) => {
-  if (path && !path.startsWith('http')) {
-    return import.meta.env.VITE_API_BASE_URL + path
-  }
-  return path
-}
-
 // 用户头像
-const userAvatar = computed(() => getFullImagePath(authStore.user.avatarImage))
+const userAvatar = computed(() => authStore.user.avatarImage)
 
 // 用户背景图片，如果未设置则使用默认图片
-const userBackground = computed(
-  () => getFullImagePath(authStore.user.backgroundImage) || defaultCoverImg
-)
+const userBackground = computed(() => authStore.user.backgroundImage || defaultCoverImg)
 
 const goToProfile = () => {
   router.push('/profile')

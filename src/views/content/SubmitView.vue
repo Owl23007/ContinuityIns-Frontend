@@ -15,14 +15,60 @@
     <div class="editor-main">
       <!-- 标题输入 -->
       <div class="input-group">
-        <input
-          type="text"
-          v-model="articleData.title"
-          placeholder="请输入文章标题..."
-          class="title-input"
-          :maxlength="100"
-        />
+        <input type="text" v-model="articleData.title" class="title-input" :maxlength="100" />
         <span class="char-count">{{ articleData.title.length }}/100</span>
+      </div>
+
+      <!-- 添加分类和标签选择 -->
+      <div class="category-tags-section">
+        <div class="category-select">
+          <label>文章分类</label>
+          <el-cascader
+            v-model="articleData.category"
+            :options="categoriesTree"
+            :props="{
+              value: 'categoryId',
+              label: 'label',
+              children: 'children',
+              emitPath: false,
+            }"
+            :loading="loading.categories"
+            placeholder="请选择分类"
+            clearable
+          >
+            <template #default="{ node, data }">
+              <span v-html="data.label"></span>
+              <span v-if="data.description" class="category-description">
+                {{ data.description }}
+              </span>
+            </template>
+          </el-cascader>
+        </div>
+
+        <div class="tags-select">
+          <label>文章标签</label>
+          <el-select
+            v-model="articleData.tags"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            :loading="loading.tags"
+            placeholder="请选择或创建标签（最多5个）"
+            :multiple-limit="5"
+            @create="handleTagCreate"
+          >
+            <template #empty>
+              <el-empty description="暂无标签数据" />
+            </template>
+            <el-option
+              v-for="tag in tagOptions"
+              :key="tag.value"
+              :label="tag.label"
+              :value="tag.value"
+            />
+          </el-select>
+        </div>
       </div>
 
       <!-- 封面图片上传 -->
@@ -160,13 +206,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, watchEffect } from 'vue'
+import { ref, reactive, computed, watch, watchEffect, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { getArticleById_get, updateArticle_put, createArticle_post } from '@/api/article'
 import { uploadFile, validateFile } from '@/api/file'
 import { ArticleStatus } from '@/pojo/article'
 import { renderMarkdown } from '@/utils/markdown'
+import { getCategories_get, getHotTags_get } from '@/api/recommend'
 import NotificationSystem from '@/components/common/NotificationSystem.vue'
 
 const router = useRouter()
@@ -182,24 +229,121 @@ const editor = ref(null)
 const preview = ref(null)
 const isEditorScrolling = ref(false)
 const isPreviewScrolling = ref(false)
-const loading = ref(false)
 const insertImageInput = ref(null)
 const notificationSystem = ref(null)
 
 const isEditing = computed(() => Boolean(route.params.id))
 
+// 修改加载状态
+const loading = ref({
+  categories: false,
+  tags: false,
+  submitting: false,
+  article: false,
+})
+
+// 分类树形结构
+const categoriesTree = ref([])
+
+// 加载分类数据
+const loadCategories = async () => {
+  loading.value.categories = true
+  try {
+    const response = await getCategories_get()
+    console.log('分类数据:', response)
+    if (response?.length) {
+      const categories = response
+
+      // 分别获取父分类和子分类
+      const parentCategories = categories.filter(
+        (cat) => cat.parentId === 0 && cat.categoryId !== 10
+      )
+      const childCategories = categories.filter((cat) => cat.parentId !== 0)
+
+      // 构建树形结构
+      categoriesTree.value = parentCategories
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((parent) => ({
+          ...parent,
+          label: `${getCategoryIcon(parent.categoryId)} ${parent.name}`,
+          children: childCategories
+            .filter((child) => child.parentId === parent.categoryId)
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((child) => ({
+              ...child,
+              label: child.name,
+            })),
+        }))
+    }
+  } catch (error) {
+    console.error('获取分类列表失败:', error)
+    error.value = '获取分类列表失败'
+  } finally {
+    loading.value.categories = false
+  }
+}
+
+// 加载标签数据
+const loadTags = async () => {
+  loading.value.tags = true
+  try {
+    const response = await getHotTags_get()
+    console.log('标签数据:', response)
+    if (response?.length) {
+      tagOptions.value = response.map((tag) => ({
+        label: tag.name,
+        value: tag.id.toString(),
+      }))
+    }
+  } catch (error) {
+    console.error('获取标签列表失败:', error)
+  } finally {
+    loading.value.tags = false
+  }
+}
+
+// 处理标签创建
+const handleTagCreate = (newTag) => {
+  tagOptions.value.push({
+    value: newTag,
+    label: newTag,
+  })
+}
+
+// 扩展文章数据
 const articleData = reactive({
   title: '',
   content: '',
   coverImg: '',
   status: ArticleStatus.DRAFT,
+  category: null, // 改为 number|null
+  tags: [],
 })
+
+// 添加分类图标映射
+const categoryIcons = {
+  1: '💻', // 科技
+  2: '🏠', // 生活
+  3: '📚', // 文学
+  4: '🎓', // 学习
+  5: '🔗', // 资源
+  6: '🎭', // 艺术
+  7: '📱', // 数码
+  8: '🎮', // 游戏
+  9: '🍲', // 美食
+  10: '💬', // 杂谈
+}
+
+// 获取分类对应的图标
+const getCategoryIcon = (categoryId) => {
+  return categoryIcons[categoryId] || '📁' // 默认图标
+}
 
 // 初始化文章数据
 const initArticle = async () => {
   if (!isEditing.value) return
 
-  loading.value = true
+  loading.value.article = true
   try {
     const response = await getArticleById_get(route.params.id)
     const article = response.data
@@ -207,11 +351,14 @@ const initArticle = async () => {
     articleData.content = article.content
     articleData.coverImg = article.coverImg
     articleData.status = article.status
+    // 对于级联选择，由于可以选择单个分类，直接使用数字ID
+    articleData.category = article.categoryId || null // 直接读取数字ID
+    articleData.tags = article.tags || []
   } catch (err) {
     error.value = err.message || '获取文章失败'
     router.push('/article')
   } finally {
-    loading.value = false
+    loading.value.article = false
   }
 }
 
@@ -290,6 +437,12 @@ const submitArticle = async (status) => {
     return
   }
 
+  // 验证分类选择
+  if (articleData.category == null) {
+    notificationSystem.value?.show('请选择文章分类', 'error')
+    return
+  }
+
   isSubmitting.value = true
 
   try {
@@ -301,20 +454,37 @@ const submitArticle = async (status) => {
       ...articleData,
       content,
       status,
+      // 直接使用数字ID
+      categoryId: articleData.category,
+      // 确保标签列表是字符串数组
+      tags: articleData.tags.map((tag) => String(tag)),
     }
 
+    let articleId
+
     if (isEditing.value) {
-      await updateArticle_put(route.params.id, data)
+      const response = await updateArticle_put(route.params.id, data)
+      articleId = route.params.id
       notificationSystem.value?.show('文章更新成功', 'success')
     } else {
-      await createArticle_post(data)
+      const response = await createArticle_post(data)
+      articleId = response.data?.id
       notificationSystem.value?.show('文章创建成功', 'success')
     }
 
     // 延迟跳转，让用户看到成功提示
     setTimeout(() => {
-      router.push('/article')
+      // 根据文章状态决定重定向目标
+      if (status === ArticleStatus.PUBLISHED && articleId) {
+        // 如果是已发布状态且有文章ID，跳转到文章详情页
+        router.push(`/article/${articleId}`)
+      } else {
+        // 如果是草稿或没有获取到ID，跳转到文章管理页
+        router.push('/user/articles')
+      }
     }, 1500)
+    // 刷新网页
+    window.location.reload()
   } catch (err) {
     notificationSystem.value?.show(err.message || '保存失败，请重试', 'error')
   } finally {
@@ -449,6 +619,11 @@ watch(error, (val) => {
     notificationSystem.value?.show(val, 'error')
     error.value = ''
   }
+})
+
+onMounted(() => {
+  loadCategories()
+  loadTags()
 })
 </script>
 
@@ -746,6 +921,51 @@ watch(error, (val) => {
   gap: 0.5rem;
 }
 
+.category-tags-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 2rem;
+}
+
+.category-select,
+.tags-select {
+  display: flex;
+  flex-direction: column;
+}
+
+.category-select label,
+.tags-select label {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.category-description {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  margin-left: 8px;
+}
+
+:deep(.el-cascader),
+:deep(.el-select) {
+  width: 100%;
+}
+
+:deep(.el-cascader-node__label) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:deep(.el-cascader-panel .el-cascader-node.is-disabled) {
+  color: #999;
+}
+
+:deep(.el-cascader__dropdown.el-popper) {
+  max-width: none;
+}
+
 @media (max-width: 768px) {
   .submit-container {
     padding: 1rem;
@@ -818,6 +1038,11 @@ watch(error, (val) => {
   .title-input {
     font-size: 1.25rem;
     padding: 0.875rem 1rem;
+  }
+
+  .category-tags-section {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 </style>

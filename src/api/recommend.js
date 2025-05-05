@@ -54,7 +54,7 @@ export const fetchArticles = async (params = {}) => {
 
 // 获取热门标签
 export const getHotTags_get = async () => {
-  const res = await publicRequest('GET', '/article/tags/hot')
+  const res = await publicRequest('GET', '/tag/hot')
   return res.data
 }
 
@@ -88,7 +88,7 @@ export const getLatestArticles_get = async (page = 1, pageSize = 10) => {
 
 // 获取热门文章
 export const getHotArticles_get = async (page = 1, pageSize = 10) => {
-  const res = await publicRequest('GET', `/article/hot?page=${page}&pageSize=${pageSize}`)
+  const res = await publicRequest('GET', `/tag/hot?page=${page}&pageSize=${pageSize}`)
   return {
     data: res.data.articles.map(transformArticleData),
     total: res.data.total,

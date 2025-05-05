@@ -1,10 +1,17 @@
 <template>
   <div class="home-page">
-    <!-- 主体内容区 -->
+    <!-- 动态背景 -->
+    <div class="animated-background"></div>
+
     <el-main class="main-content">
       <el-row :gutter="20">
-        <!-- 瀑布流文章列表 -->
+        <!-- 左侧内容区：slogan + 文章列表 -->
         <el-col :span="18">
+          <!-- Slogan -->
+          <div class="slogan-container">
+            <h1 class="slogan">存续人类的伟大与美德</h1>
+          </div>
+
           <!-- 文章加载状态 -->
           <div v-if="loading" class="loading-container">
             <el-skeleton :rows="3" animated />
@@ -28,7 +35,7 @@
           </template>
         </el-col>
 
-        <!-- 侧边栏 -->
+        <!-- 右侧边栏 -->
         <el-col :span="6">
           <div class="sidebar">
             <!-- 分类列表 -->
@@ -83,8 +90,13 @@
               <template #header>
                 <span>热门标签</span>
               </template>
-              <el-tag v-for="tag in tags" :key="tag.id" class="tag" @click="filterByTag(tag.id)">
-                {{ tag.name }}
+              <el-tag
+                v-for="tag in tags"
+                :key="tag.tagId"
+                class="tag"
+                @click="filterByTag(tag.tagId)"
+              >
+                {{ tag.tagName }}
               </el-tag>
             </el-card>
           </div>
@@ -147,7 +159,11 @@ const loadData = async () => {
 
     // 加载标签和分类数据，使用try-catch分别处理，避免一个失败影响另一个
     try {
-      tags.value = await getHotTags_get()
+      const tagsData = await getHotTags_get()
+      tags.value = tagsData.map((tag) => ({
+        ...tag,
+        tagName: tag.tagName || '未命名标签', // 确保tagName存在
+      }))
       console.log('标签数据:', tags.value)
     } catch (error) {
       console.error('加载标签失败:', error)
@@ -299,9 +315,6 @@ const filterByParentCategory = (parentCategoryId) => {
 const loadArticlesByParentCategory = async (parentCategoryId) => {
   loading.value = true
   try {
-    // 待实现: 调用API按父分类获取文章
-    // const res = await fetchArticlesByParentCategory(parentCategoryId)
-    // articles.value = res?.list || []
     console.log('按父分类筛选:', parentCategoryId)
   } catch (error) {
     console.error('按父分类加载文章失败:', error)
@@ -326,9 +339,63 @@ const loadArticlesByParentCategory = async (parentCategoryId) => {
   justify-content: center;
 }
 
+/* 动态背景样式 */
+.animated-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(125deg, #ffffff, #f0f7ff, #e6f1ff);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  z-index: -1;
+  opacity: 0.8;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .main-content {
-  flex: 1;
-  padding: 20px;
+  position: relative;
+  z-index: 1;
+  padding: 30px;
+  backdrop-filter: blur(10px);
+}
+
+.slogan-container {
+  text-align: left;
+  margin-bottom: 30px;
+  padding: 20px 0;
+}
+
+.slogan {
+  font-size: 32px;
+  color: #2c3e50;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: inline-block;
+}
+
+.slogan::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 60%;
+  height: 3px;
+  background: linear-gradient(90deg, #409eff, transparent);
 }
 
 .sidebar {
@@ -339,6 +406,10 @@ const loadArticlesByParentCategory = async (parentCategoryId) => {
 .category-card,
 .tags-card {
   margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .category-grid {

@@ -23,6 +23,55 @@
         <el-button type="primary" @click="createPost">发布帖子</el-button>
       </div>
 
+      <!-- 添加分类和标签筛选 -->
+      <div class="filter-options">
+        <div class="category-filter">
+          <span class="filter-label">分类：</span>
+          <el-radio-group v-model="selectedCategory" @change="handleFilterChange">
+            <el-radio-button label="">全部</el-radio-button>
+            <el-radio-button
+              v-for="category in categories"
+              :key="category.value"
+              :label="category.value"
+            >
+              {{ category.label }}
+            </el-radio-button>
+          </el-radio-group>
+        </div>
+
+        <div class="tag-filter">
+          <span class="filter-label">标签：</span>
+          <el-tag
+            v-for="tag in popularTags"
+            :key="tag.value"
+            :effect="selectedTags.includes(tag.value) ? 'dark' : 'plain'"
+            @click="toggleTag(tag.value)"
+            class="filter-tag"
+          >
+            {{ tag.label }}
+          </el-tag>
+          <el-popover placement="bottom" trigger="click" width="300">
+            <template #reference>
+              <el-button size="small" text>更多标签</el-button>
+            </template>
+            <div class="all-tags">
+              <el-tag
+                v-for="tag in allTags"
+                :key="tag.value"
+                :effect="selectedTags.includes(tag.value) ? 'dark' : 'plain'"
+                @click="toggleTag(tag.value)"
+                class="filter-tag"
+              >
+                {{ tag.label }}
+              </el-tag>
+            </div>
+          </el-popover>
+          <el-button size="small" text v-if="selectedTags.length > 0" @click="clearTags">
+            清除标签
+          </el-button>
+        </div>
+      </div>
+
       <div class="posts-list">
         <el-skeleton :rows="6" animated v-if="loading" />
         <div v-else-if="posts.length === 0" class="no-posts">
@@ -76,6 +125,57 @@ export default {
     const searchQuery = ref('')
     const activeTab = ref('all')
 
+    // 添加分类和标签状态
+    const selectedCategory = ref('')
+    const selectedTags = ref([])
+
+    // 分类选项 - 改为动态获取
+    const categories = ref([
+      { label: '全部', value: '' }, // 默认选项
+    ])
+
+    // 加载分类数据
+    const loadCategories = async () => {
+      try {
+        // 从后端获取社区分类
+        const response = await getCategoriesByModule('community')
+        if (response && response.data) {
+          // 将后端数据转换为前端所需格式
+          const backendCategories = response.data.map((item) => ({
+            label: item.name,
+            value: item.id.toString(),
+            description: item.description,
+          }))
+
+          // 合并默认的"全部"选项与后端数据
+          categories.value = [{ label: '全部', value: '' }, ...backendCategories]
+        }
+      } catch (error) {
+        console.error('获取分类列表失败:', error)
+      }
+    }
+
+    // 标签选项
+    const allTags = ref([
+      { label: 'JavaScript', value: 'javascript' },
+      { label: 'Vue', value: 'vue' },
+      { label: 'React', value: 'react' },
+      { label: 'Node.js', value: 'nodejs' },
+      { label: '前端', value: 'frontend' },
+      { label: '后端', value: 'backend' },
+      { label: '数据库', value: 'database' },
+      { label: '云计算', value: 'cloud' },
+      { label: '人工智能', value: 'ai' },
+      { label: '机器学习', value: 'ml' },
+      { label: '开源', value: 'opensource' },
+      { label: '求职', value: 'job' },
+    ])
+
+    // 热门标签（只展示一部分）
+    const popularTags = computed(() => {
+      return allTags.value.slice(0, 5)
+    })
+
     // 获取社区帖子列表
     const fetchPosts = async () => {
       loading.value = true
@@ -85,7 +185,9 @@ export default {
         //   page: currentPage.value,
         //   pageSize: pageSize.value,
         //   query: searchQuery.value,
-        //   tab: activeTab.value
+        //   tab: activeTab.value,
+        //   category: selectedCategory.value,
+        //   tags: selectedTags.value
         // })
         // posts.value = response.data.items
         // total.value = response.data.total
@@ -104,6 +206,8 @@ export default {
             views: Math.floor(Math.random() * 1000),
             comments: Math.floor(Math.random() * 50),
             likes: Math.floor(Math.random() * 100),
+            category: categories.value[Math.floor(Math.random() * categories.value.length)].value,
+            tags: [allTags.value[Math.floor(Math.random() * allTags.value.length)].value],
           }))
           total.value = 100
           loading.value = false
@@ -113,6 +217,29 @@ export default {
       } finally {
         loading.value = false
       }
+    }
+
+    // 处理分类和标签变化
+    const handleFilterChange = () => {
+      currentPage.value = 1
+      fetchPosts()
+    }
+
+    // 切换标签选择
+    const toggleTag = (tagValue) => {
+      const index = selectedTags.value.indexOf(tagValue)
+      if (index === -1) {
+        selectedTags.value.push(tagValue)
+      } else {
+        selectedTags.value.splice(index, 1)
+      }
+      handleFilterChange()
+    }
+
+    // 清除所有选中标签
+    const clearTags = () => {
+      selectedTags.value = []
+      handleFilterChange()
     }
 
     // 格式化日期
@@ -151,6 +278,9 @@ export default {
 
     onMounted(() => {
       fetchPosts()
+      loadCategories() // 加载分类数据
+      // 这里可以添加获取标签列表的API调用
+      // loadTags()
     })
 
     return {
@@ -161,10 +291,18 @@ export default {
       pageSize,
       searchQuery,
       activeTab,
+      categories,
+      allTags,
+      popularTags,
+      selectedCategory,
+      selectedTags,
       formatDate,
       handlePageChange,
       handleSearch,
       handleTabClick,
+      handleFilterChange,
+      toggleTag,
+      clearTags,
       viewPost,
       createPost,
     }
@@ -253,5 +391,40 @@ export default {
   text-align: center;
   padding: 50px 0;
   color: #909399;
+}
+
+/* 添加筛选样式 */
+.filter-options {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.category-filter,
+.tag-filter {
+  margin-bottom: 10px;
+}
+
+.filter-label {
+  display: inline-block;
+  width: 50px;
+  font-weight: bold;
+  margin-right: 10px;
+  color: #606266;
+}
+
+.filter-tag {
+  margin-right: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.all-tags {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 </style>
