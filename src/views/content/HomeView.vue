@@ -94,7 +94,7 @@
                 v-for="tag in tags"
                 :key="tag.tagId"
                 class="tag"
-                @click="filterByTag(tag.tagId)"
+                @click="filterByTag(tag.tagId, tag.tagName)"
               >
                 {{ tag.tagName }}
               </el-tag>
@@ -108,6 +108,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router' // 添加 router 导入
 import ArticleCard from './components/ArticleCard.vue'
 import { fetchArticles, getHotTags_get, getCategories_get, searchArticles } from '@/api/recommend'
 import { ArrowDown } from '@element-plus/icons-vue'
@@ -118,6 +119,8 @@ const tags = ref([])
 const categories = ref([])
 const searchKeyword = ref('') // 搜索关键词
 const isSearching = ref(false) // 是否正在搜索
+
+const router = useRouter() // 获取 router 实例
 
 // 计算父分类（顶级分类）
 const parentCategories = computed(() => {
@@ -195,13 +198,16 @@ const filterByCategory = (categoryId) => {
   loadArticlesByCategory(categoryId)
 }
 
-// 标签筛选
-const filterByTag = (tagId) => {
-  // 重置搜索状态
-  searchKeyword.value = ''
-  isSearching.value = false
-  // 实现标签筛选逻辑
-  loadArticlesByTag(tagId)
+// 修改标签筛选函数
+const filterByTag = (tagId, tagName) => {
+  // 跳转到搜索页面，将标签名作为关键词
+  router.push({
+    path: '/search',
+    query: {
+      keyword: tagName,
+      type: 'article' // 默认搜索文章类型
+    }
+  })
 }
 
 // 根据分类加载文章

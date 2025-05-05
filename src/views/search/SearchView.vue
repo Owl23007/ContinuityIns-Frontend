@@ -162,7 +162,7 @@
       <!-- 结果摘要 -->
       <div class="results-summary">
         <h2 v-if="searchResults.length > 0">
-          关于 "{{ currentKeyword }}" 的搜索结果，共找到 {{ totalResults }} 条匹配内容
+          关于 "{{ currentKeyword }}" 的搜索结果，共找到 {{ searchResults.length }} 条匹配内容
         </h2>
         <div v-else class="no-results">
           <el-empty description="没有找到相关结果" :image-size="200">
@@ -177,11 +177,10 @@
       <div v-if="searchResults.length > 0" class="results-list">
         <el-card v-for="(item, index) in searchResults" :key="index" class="result-item">
           <!-- 文章结果 -->
-          <template v-if="item.type === 'article'">
+          <router-link :to="`/article/${item.id}`" class="item-title">
+            <template v-if="item.type === 'article'">
             <div class="item-header">
-              <router-link :to="`/article/${item.id}`" class="item-title">
                 <span v-html="highlightKeyword(item.title)"></span>
-              </router-link>
               <el-tag size="small" effect="plain">文章</el-tag>
             </div>
 
@@ -207,9 +206,10 @@
               </el-tag>
             </div>
           </template>
+          </router-link>
 
           <!-- 问答结果 -->
-          <template v-else-if="item.type === 'question'">
+          <template v-if="item.type === 'question'">
             <div class="item-header">
               <router-link :to="`/question/${item.id}`" class="item-title">
                 <span v-html="highlightKeyword(item.title)"></span>
@@ -232,7 +232,7 @@
           </template>
 
           <!-- 用户结果 -->
-          <template v-else-if="item.type === 'user'">
+          <template v-if="item.type === 'user'">
             <div class="user-result">
               <el-avatar :size="60" :src="item.avatar"></el-avatar>
               <div class="user-info">
@@ -272,7 +272,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Search, ArrowDown, Setting, Clock, Star, View, ChatRound } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getCategories_get, getHotTags_get, searchContent } from '@/api/recommend'
+import { getCategories_get, getHotTags_get ,searchContent} from '@/api/recommend'
 import defaultCover from '@/assets/image/default_cover.png'
 
 const router = useRouter()
@@ -397,7 +397,7 @@ const handleSearch = async () => {
     const response = await searchContent(searchParams)
     // 数据字段映射
     const data = response
-    searchResults.value = (data.list || []).map((item) => {
+    searchResults.value = (data || []).map((item) => {
       if (searchType.value === 'article') {
         return {
           id: item.articleId || item.id,
@@ -447,7 +447,7 @@ const handleSearch = async () => {
       }
       return item
     })
-    totalResults.value = data.total || 0
+    totalResults.value = data || 0
 
     if (searchResults.value.length === 0) {
       ElMessage.info('没有找到相关内容')
