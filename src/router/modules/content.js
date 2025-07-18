@@ -71,7 +71,7 @@ export default [
   {
     path: '/community',
     name: 'community',
-    component: () => import('@/views/community/CommunityView.vue'),
+    component: () => import('@/views/community/Communityview.vue'),
     meta: {
       title: '社区',
       requiresAuth: false,
