@@ -425,6 +425,11 @@ const loadArticlesByParentCategory = async (parentCategoryId) => {
   text-align: left;
   margin-bottom: 30px;
   padding: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .slogan {
@@ -445,6 +450,24 @@ const loadArticlesByParentCategory = async (parentCategoryId) => {
   width: 60%;
   height: 3px;
   background: linear-gradient(90deg, #409eff, transparent);
+}
+
+.image-notice {
+  font-size: 14px;
+  color: #666;
+  background-color: #fff8e6;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border-left: 4px solid #e6a23c;
+}
+
+.notice-link {
+  color: #409eff;
+  text-decoration: none;
+}
+
+.notice-link:hover {
+  text-decoration: underline;
 }
 
 .sidebar {

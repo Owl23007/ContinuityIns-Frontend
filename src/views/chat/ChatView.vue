@@ -319,7 +319,7 @@ const handleMessageSubmit = async (messageText) => {
 
   try {
     isLoading.value = true
-    controller?.abort()
+    controller?.abort() // 中断上一个请求
     controller = new AbortController()
 
     // 添加消息到store
