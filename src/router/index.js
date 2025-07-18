@@ -52,10 +52,13 @@ router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} - 存续院` : '存续院'
 
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  
+  // 如果页面不需要认证，直接放行
   if (!requiresAuth) {
     return next()
   }
 
+  // 只有需要认证的页面才检查登录状态
   if (hasValidToken()) {
     const authStore = useAuthStore()
 
@@ -80,6 +83,7 @@ router.beforeEach(async (to, from, next) => {
 
     return next()
   } else {
+    // 没有token且需要认证时才重定向到登录页
     return next({
       path: '/auth',
       query: { redirect: to.fullPath },
