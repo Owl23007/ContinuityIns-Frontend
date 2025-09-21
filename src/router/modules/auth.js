@@ -7,7 +7,7 @@ export default [
   {
     path: '/auth',
     name: 'loginPage',
-    component: () => import('../../views/auth/LoginView.vue'),
+    component: () => import('@/views/auth/login/index.vue'),
     meta: {
       title: '身份认证',
       requiresAuth: false,
@@ -17,7 +17,7 @@ export default [
   {
     path: '/auth/active',
     name: 'activeUsers',
-    component: () => import('../../views/auth/ActiveView.vue'),
+    component: () => import('@/views/auth/active/index.vue'),
     meta: {
       title: '用户激活',
       requiresAuth: false,
@@ -27,7 +27,7 @@ export default [
   {
     path: '/auth/reset',
     name: 'resetPassword',
-    component: () => import('../../views/auth/ResetPasswordView.vue'),
+    component: () => import('@/views/auth/reset-password/index.vue'),
     meta: {
       title: '重置密码',
       requiresAuth: false,
